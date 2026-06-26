@@ -168,14 +168,14 @@ html, body {
 .route-row { display:flex; gap:9px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); }
 .route-row:last-child { border-bottom:none; padding-bottom:0; }
 .rdot { width:9px; height:9px; border-radius:50%; margin-top:4px; flex-shrink:0; }
-.rname { font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:var(--text); }
+.rname { font-family:'IBM Plex Sans','Inter',sans-serif; font-size:14px; font-weight:600; color:var(--text); }
 .rpath { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:2px; }
 .rdesc { font-family:'Crimson Pro',serif; font-size:13px; color:var(--text-mid); margin-top:2px; }
 
 /* orange bar */
 .orange-bar {
   background:var(--orange); border-radius:4px; padding:7px 12px;
-  font-family:'Inter',sans-serif; font-size:14px; font-weight:700;
+  font-family:'IBM Plex Sans','Inter',sans-serif; font-size:14px; font-weight:700;
   color:#fff; margin-bottom:11px; display:flex; align-items:center; gap:7px;
 }
 
@@ -193,7 +193,7 @@ html, body {
   padding:16px; background:var(--panel); text-align:center;
 }
 .avatar { width:42px; height:42px; border-radius:50%; background:var(--panel2); border:1.5px solid rgba(14,116,144,0.35); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 10px; }
-.hname { font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--text); }
+.hname { font-family:'IBM Plex Sans','Inter',sans-serif; font-size:16px; font-weight:700; color:var(--text); }
 .hfile { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:3px; }
 
 /* Button grid: Approve+Pend on row 1, Deny full-width on row 2 */
@@ -244,7 +244,7 @@ html, body {
 
 /* ── INFRA PANELS ── */
 .infra-panel { background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:15px 16px; box-shadow:0 2px 12px var(--shadow), 0 0 0 1px rgba(14,116,144,0.06); }
-.infra-title { font-family:'Inter',sans-serif; font-size:17px; font-weight:700; margin-bottom:3px; }
+.infra-title { font-family:'IBM Plex Sans','Inter',sans-serif; font-size:17px; font-weight:700; margin-bottom:3px; }
 .infra-sub { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-bottom:12px; }
 .fs-tag { font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 7px; border-radius:3px; background:var(--tag-bg); color:var(--tag-tx); border:1px solid var(--tag-bd); white-space:nowrap; }
 .fs-sec { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; margin:7px 0 3px; width:100%; }
@@ -450,15 +450,15 @@ html, body {
   <div class="infra-sub">agent_framework.memory · Delta Lake · analytics.warehouse</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid rgba(184,160,248,0.30);border-radius:6px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">STM</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">STM</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">conversation<br>turns window<br>Delta table<br>session-scoped</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(119,196,216,0.28);border-radius:6px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">LTM</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">LTM</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">agent_long_<br>term_memory<br>user-scoped<br>persistent</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(252,182,49,0.28);border-radius:6px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px">KG</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px">KG</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">kg_entities<br>kg_triples<br>LangGraph<br>entity extract</div>
     </div>
   </div>
@@ -471,11 +471,11 @@ html, body {
   <div class="infra-sub">delegation_chain.py · tool_gateway · HMAC-SHA256</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">DelegationLink</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">DelegationLink</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">caller_id<br>scope: policy_read<br>signed: HMAC-SHA256</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">ToolGateway</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">ToolGateway</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">validates chain<br>scope-enforced<br>every tool call</div>
     </div>
   </div>
@@ -520,11 +520,11 @@ html, body {
   <div class="infra-sub">[databricks-workspace] · AI/BI + Model Serving</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Serving Layer</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Serving Layer</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">um-orchestrator<br>um-clinical-policy<br>um-pharmacy<br>um-triage<br>Open WebUI app</div>
     </div>
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">Data Layer</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">Data Layer</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">Unity Catalog<br>Vector Search<br>Delta Lake<br>MLflow (exp: 429&#8230;)<br>AI Gateway</div>
     </div>
   </div>
@@ -537,11 +537,11 @@ html, body {
   <div class="infra-sub">MLflow · traces · assessments · feedback</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--green-hi);margin-bottom:5px">MLflow Traces</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--green-hi);margin-bottom:5px">MLflow Traces</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">14 spans/req<br>agent_tracing.py<br>record_tool_event<br>update_trace tags</div>
     </div>
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
-      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:5px">Feedback Loop</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:5px">Feedback Loop</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">&#128077;&#128078; action functions<br>custom_good<br>TRACE_ID tag<br>POST /v1/feedback</div>
     </div>
   </div>
