@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Framework · Multi-Agent Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:        #f4f4f4;
+  --bg2:       #f9f9f9;
+  --panel:     #ffffff;
+  --panel2:    #f9f9f9;
+  --panel3:    #dde8f2;
+  --border:    rgba(14,116,144,0.22);
+  --brite:     rgba(14,116,144,0.60);
+  --shadow:    rgba(15,23,42,0.10);
+  --text:      #0f172a;
+  --text-dim:  #4a6078;
+  --text-mid:  #334155;
+  --blue:      #0369a1;
+  --teal:      #0e7490;
+  --purple:    #6d28d9;
+  --pink:      #be185d;
+  --orange:    #b45309;
+  --green:     #15803d;
+  --green-hi:  #166534;
+  --green-bg:  rgba(21,128,61,0.08);
+  --yellow:    #92400e;
+  --red:       #b91c1c;
+  --topbar:    rgba(255,255,255,0.97);
+  --topbar-b:  rgba(14,116,144,0.22);
+  --tag-bg:    rgba(38,39,105,0.05);
+  --tag-bd:    rgba(14,116,144,0.22);
+  --tag-tx:    #0e7490;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Pro', Georgia, serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#particle-bg {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position:fixed; top:0; left:0; right:0; height:50px;
+  background:var(--topbar); border-bottom:1px solid var(--topbar-b);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px; z-index:100; backdrop-filter:blur(12px);
+  box-shadow:0 1px 12px rgba(15,23,42,0.12);
+}
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.topbar-title {
+  font-family:'Cinzel',serif; font-size:15px; font-weight:600;
+  color:var(--text); letter-spacing:0.07em;
+}
+.topbar-title span { color:var(--blue); }
+.topbar-sub {
+  font-family:'Crimson Pro',serif; font-size:14px;
+  color:var(--text-dim);
+}
+.topbar-sub em { color:var(--green-hi); font-style:normal; font-weight:500; }
+
+/* ── TABS ── */
+.tab-nav { display:flex; gap:4px; }
+.tab-btn {
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.06em;
+  text-transform:uppercase; padding:6px 18px; border-radius:5px;
+  cursor:pointer; border:1px solid var(--tag-bd);
+  color:var(--text-dim); background:transparent;
+  transition:all 0.18s;
+}
+.tab-btn.active {
+  background:var(--panel2);
+  border-color:var(--brite); color:var(--teal);
+}
+
+/* ── TAB PANELS ── */
+.tab-panel { display:none; }
+.tab-panel.visible { display:block; }
+
+/* ── CANVAS ── */
+.stage-canvas {
+  position:fixed; top:50px; left:0; right:0; bottom:0;
+  overflow:auto; cursor:grab; z-index:1;
+}
+#canvas-pipeline { overflow-x:auto; overflow-y:hidden; }
+#canvas-infra    { overflow-x:hidden; overflow-y:auto; }
+.stage-canvas:active { cursor:grabbing; }
+
+/* ── WORLDS ── */
+#world-pipeline { position:relative; width:3310px; height:960px; background:var(--bg2); }
+#world-infra    { width:100%; min-height:100%; background:var(--bg2); display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:18px; padding:24px; align-content:start; box-sizing:border-box; }
+#lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+/* ── STAGE ── */
+.stage { position:absolute; width:238px; }
+.stage.w260 { width:264px; }
+.stage.w280 { width:285px; }
+
+/* No eyebrow — title is first element */
+.stage-title {
+  font-family:'IBM Plex Sans','Inter',system-ui,sans-serif;
+  font-size:28px; font-weight:700;
+  margin-bottom:4px; letter-spacing:-0.02em;
+}
+.stage-subtitle {
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px; color:var(--text-dim); margin-bottom:15px;
+}
+
+/* ── CARD ── */
+.card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:9px; padding:15px; margin-bottom:9px;
+  box-shadow:0 2px 12px var(--shadow), 0 0 0 1px rgba(14,116,144,0.06);
+}
+.card-label {
+  font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500;
+  color:var(--text-dim); letter-spacing:0.05em;
+  text-transform:uppercase; margin-bottom:11px;
+}
+
+/* input rows */
+.input-item { display:flex; align-items:center; gap:14px; padding:5px 0; font-size:15px; color:var(--text-mid); }
+.input-item .i { font-size:13px; opacity:0.75; }
+.input-item.hi {
+  background:rgba(200,120,80,0.14); border:1px solid rgba(200,120,80,0.38);
+  border-radius:5px; padding:7px 10px; color:var(--orange); margin:4px 0;
+}
+
+/* mono box */
+.mono-box {
+  background:var(--panel2); border:1px solid var(--border);
+  border-radius:5px; padding:10px 12px;
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  color:var(--text-mid); line-height:1.80; margin-top:7px;
+}
+.mk{color:var(--green-hi);} .ms{color:var(--green);} .mn{color:var(--blue);}
+.mc{color:var(--text-dim);} .mo{color:var(--orange);} .mp{color:var(--purple);}
+.my{color:var(--yellow);}   .mr{color:var(--red);}
+
+/* badge */
+.badge {
+  display:inline-block; font-family:'JetBrains Mono',monospace;
+  font-size:11px; padding:3px 9px; border-radius:3px; margin-bottom:6px;
+}
+.b-blue{background:var(--tag-bg);color:var(--blue);border:1px solid var(--tag-bd);}
+.b-teal{background:var(--panel2);color:var(--teal);border:1px solid rgba(14,116,144,0.28);}
+.b-ora{background:rgba(230,155,121,0.10);color:var(--orange);border:1px solid rgba(230,155,121,0.30);}
+.b-pink{background:rgba(232,160,144,0.10);color:var(--pink);border:1px solid rgba(232,160,144,0.30);}
+.b-grn{background:rgba(21,128,61,0.07);color:var(--green);border:1px solid rgba(21,128,61,0.30);}
+.b-yel{background:rgba(252,182,49,0.10);color:var(--yellow);border:1px solid rgba(252,182,49,0.30);}
+.b-pur{background:rgba(184,160,248,0.10);color:var(--purple);border:1px solid rgba(184,160,248,0.30);}
+
+.llm-box { height:32px; border-radius:5px; background:var(--panel2); border:1px dashed var(--border); margin:9px 0; }
+
+/* route */
+.route-row { display:flex; gap:9px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); }
+.route-row:last-child { border-bottom:none; padding-bottom:0; }
+.rdot { width:9px; height:9px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.rname { font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:var(--text); }
+.rpath { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:2px; }
+.rdesc { font-family:'Crimson Pro',serif; font-size:13px; color:var(--text-mid); margin-top:2px; }
+
+/* orange bar */
+.orange-bar {
+  background:var(--orange); border-radius:4px; padding:7px 12px;
+  font-family:'Inter',sans-serif; font-size:14px; font-weight:700;
+  color:#fff; margin-bottom:11px; display:flex; align-items:center; gap:7px;
+}
+
+/* tree */
+.tree { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-mid); line-height:1.80; }
+.tree .th{color:var(--orange);font-weight:600;} .tree .td{color:var(--text-dim);}
+
+/* pill */
+.pill { display:inline-flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 8px; border-radius:10px; background:var(--panel2); color:var(--teal); border:1px solid rgba(14,116,144,0.28); }
+.pill-dot { width:6px; height:6px; border-radius:50%; background:var(--blue); box-shadow:0 0 5px var(--blue); }
+
+/* ── HUMAN GATE ── */
+.human-box {
+  border:1.5px solid rgba(14,116,144,0.30); border-radius:10px;
+  padding:16px; background:var(--panel); text-align:center;
+}
+.avatar { width:42px; height:42px; border-radius:50%; background:var(--panel2); border:1.5px solid rgba(14,116,144,0.35); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 10px; }
+.hname { font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--text); }
+.hfile { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-top:3px; }
+
+/* Button grid: Approve+Pend on row 1, Deny full-width on row 2 */
+.btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+.hbtn { padding:13px 0; border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; text-align:center; }
+.hbtn-a { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+.hbtn-p { background:rgba(252,182,49,0.10); color:#854d0e; border:1px solid #fde047; }
+.hbtn-r { background:rgba(232,160,144,0.10); color:#991b1b; border:1px solid #fca5a5; grid-column:1/-1; margin-top:2px; }
+
+.liam-box { background:var(--panel2); border:1px solid var(--border); border-radius:5px; padding:10px 12px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-mid); line-height:1.80; margin-top:8px; }
+.only-human { font-family:'Crimson Pro',serif; font-style:italic; font-size:13px; color:var(--text-dim); margin-top:9px; line-height:1.65; border-top:1px solid var(--border); padding-top:9px; }
+
+/* workers */
+.worker-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:8px 0; }
+.wtag { font-family:'JetBrains Mono',monospace; font-size:11px; padding:5px 8px; border-radius:4px; color:var(--text-dim); background:var(--panel2); border:1px solid var(--border); }
+.wtag.wg{color:var(--green);border-color:rgba(21,128,61,0.32);background:rgba(21,128,61,0.07);}
+.wtag.wo{color:var(--orange);border-color:rgba(230,155,121,0.32);background:rgba(230,155,121,0.08);}
+.wtag.wb{color:var(--teal);border-color:rgba(14,116,144,0.28);background:var(--panel2);}
+.wtag.wy{color:var(--yellow);border-color:rgba(252,182,49,0.30);background:rgba(252,182,49,0.08);}
+.wtag.span2{grid-column:1/-1;}
+
+.pm-row { background:var(--panel2); border:1px solid rgba(14,116,144,0.22); border-radius:6px; padding:8px 12px; text-align:center; margin-bottom:8px; }
+.pm-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; }
+.pm-val { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--green-hi); margin-top:3px; }
+
+.srow { display:flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:12px; padding:3px 0; }
+.sdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.sg{background:var(--green);box-shadow:0 0 4px var(--green);}
+.so{background:var(--orange);box-shadow:0 0 5px var(--orange);}
+.sb{background:var(--blue);box-shadow:0 0 4px var(--blue);}
+.sy{background:var(--yellow);box-shadow:0 0 4px var(--yellow);}
+.sd{background:var(--text-dim);}
+.sval{margin-left:auto;}
+.sv-g{color:var(--green);} .sv-o{color:var(--orange);} .sv-d{color:var(--text-dim);}
+
+.divider { height:1px; background:var(--border); margin:9px 0; }
+.log-line { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); line-height:1.90; }
+.log-line span { color:var(--text-mid); }
+
+.chain-line { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-mid); line-height:2.0; padding:9px 11px; background:var(--panel2); border:1px solid var(--border); border-radius:5px; margin-top:7px; }
+.ca{color:var(--yellow);} .cb{color:var(--blue);} .cc{color:var(--green-hi);}
+
+.guard-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; }
+.guard-row:last-child { border-bottom:none; }
+.gcheck{font-size:13px;} .gname{color:var(--text);font-weight:600;flex:1;} .gstatus{color:var(--green-hi);font-size:11px;}
+
+.mem-title { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.16em; text-transform:uppercase; margin-bottom:4px; }
+
+/* ── INFRA PANELS ── */
+.infra-panel { background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:15px 16px; box-shadow:0 2px 12px var(--shadow), 0 0 0 1px rgba(14,116,144,0.06); }
+.infra-title { font-family:'Inter',sans-serif; font-size:17px; font-weight:700; margin-bottom:3px; }
+.infra-sub { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); margin-bottom:12px; }
+.fs-tag { font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 7px; border-radius:3px; background:var(--tag-bg); color:var(--tag-tx); border:1px solid var(--tag-bd); white-space:nowrap; }
+.fs-sec { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; margin:7px 0 3px; width:100%; }
+.tag-grid { display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
+
+</style>
+</head>
+<body>
+<canvas id="particle-bg"></canvas>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title"><span>Agentic Framework</span> · Multi-Agent Pipeline</div>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
+    <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
+  </div>
+</div>
+
+<!-- ══════════════ PIPELINE TAB ══════════════ -->
+<div id="tab-pipeline" class="tab-panel visible">
+<div class="stage-canvas" id="canvas-pipeline">
+<div id="world-pipeline">
+<svg id="lines" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<!-- S1: CAPTURE -->
+<div class="stage" id="s1" style="left:60px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Capture</div>
+  <div class="stage-subtitle">um_demo/input/ · Responses API</div>
+  <div class="card">
+    <div class="card-label">PA Request · demo input</div>
+    <div class="input-item hi"><span class="i">✏</span> Text message via Responses API</div>
+    <div class="input-item"><span class="i">📄</span> .txt / structured file → input dir</div>
+    <div class="input-item"><span class="i">⚡</span> custom_inputs: user_id, delegation_chain</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px">POST /serving-endpoints/<br>um-orchestrator/invocations<br><span class="mk">"input"</span>: [{<span class="ms">"role"</span>: <span class="ms">"user"</span>,<br>&nbsp;<span class="ms">"content"</span>: <span class="ms">"PA for Humira..."</span>}]</div>
+  </div>
+</div>
+
+<!-- S2: TRIAGE -->
+<div class="stage" id="s2" style="left:378px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Classify</div>
+  <div class="stage-subtitle">classification agent · LangGraph endpoint</div>
+  <div class="card">
+    <div class="badge b-teal">sub-agent · classify only · domain-agnostic</div><br>
+    <div class="mono-box" style="margin-top:3px;margin-bottom:8px">build_classifier_agent() → StateGraph</div>
+    <div class="badge b-blue">llm · read-only · emit JSON</div>
+    <div class="mono-box">{<br>&nbsp;<span class="mk">"request_type"</span>: <span class="ms">"MEDICATION_PRIOR_AUTH"</span>,<br>&nbsp;<span class="mk">"drug"</span>: <span class="ms">"humira"</span>,<br>&nbsp;<span class="mk">"member_id"</span>: <span class="ms">"MBR-001234"</span>,<br>&nbsp;<span class="mk">"dx"</span>: <span class="ms">"RA (M05.79)"</span>,<br>&nbsp;<span class="mk">"provider"</span>: <span class="ms">"rheumatologist"</span><br>}</div>
+    <div class="mono-box" style="margin-top:6px;font-size:10px;color:var(--text-dim)">types: MED_PA · PROC_PA<br>DME_PA · INPATIENT · APPEAL</div>
+  </div>
+</div>
+
+<!-- S3: ROUTE (ORCHESTRATOR) -->
+<div class="stage w260" id="s3" style="left:706px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Orchestrate</div>
+  <div class="stage-subtitle">orchestrator agent · LLM tool routing</div>
+  <div class="card">
+    <div class="badge b-ora" style="margin-bottom:8px">ReACT · LLM decides tool order</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);margin-bottom:9px">Sub-agents registered as tools.<br>Orchestrator decides which to call<br>and in what order.</div>
+    <div class="route-row"><div class="rdot" style="background:var(--blue)"></div><div><div class="rname">um-triage</div><div class="rpath">scope: um_triage</div><div class="rdesc">Classify type, extract fields</div></div></div>
+    <div class="route-row"><div class="rdot" style="background:var(--purple)"></div><div><div class="rname">um-clinical-policy</div><div class="rpath">scope: policy_read</div><div class="rdesc">Criteria · medical necessity</div></div></div>
+    <div class="route-row"><div class="rdot" style="background:var(--orange)"></div><div><div class="rname">um-pharmacy</div><div class="rpath">scope: pharmacy_read</div><div class="rdesc">Formulary · step therapy</div></div></div>
+  </div>
+</div>
+
+<!-- S4: MEMORY -->
+<div class="stage w260" id="s4" style="left:1072px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Memory</div>
+  <div class="stage-subtitle">agent_framework.memory</div>
+  <div class="card">
+    <div class="badge b-pur">Delta-backed · analytics.warehouse</div>
+    <div style="margin-top:9px">
+      <div class="mem-title">Short-Term (STM) · short_term_memory.py</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px">session: MBR-001234-20260702<br><span class="mp">turn 1</span> → PA request received<br><span class="mp">turn 2</span> → classified: MEDICATION_PA<br>window: <span class="mn">10 turns</span></div>
+    </div>
+    <div style="margin-top:8px">
+      <div class="mem-title">Long-Term (LTM) · long_term_memory.py</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="ms">prior auth history</span> → 3 found<br>table: <span class="mn">agent_long_term_memory</span><br>connector: <span class="mk">delta_connector.py</span></div>
+    </div>
+    <div style="margin-top:8px">
+      <div class="mem-title">Knowledge Graph · knowledge_graph.py</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="my">entity:</span> humira → biologic<br><span class="my">entity:</span> RA (M05.79) → ICD-10<br>tables: <span class="mn">agent_kg_entities</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mn">agent_kg_triples</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- S5: GUARDRAILS -->
+<div class="stage w260" id="s5" style="left:1436px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Guardrails</div>
+  <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
+  <div class="card">
+    <div class="badge b-pink">pre_llm + post_tool · plugin_registry.py</div>
+    <div style="margin-top:10px">
+      <div class="guard-row"><span class="gcheck">🛡</span><span class="gname">AI Gateway</span><span class="gstatus">✓ routing</span></div>
+      <div class="guard-row"><span class="gcheck">🔒</span><span class="gname">DelegationChain</span><span class="gstatus">✓ HMAC-SHA256</span></div>
+      <div class="guard-row"><span class="gcheck">💰</span><span class="gname">Budget Enforcer</span><span class="gstatus">✓ within</span></div>
+      <div class="guard-row"><span class="gcheck">⏱</span><span class="gname">Rate Limiter</span><span class="gstatus">✓ ok</span></div>
+      <div class="guard-row"><span class="gcheck">📋</span><span class="gname">Audit Trail</span><span class="gstatus">✓ hash-chained</span></div>
+    </div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">security_plugin.py</span> → pre_llm<br><span class="mk">audit_plugin.py</span> → post_tool<br><span class="mk">rate_limiter.py</span> → 120 req/min<br><span class="mk">budget_enforcer.py</span> → enforced</div>
+  </div>
+</div>
+
+<!-- S6: PROCESS -->
+<div class="stage w280" id="s6" style="left:1800px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Process</div>
+  <div class="stage-subtitle">parallel_orchestrator.py · scope enforcement</div>
+  <div class="card">
+    <div class="badge b-blue" style="margin-bottom:8px">DelegationChain · confused deputy blocked</div>
+    <div class="chain-line"><span class="ca">reviewer_id</span> → <span class="cb">um-orchestrator</span><br>&nbsp;&nbsp;[um_orchestrate, delegate]<br>→ <span class="cc">um-clinical-policy</span> [policy_read]<br>→ <span class="cc">um-pharmacy</span> [pharmacy_read]<br><span style="color:var(--text-dim)">HMAC-SHA256 · delegation_chain.py</span></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:14px;font-weight:700;color:var(--text)">ToolGateway enforcement</span>
+      <span class="pill"><span class="pill-dot"></span>active</span>
+    </div>
+    <div class="srow"><span class="sdot sg"></span>check_formulary_status<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot sg"></span>search_medical_policy<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot sg"></span>check_medical_necessity<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot so"></span>get_member_clinical_records<span class="sval sv-o">DENIED</span></div>
+    <div class="mono-box" style="margin-top:8px;font-size:11px">pharmacy scope: <span class="mo">pharmacy_read</span><br>clinical tool requires: <span class="mr">clinical_read</span><br>gateway: <span class="mr">ACCESS_DENIED</span> ← confused deputy blocked<br>react_engine: <span class="mn">tool loop · reflect · retry</span></div>
+  </div>
+</div>
+
+<!-- S7: HUMAN GATE -->
+<div class="stage w260" id="s7" style="left:2194px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Human Gate</div>
+  <div class="stage-subtitle">hitl_engine.py · confidence &lt; 0.70</div>
+  <div class="badge b-pink" style="margin-bottom:10px">HUMAN IN THE LOOP</div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="card-label">Confidence Composite</div>
+    <div class="srow"><span class="sdot sb"></span>LLM self-reported<span class="sval" style="color:var(--blue)">30%</span></div>
+    <div class="srow"><span class="sdot sb"></span>Source doc coverage<span class="sval" style="color:var(--blue)">25%</span></div>
+    <div class="srow"><span class="sdot sb"></span>Tool result consistency<span class="sval" style="color:var(--blue)">20%</span></div>
+    <div class="srow"><span class="sdot sb"></span>Category risk<span class="sval" style="color:var(--blue)">15%</span></div>
+    <div class="srow"><span class="sdot sb"></span>Error history<span class="sval" style="color:var(--blue)">10%</span></div>
+    <div class="divider"></div>
+    <div class="srow" style="font-size:10px"><span class="sdot sg"></span>≥ 0.92 → auto-approve</div>
+    <div class="srow" style="font-size:10px"><span class="sdot sy"></span>0.70–0.92 → audit + proceed</div>
+    <div class="srow" style="font-size:10px"><span class="sdot so"></span>&lt; 0.70 → escalate to human</div>
+  </div>
+  <div class="human-box">
+    <div class="avatar">👤</div>
+    <div class="hname">UM Reviewer</div>
+    <div class="hfile">PA-BIO-001 · humira-40mg</div>
+    <div class="btn-grid">
+      <div class="hbtn hbtn-a">✓ Approve</div>
+      <div class="hbtn hbtn-p">◷ Pend</div>
+      <div class="hbtn hbtn-r">✕ Deny</div>
+    </div>
+  </div>
+</div>
+
+<!-- S8: DECISION -->
+<div class="stage w280" id="s8" style="left:2568px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Decision</div>
+  <div class="stage-subtitle">orchestrator aggregates · audit_trail.py · any outcome</div>
+  <div class="card">
+    <div class="mono-box" style="margin-bottom:9px;font-size:11px">orchestrator aggregates results:<br><span class="ms">clinical_policy</span> → criteria met<br><span class="ms">pharmacy</span> → step therapy met<br><span class="mn">confidence: 0.95</span> → auto-approve</div>
+    <div style="background:#dcfce7;border:1px solid #86efac;border-radius:5px;padding:7px 12px;font-family:'IBM Plex Sans','Inter',sans-serif;font-size:14px;font-weight:700;color:#15803d;margin-bottom:10px;text-align:center">PA-BIO-001 → APPROVED</div>
+    <div class="badge b-pur" style="margin-bottom:8px">audit_trail.py · hash-chained</div>
+    <div class="srow"><span class="sdot sg"></span>decision written to Delta<span class="sval sv-g">done</span></div>
+    <div class="srow"><span class="sdot sg"></span>audit entry hash-chained<span class="sval sv-g">done</span></div>
+    <div class="srow"><span class="sdot sy"></span>FHIR R4 ClaimResponse<span class="sval sv-o">queued</span></div>
+    <div class="srow"><span class="sdot sd"></span>provider notification<span class="sval sv-d">pending</span></div>
+    <div class="divider"></div>
+    <div class="log-line">audit: <span>PA-BIO-001 approved · hash-chained</span><br>table: <span>analytics.warehouse.agent_audit_trail</span></div>
+  </div>
+</div>
+
+<!-- S9: OUTPUT -->
+<div class="stage w260" id="s9" style="left:2966px;top:30px;">
+  <div class="stage-title" style="color:var(--blue)">Output</div>
+  <div class="stage-subtitle">MLflow traces · feedback</div>
+  <div class="card">
+    <div class="badge b-teal">post_response · async_tasks.py</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">FHIR R4</span> ClaimResponse → sent<br><span class="mk">provider</span> notified: <span class="ms">approved</span><br><span class="mk">output dir</span>: um_demo/output/<br><span class="mk">decision JSON</span> → written</div>
+    <div class="divider"></div>
+    <div class="badge b-blue">MLflow · experiment [experiment-id]</div>
+    <div class="mono-box" style="margin-top:5px;font-size:11px">trace_id: <span class="ms">auto via autolog</span><br>spans: <span class="mn">langchain autolog</span><br>assessment: <span class="ms">user_satisfaction</span><br><span class="mk">mlflow.langchain.autolog()</span></div>
+    <div class="divider"></div>
+    <div class="badge b-grn">feedback · Open WebUI</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <div class="hbtn hbtn-a" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center">👍 Good</div>
+      <div class="hbtn hbtn-r" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center;color:#721c24;border:1px solid #f5c6cb;border-radius:6px;">👎 Bad</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /world-pipeline -->
+</div><!-- /canvas-pipeline -->
+</div><!-- /tab-pipeline -->
+
+<!-- ══════════════ INFRASTRUCTURE TAB ══════════════ -->
+<div id="tab-infra" class="tab-panel">
+<div class="stage-canvas" id="canvas-infra">
+<div id="world-infra">
+
+<!-- MEMORY -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--purple)">Memory Architecture</div>
+  <div class="infra-sub">agent_framework.memory · Delta Lake · analytics.warehouse</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+    <div style="background:var(--panel2);border:1px solid rgba(184,160,248,0.30);border-radius:6px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">STM</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">conversation<br>turns window<br>Delta table<br>session-scoped</div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid rgba(119,196,216,0.28);border-radius:6px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">LTM</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">agent_long_<br>term_memory<br>user-scoped<br>persistent</div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid rgba(252,182,49,0.28);border-radius:6px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px">KG</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">kg_entities<br>kg_triples<br>LangGraph<br>entity extract</div>
+    </div>
+  </div>
+  <div class="mono-box" style="font-size:11px">LangGraph: user_id &#8594; session_id &#8594; memory &#8594; KG &#8594; RAG &#8594; LLM &#8594; [tool loop] &#8594; fact_check &#8594; memory_write &#8594; entity_extract &#8594; END</div>
+</div>
+
+<!-- SECURITY -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--pink)">Security · Confused Deputy Prevention</div>
+  <div class="infra-sub">delegation_chain.py · tool_gateway · HMAC-SHA256</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
+    <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">DelegationLink</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">caller_id<br>scope: policy_read<br>signed: HMAC-SHA256</div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">ToolGateway</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">validates chain<br>scope-enforced<br>every tool call</div>
+    </div>
+  </div>
+  <div class="mono-box" style="font-size:11px">user &#8594; orchestrator &#8594; clinical_policy (scope: policy_read)<br>user &#8594; orchestrator &#8594; pharmacy (scope: pharmacy_read)<br><span class="mr">&#10005; confused deputy blocked</span>: orchestrator cannot invoke tools outside its own scope boundary</div>
+</div>
+
+<!-- AGENT TEMPLATE -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--blue)">agent-template/scripts</div>
+  <div class="infra-sub">16 reusable framework modules · 5 hook-based plugins</div>
+  <div class="tag-grid">
+    <div class="fs-sec">Core Engine</div>
+    <span class="fs-tag" style="color:var(--blue)">react_engine.py</span><span class="fs-tag" style="color:var(--blue)">model.py</span><span class="fs-tag" style="color:var(--blue)">structured_output.py</span><span class="fs-tag" style="color:var(--blue)">agent_model_template.py</span>
+    <div class="fs-sec">Multi-Agent</div>
+    <span class="fs-tag" style="color:var(--purple)">agent_comms.py</span><span class="fs-tag" style="color:var(--purple)">parallel_orchestrator.py</span><span class="fs-tag" style="color:var(--purple)">agent_router.py</span><span class="fs-tag" style="color:var(--purple)">delegation_chain.py</span>
+    <div class="fs-sec">Security &amp; Compliance</div>
+    <span class="fs-tag" style="color:var(--pink)">audit_trail.py</span><span class="fs-tag" style="color:var(--pink)">budget_enforcer.py</span><span class="fs-tag" style="color:var(--pink)">rate_limiter.py</span><span class="fs-tag" style="color:var(--orange)">hitl_engine.py</span>
+    <div class="fs-sec">Lifecycle &amp; Plugins</div>
+    <span class="fs-tag" style="color:var(--green)">deploy.py</span><span class="fs-tag" style="color:var(--green)">plugin_registry.py</span><span class="fs-tag" style="color:var(--green)">tool_registry.py</span><span class="fs-tag" style="color:var(--green)">memory_tools.py</span>
+    <span class="fs-tag" style="color:var(--green-hi)">hitl_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">audit_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">router_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">parallel_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">security_plugin.py</span>
+  </div>
+</div>
+
+<!-- CENTENE_AGENTS -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--purple)">agent_framework</div>
+  <div class="infra-sub">8 agent subpackages · 50+ modules</div>
+  <div class="tag-grid">
+    <div class="fs-sec">Packages</div>
+    <span class="fs-tag" style="color:var(--purple)">memory (STM+LTM+KG)</span><span class="fs-tag" style="color:var(--purple)">rag (single/multi-turn)</span><span class="fs-tag" style="color:var(--purple)">responses_agent</span><span class="fs-tag" style="color:var(--purple)">ingestion</span>
+    <span class="fs-tag" style="color:var(--purple)">evaluation</span><span class="fs-tag" style="color:var(--purple)">feedback</span><span class="fs-tag" style="color:var(--purple)">agent_tracing</span><span class="fs-tag" style="color:var(--purple)">tool_calling</span>
+    <div class="fs-sec">Utils</div>
+    <span class="fs-tag">guardrails.py</span><span class="fs-tag">llm_resilience.py</span><span class="fs-tag">embedding.py</span><span class="fs-tag">chunking.py</span>
+    <span class="fs-tag">databricks.py</span><span class="fs-tag">config.py</span><span class="fs-tag">logger.py</span><span class="fs-tag">indexing.py</span>
+    <span class="fs-tag">parsing.py</span><span class="fs-tag">fallback.py</span><span class="fs-tag">sql_client.py</span><span class="fs-tag">file_utils.py</span>
+  </div>
+</div>
+
+<!-- PLATFORM -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--blue)">Databricks Platform</div>
+  <div class="infra-sub">[databricks-workspace] · AI/BI + Model Serving</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Serving Layer</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">um-orchestrator<br>um-clinical-policy<br>um-pharmacy<br>um-triage<br>Open WebUI app</div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">Data Layer</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">Unity Catalog<br>Vector Search<br>Delta Lake<br>MLflow (exp: 429&#8230;)<br>AI Gateway</div>
+    </div>
+  </div>
+  <div class="mono-box" style="font-size:11px">task: agent/v1/responses · db_agents.deploy()<br>secret: secrets/sp_token · metadata: {task: "agent/v1/responses"}</div>
+</div>
+
+<!-- OBSERVABILITY -->
+<div class="infra-panel">
+  <div class="infra-title" style="color:var(--green-hi)">Observability</div>
+  <div class="infra-sub">MLflow · traces · assessments · feedback</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--green-hi);margin-bottom:5px">MLflow Traces</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">14 spans/req<br>agent_tracing.py<br>record_tool_event<br>update_trace tags</div>
+    </div>
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:5px">Feedback Loop</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">&#128077;&#128078; action functions<br>custom_good<br>TRACE_ID tag<br>POST /v1/feedback</div>
+    </div>
+  </div>
+  <div class="mono-box" style="font-size:11px">experiment: [experiment-id]<br>assessment: user_satisfaction &#8594; MLflow Assessments<br>audit: hash-chained Delta · HIPAA/CMS/NCQA</div>
+</div>
+
+</div><!-- /world-infra -->
+</div><!-- /canvas-infra -->
+</div><!-- /tab-infra -->
+
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('visible');
+  btn.classList.add('active');
+  if (name === 'pipeline') { drawLines(); }
+}
+
+function drawLines() {
+  // Guard: retry until stages are laid out
+  const first = document.getElementById('s1');
+  if (!first || first.offsetWidth === 0) { setTimeout(drawLines, 250); return; }
+  const svg = document.getElementById('lines');
+  if (!svg) return;
+  svg.innerHTML = '';
+  const color = '#0369a1';
+  const stages = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  for (let i = 0; i < stages.length - 1; i++) {
+    const a = document.getElementById(stages[i]), b = document.getElementById(stages[i+1]);
+    if (!a || !b) continue;
+    // 38% of stage height → lands in the card body area
+    const ay = a.offsetTop + a.offsetHeight * 0.38;
+    const by = b.offsetTop + b.offsetHeight * 0.38;
+    const ax = a.offsetLeft + a.offsetWidth;
+    const bx = b.offsetLeft;
+    const gap = bx - ax;
+    const cx1 = ax + gap * 0.55;
+    const cx2 = bx - gap * 0.55;
+    const d = `M${ax},${ay} C${cx1},${ay} ${cx2},${by} ${bx},${by}`;
+    const glow = document.createElementNS('http://www.w3.org/2000/svg','path');
+    glow.setAttribute('d',d); glow.setAttribute('fill','none');
+    glow.setAttribute('stroke',color); glow.setAttribute('stroke-width','14');
+    glow.setAttribute('stroke-opacity','0.09'); glow.setAttribute('stroke-linecap','round');
+    svg.appendChild(glow);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+    line.setAttribute('d',d); line.setAttribute('fill','none');
+    line.setAttribute('stroke',color); line.setAttribute('stroke-width','2.2');
+    line.setAttribute('stroke-opacity','0.85'); line.setAttribute('stroke-linecap','round');
+    svg.appendChild(line);
+    [[ax,ay],[bx,by]].forEach(([cx,cy]) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r','4');
+      c.setAttribute('fill',color); c.setAttribute('fill-opacity','0.88');
+      svg.appendChild(c);
+    });
+  }
+}
+
+let animId;
+function initParticles() {
+  if (animId) cancelAnimationFrame(animId);
+  const cv = document.getElementById('particle-bg'), ctx = cv.getContext('2d');
+  const COUNT = 70, MAX = 150, SP = 0.25;
+  let W, H, pts;
+  function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+  resize();
+  pts = Array.from({length:COUNT}, () => ({
+    x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()-.5)*SP, vy:(Math.random()-.5)*SP,
+    r:Math.random()*1.3+0.5
+  }));
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    for (const p of pts) {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; else if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; else if(p.y>H)p.y=0;
+    }
+    for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++) {
+      const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.sqrt(dx*dx+dy*dy);
+      if(d<MAX) {
+        const a=(1-d/MAX)*0.12;
+        ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(14,116,144,${a * 0.45})`; ctx.lineWidth=0.7; ctx.stroke();
+      }
+    }
+    for (const p of pts) {
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(38,39,105,0.10)'; ctx.fill();
+    }
+    animId = requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  draw();
+}
+
+/* drag-to-pan for both canvases */
+['canvas-pipeline','canvas-infra'].forEach(id => {
+  const cv = document.getElementById(id);
+  let drag=false, sx=0, sy=0, sl=0, st=0;
+  cv.addEventListener('mousedown', e => { drag=true; sx=e.clientX; sy=e.clientY; sl=cv.scrollLeft; st=cv.scrollTop; });
+  window.addEventListener('mousemove', e => { if(!drag)return; cv.scrollLeft=sl-(e.clientX-sx); cv.scrollTop=st-(e.clientY-sy); });
+  window.addEventListener('mouseup', () => drag=false);
+});
+
+setTimeout(() => { drawLines(); initParticles(); }, 120);
+window.addEventListener('resize', drawLines);
+</script>
+</body>
+</html>
