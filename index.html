@@ -42,7 +42,42 @@ html, body {
   color: var(--text);
   font-family: 'Crimson Pro', Georgia, serif;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: show;
+}
+
+/* Mobile header elements hidden by default on desktop */
+
+/* ── MOBILE LAYOUT FIXES ── */
+@media (max-width: 760px) {
+  /* Pipeline: make tab-panel and canvas scroll naturally */
+  #tab-pipeline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 90px; /* fallback; JS sets exact topbar height */
+  }
+  #canvas-pipeline {
+    position: relative;
+    top: auto; left: auto; right: auto; bottom: auto;
+    overflow: visible;
+    cursor: default;
+    width: 100%;
+  }
+
+  /* Infrastructure: single-column grid to prevent horizontal overflow */
+  #world-infra {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Infra 3-col sub-grids → single col */
+  #world-infra [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Infra 2-col sub-grids → single col */
+  #world-infra [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 #particle-bg {
@@ -52,23 +87,31 @@ html, body {
 
 /* ── TOPBAR ── */
 .topbar {
-  position:fixed; top:0; left:0; right:0; height:50px;
+  position:fixed; top:0; left:0; right:0;
   background:var(--topbar); border-bottom:1px solid var(--topbar-b);
   display:flex; align-items:center; justify-content:space-between;
   padding:0 22px; z-index:100; backdrop-filter:blur(12px);
   box-shadow:0 1px 12px rgba(15,23,42,0.12);
+  height:50px;
 }
-.topbar-left { display:flex; align-items:center; gap:10px; }
 .topbar-title {
   font-family:'Cinzel',serif; font-size:15px; font-weight:600;
   color:var(--text); letter-spacing:0.07em;
 }
 .topbar-title span { color:var(--blue); }
-.topbar-sub {
-  font-family:'Crimson Pro',serif; font-size:14px;
-  color:var(--text-dim);
+.hamburger-btn {
+  display:none; flex-direction:column; gap:4px;
+  cursor:pointer; padding:6px; background:none; border:none;
+  flex-shrink:0;
 }
-.topbar-sub em { color:var(--green-hi); font-style:normal; font-weight:500; }
+.hamburger-btn span {
+  display:block; width:22px; height:3px;
+  background:var(--text); border-radius:0;
+}
+
+/* .sub is always inline on desktop */
+.topbar-title .sep { display:inline; }
+.topbar-title .sub { display:inline; color:var(--text); }
 
 /* ── TABS ── */
 .tab-nav { display:flex; gap:4px; }
@@ -84,6 +127,51 @@ html, body {
   border-color:var(--brite); color:var(--teal);
 }
 
+@media (max-width: 760px) {
+  /* Switch to hamburger layout */
+  .tab-nav { display:none; }
+  .hamburger-btn { display:flex; }
+
+  .topbar {
+    height:auto;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:16px 16px 10px;
+    gap:14px;
+  }
+  .topbar-title {
+    text-align:center;
+    line-height:1.5;
+  }
+  /* Hide separator and subtitle entirely on mobile */
+  .topbar-title .sep { display:none; }
+  .topbar-title .sub { display:none; }
+  .hamburger-btn {
+    align-self:center;
+  }
+}
+
+/* ── MOBILE NAV DROPDOWN ── */
+.mobile-nav-dropdown {
+  display:none; position:fixed; top:50px; left:0; right:0;
+  background:#fff; border-bottom:1px solid var(--topbar-b);
+  box-shadow:0 4px 16px rgba(15,23,42,0.10);
+  z-index:99; flex-direction:column;
+}
+@media (max-width: 760px) {
+  .mobile-nav-dropdown.open { display:flex; }
+}
+.mobile-nav-link {
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  letter-spacing:0.06em; text-transform:uppercase;
+  padding:14px 22px; color:var(--text-dim); cursor:pointer;
+  border:none; border-bottom:1px solid var(--border);
+  background:none; text-align:left; transition:color 0.15s, background 0.15s;
+}
+.mobile-nav-link:last-child { border-bottom:none; }
+.mobile-nav-link.active { color:var(--teal);}
+
 /* ── TAB PANELS ── */
 .tab-panel { display:none; }
 .tab-panel.visible { display:block; }
@@ -93,12 +181,12 @@ html, body {
   position:fixed; top:50px; left:0; right:0; bottom:0;
   overflow:auto; cursor:grab; z-index:1;
 }
-#canvas-pipeline { overflow-x:auto; overflow-y:hidden; }
+#canvas-pipeline { overflow-x:auto; overflow-y:auto; }
 #canvas-infra    { overflow-x:hidden; overflow-y:auto; }
 .stage-canvas:active { cursor:grabbing; }
 
 /* ── WORLDS ── */
-#world-pipeline { position:relative; width:3310px; height:960px; background:var(--bg2); }
+#world-pipeline { position:relative; width:3310px; height:750px; background:var(--bg2); }
 #world-infra    { width:100%; min-height:100%; background:var(--bg2); display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:18px; padding:24px; align-content:start; box-sizing:border-box; }
 #lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
 
@@ -256,14 +344,20 @@ html, body {
 <canvas id="particle-bg"></canvas>
 
 <!-- ── TOPBAR ── -->
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="topbar-title"><span>Agentic Framework</span> · Multi-Agent Pipeline</div>
-  </div>
+<div class="topbar" id="topbar">
+  <div class="topbar-title" id="topbar-title"><span>Agentic Framework</span><span class="sep"> · </span><span class="sub">Multi-Agent Pipeline</span></div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
     <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
   </div>
+  <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+<!-- Dropdown sits outside topbar so it falls below it cleanly -->
+<div class="mobile-nav-dropdown" id="mobile-nav">
+  <button class="mobile-nav-link active" id="mnav-pipeline" onclick="mobileShowTab('pipeline')" style="padding:17px 22px 14px 22px">Pipeline</button>
+  <button class="mobile-nav-link" id="mnav-infra" onclick="mobileShowTab('infra')">Infrastructure</button>
 </div>
 
 <!-- ══════════════ PIPELINE TAB ══════════════ -->
@@ -561,6 +655,37 @@ function showTab(name, btn) {
   if (name === 'pipeline') { drawLines(); }
 }
 
+function toggleMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  nav.style.top = document.getElementById('topbar').offsetHeight + 'px';
+  nav.classList.toggle('open');
+}
+
+function mobileShowTab(name) {
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('tab-' + name).classList.add('visible');
+  document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('mnav-' + name).classList.add('active');
+  const subtitles = { pipeline: 'Multi-Agent Pipeline', infra: 'Infrastructure' };
+  document.getElementById('topbar-title').innerHTML = '<span>Agentic Framework</span><span class="sep"> · </span><span class="sub">' + subtitles[name] + '</span>';
+  if (name === 'pipeline') { drawLines(); }
+}
+
+function adjustCanvasTop() {
+  const topbarH = document.getElementById('topbar').offsetHeight;
+  // Infra canvas (position:fixed) — shift down
+  const infra = document.getElementById('canvas-infra');
+  if (infra) infra.style.top = topbarH + 'px';
+  // Pipeline tab on mobile is a fixed scroller — set padding so content clears topbar
+  const pip = document.getElementById('tab-pipeline');
+  if (pip && window.getComputedStyle(pip).position === 'fixed') {
+    pip.style.paddingTop = topbarH + 'px';
+  }
+}
+
+window.addEventListener('resize', adjustCanvasTop);
+
 function drawLines() {
   // Guard: retry until stages are laid out
   const first = document.getElementById('s1');
@@ -648,7 +773,7 @@ function initParticles() {
   window.addEventListener('mouseup', () => drag=false);
 });
 
-setTimeout(() => { drawLines(); initParticles(); }, 120);
+setTimeout(() => { drawLines(); initParticles(); adjustCanvasTop(); }, 120);
 window.addEventListener('resize', drawLines);
 </script>
 </body>
