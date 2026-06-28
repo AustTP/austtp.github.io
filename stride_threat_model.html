@@ -21,10 +21,13 @@ body {
   background: #f4f4f4;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 .page {
   max-width: 1000px;
   margin: 40px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 h1 {
   font-family: 'Cinzel', serif;
@@ -59,6 +62,11 @@ table {
   width: 100%;
   margin: 1em 0;
   font-size: .9em;
+}
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 tr {
   background: #FFF;
@@ -97,8 +105,12 @@ pre {
   border-radius: 6px;
   border-left: 3px solid #0e7490;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   font-size: .84em;
   line-height: 1.55;
+  max-width: 100%;
+  white-space: pre;
+  word-wrap: normal;
 }
 pre code {
   background: none;
@@ -141,7 +153,7 @@ a { color: #0369a1; }
 <div class="cell-title">Document Header</div>
 <h1>STRIDE Threat Model</h1>
 <h2>Enterprise Agentic AI Platform</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Field</th>
@@ -174,7 +186,7 @@ a { color: #0369a1; }
   <td><code>agent-core/</code>, <code>agent-template/</code>, <code>agent-ui/</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <p><strong>Purpose</strong>: This document enumerates all STRIDE threat findings for a production agentic AI platform. NIST AI RMF alignment is noted inline where applicable.</p>
 <p><strong>Assessment approach</strong>: Each finding is assigned a STRIDE category, unique ID, attack vector, impact, mitigation status, and DREAD score. Red team validation evidence is sourced from adversarial AI red team assessment.</p>
@@ -182,7 +194,7 @@ a { color: #0369a1; }
 <div class="cell-title">System Under Assessment</div>
 <hr />
 <h2>System Under Assessment</h2>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Repository</th>
@@ -207,7 +219,7 @@ a { color: #0369a1; }
   <td>Databricks App</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Architecture Overview</h3>
 <pre><code>+---------------------------------------------------------------------+
 |                         USER (Browser)                               |
@@ -233,7 +245,7 @@ a { color: #0369a1; }
    +--------+ +--------+ +------+ +--------+ +---------+
 </code></pre>
 <h3>Trust Boundaries</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -268,13 +280,13 @@ a { color: #0369a1; }
   <td>NIST CSF: PR.AC-4</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 
 <div class="cell-title">STRIDE Methodology</div>
 <hr />
 <h2>STRIDE Methodology</h2>
 <p><strong>STRIDE</strong> is a threat modeling framework that categorizes threats by the type of security property they violate:</p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Category</th>
@@ -321,9 +333,9 @@ a { color: #0369a1; }
   <td>Prompt→tool→SQL chain, relay→code execution, memory identity escalation</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Severity Framework</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Severity</th>
@@ -353,10 +365,10 @@ a { color: #0369a1; }
   <td>Document; accept or address in future cycle</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>DREAD scoring</strong>: Damage (1–10) + Reproducibility (1–10) + Exploitability (1–10) + Affected users (1–10) + Discoverability (1–10)</p>
 <h3>Finding Status</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Status</th>
@@ -381,14 +393,14 @@ a { color: #0369a1; }
   <td>No control in place; remediation required</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><em>Red team validation source: adversarial AI red team assessment</em></p>
 
 <div class="cell-title">S — Spoofing Findings</div>
 <hr />
 <h2>S — Spoofing Findings</h2>
 <p><em>Threats that violate authentication — impersonating a user, agent, or system component.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -449,7 +461,7 @@ a { color: #0369a1; }
   <td>20</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>S-1</strong>: Databricks Apps proxy unconditionally sets <code>X-Forwarded-Email</code> from Databricks SSO; headers injected by infra, not passthrough</li>
@@ -463,7 +475,7 @@ a { color: #0369a1; }
 <hr />
 <h2>T — Tampering Findings</h2>
 <p><em>Threats that violate integrity — unauthorized modification of data, code, or messages.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -548,7 +560,7 @@ a { color: #0369a1; }
   <td>22</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>T-1</strong>: SP-only writes to LTM; <code>fact_checker.py</code> validates extracted facts; <code>user_id</code> partitioning limits blast radius</li>
@@ -566,7 +578,7 @@ a { color: #0369a1; }
 <hr />
 <h2>R — Repudiation Findings</h2>
 <p><em>Threats that violate non-repudiation — the ability to prove an actor performed an action.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -619,7 +631,7 @@ a { color: #0369a1; }
   <td>18</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>R-1</strong>: MLflow tracing with <code>user_id</code> tag + <code>[audit-table]</code> Delta table (append-only) provides durable per-request record</li>
@@ -633,7 +645,7 @@ a { color: #0369a1; }
 <hr />
 <h2>I — Information Disclosure Findings</h2>
 <p><em>Threats that violate confidentiality — exposing data to unauthorized parties.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -734,7 +746,7 @@ a { color: #0369a1; }
   <td>12</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>I-1 partial</strong>: current system prompt uses terse refusals; translation/encoding attacks partially blocked; full extraction not demonstrated but not fully ruled out</li>
@@ -753,7 +765,7 @@ a { color: #0369a1; }
 <hr />
 <h2>D — Denial of Service Findings</h2>
 <p><em>Threats that violate availability — degrading or preventing legitimate use of the system.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -830,7 +842,7 @@ a { color: #0369a1; }
   <td>14</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>D-1</strong>: Databricks serving endpoint autoscaling; endpoint-level concurrency config limits</li>
@@ -847,7 +859,7 @@ a { color: #0369a1; }
 <hr />
 <h2>E — Elevation of Privilege Findings</h2>
 <p><em>Threats that violate authorization — gaining capabilities beyond the granted permission level.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>ID</th>
@@ -932,7 +944,7 @@ a { color: #0369a1; }
   <td>28</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>E-1</strong>: Static tool registry loaded at model init; no runtime tool registration path exposed</li>
@@ -949,7 +961,7 @@ a { color: #0369a1; }
 <hr />
 <h2>DREAD Risk Scoring Matrix</h2>
 <p><em>Top findings ranked by DREAD total score (D=Damage, R=Reproducibility, E=Exploitability, A=Affected users, D=Discoverability)</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Finding</th>
@@ -1273,9 +1285,9 @@ a { color: #0369a1; }
   <td>Low</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Open Critical/High Findings (require remediation)</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Finding</th>
@@ -1300,13 +1312,13 @@ a { color: #0369a1; }
   <td>HIGH — same as T-6</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 
 <div class="cell-title">Mitigation Status Summary</div>
 <hr />
 <h2>Mitigation Status Summary</h2>
 <h3>By Finding Status</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Status</th>
@@ -1336,7 +1348,7 @@ a { color: #0369a1; }
   <td>T-5, T-6, E-6</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Defense-in-Depth Assessment</h3>
 <pre><code>USER
   └─ Open WebUI (Trusted-Header SSO)        ✔ S-1, S-3, S-7 mitigated
@@ -1352,7 +1364,7 @@ a { color: #0369a1; }
 <p><strong>Key gap</strong>: Zero defense layers exist between the file-system relay and agent execution context (T-6, E-6). Any process with file-write access to the relay directory has full agent execution capability.</p>
 <p><strong>Key gap</strong>: Supply chain (T-5) has no integrity layer — all deployed code is implicitly trusted after the workspace ACL boundary.</p>
 <h3>AI Gateway Guardrail Status</h3>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Control</th>
@@ -1387,14 +1399,14 @@ a { color: #0369a1; }
   <td><code>[inference-table]</code> exists; sensitive column masking not configured</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><em>AI Gateway safety filters and PII detection enabled prior to production deployment. Rate limiting relies on platform defaults.</em></p>
 
 <div class="cell-title">Accepted Risks</div>
 <hr />
 <h2>Accepted Risks</h2>
 <p><em>Risks documented as accepted require explicit justification and periodic review.</em></p>
-<table>
+<div class="table-wrap"><table>
 <thead>
 <tr>
   <th>Finding</th>
@@ -1423,7 +1435,7 @@ a { color: #0369a1; }
   <td>If knowledge base spaces are reclassified as restricted</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Accepted risk review schedule</strong>: Quarterly, or immediately upon any user-base change (adding external users, member-facing deployment, or cross-BU access).</p>
 
 </div></body></html>
