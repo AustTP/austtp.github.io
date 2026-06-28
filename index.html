@@ -139,11 +139,33 @@ html, body {
 .tab-btn-ext:hover { background:rgba(109,40,217,0.06); border-color:var(--purple); }
 .tab-btn-ext svg { flex-shrink:0; }
 
-@media (max-width: 900px) {
-  /* Switch to hamburger layout */
+@media (max-width: 1100px) {
+  /* Medium: title left, hamburger right, single row — no stacking */
   .tab-nav { display:none; }
   .hamburger-btn { display:flex; }
 
+  .topbar {
+    height:50px;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    gap:0;
+  }
+  .topbar-title {
+    text-align:left;
+    line-height:1.4;
+  }
+  /* Keep subtitle visible at medium width */
+  .topbar-title .sep { display:inline; }
+  .topbar-title .sub { display:inline; color:var(--text); }
+  .hamburger-btn {
+    align-self:center;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Mobile: stacked — title centered, hamburger below */
   .topbar {
     height:auto;
     flex-direction:column;
@@ -156,7 +178,7 @@ html, body {
     text-align:center;
     line-height:1.5;
   }
-  /* Hide separator and subtitle entirely on mobile */
+  /* Hide separator and subtitle on small mobile */
   .topbar-title .sep { display:none; }
   .topbar-title .sub { display:none; }
   .hamburger-btn {
@@ -171,7 +193,7 @@ html, body {
   box-shadow:0 4px 16px rgba(15,23,42,0.10);
   z-index:99; flex-direction:column;
 }
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .mobile-nav-dropdown.open { display:flex; }
 }
 .mobile-nav-link {
@@ -188,6 +210,53 @@ html, body {
 /* ── TAB PANELS ── */
 .tab-panel { display:none; }
 .tab-panel.visible { display:block; }
+
+/* ── ABOUT PANEL ── */
+#tab-about {
+  position:fixed; top:50px; left:0; right:0; bottom:0;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  z-index:1; background:var(--bg2);
+}
+@media (max-width: 600px) {
+  #tab-about { top:0; padding-top:90px; }
+}
+.about-page {
+  max-width:760px; margin:0 auto; padding:40px 28px 60px;
+}
+.about-section {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:9px; padding:28px 30px; margin-bottom:24px;
+  box-shadow:0 2px 12px var(--shadow), 0 0 0 1px rgba(14,116,144,0.06);
+}
+.about-eyebrow {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--text-dim); margin-bottom:8px;
+}
+.about-title {
+  font-family:'IBM Plex Sans','Inter',sans-serif; font-size:22px;
+  font-weight:700; color:var(--text); margin-bottom:16px;
+  letter-spacing:-0.01em;
+}
+.about-body {
+  font-family:'Crimson Pro',Georgia,serif; font-size:17px;
+  color:var(--text-mid); line-height:1.80;
+}
+.about-body p { margin-bottom:1em; }
+.about-body p:last-child { margin-bottom:0; }
+.about-divider {
+  height:1px; background:var(--border); margin:20px 0;
+}
+.about-cta {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono',monospace; font-size:11px;
+  letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--purple); text-decoration:none;
+  border:1px solid rgba(109,40,217,0.35); border-radius:5px;
+  padding:8px 16px; margin-top:6px;
+  transition:all 0.18s;
+}
+.about-cta:hover { background:rgba(109,40,217,0.06); border-color:var(--purple); }
 
 /* ── CANVAS ── */
 .stage-canvas {
@@ -360,6 +429,7 @@ html, body {
 <div class="topbar" id="topbar">
   <div class="topbar-title" id="topbar-title"><span>Agentic Framework</span><span class="sep"> · </span><span class="sub">Multi-Agent Pipeline</span></div>
   <div class="tab-nav">
+    <button class="tab-btn" onclick="showTab('about',this)">About</button>
     <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
     <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
     <a class="tab-btn-ext" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
@@ -373,12 +443,51 @@ html, body {
 </div>
 <!-- Dropdown sits outside topbar so it falls below it cleanly -->
 <div class="mobile-nav-dropdown" id="mobile-nav">
-  <button class="mobile-nav-link active" id="mnav-pipeline" onclick="mobileShowTab('pipeline')" style="padding:17px 22px 14px 22px">Pipeline</button>
+  <button class="mobile-nav-link" id="mnav-about" onclick="mobileShowTab('about')" style="padding:17px 22px 14px 22px">About</button>
+  <button class="mobile-nav-link active" id="mnav-pipeline" onclick="mobileShowTab('pipeline')">Pipeline</button>
   <button class="mobile-nav-link" id="mnav-infra" onclick="mobileShowTab('infra')">Infrastructure</button>
   <a class="mobile-nav-link" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:6px;color:var(--purple);text-decoration:none;">
     STRIDE Threat Model
     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
+</div>
+
+<!-- ══════════════ ABOUT TAB ══════════════ -->
+<div id="tab-about" class="tab-panel">
+<div class="about-page">
+
+  <div class="about-section">
+    <div class="about-eyebrow">Enterprise Multi-Agent AI Framework</div>
+    <div class="about-title">Agentic Framework</div>
+    <div class="about-body">
+      <p>Built a production multi-agent AI framework designed to be reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
+      <p>The framework ships with Delta-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
+      <p>Plugin hooks at pre-LLM and post-tool boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
+    </div>
+    <div class="about-divider"></div>
+    <div class="about-eyebrow" style="margin-bottom:6px">Explore the architecture</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="tab-btn" style="font-size:11px" onclick="switchToTab('pipeline')">Pipeline ↗</button>
+      <button class="tab-btn" style="font-size:11px" onclick="switchToTab('infra')">Infrastructure ↗</button>
+    </div>
+  </div>
+
+  <div class="about-section">
+    <div class="about-eyebrow">Security Assessment</div>
+    <div class="about-title">STRIDE Threat Model</div>
+    <div class="about-body">
+      <p>Built and adversarially tested a production agentic AI platform using STRIDE across all six threat categories. There were forty findings total at the time. Each was assigned a unique attack vector, a DREAD score calibrated individually across five dimensions, and validation through adversarial red team testing. Nothing was scored Critical without a tested attack path.</p>
+      <p>Agentic systems have a threat surface that standard frameworks do not cover. Memory poisoning that persists false identity across sessions, RAG corpus tampering via controlled ingestion pipelines, identity chain confusion where user context derives from injectable headers, relay injection between agent-to-agent handoffs with no message signing, and supply chain attacks against deployed model artifacts. Everything is enumerated with a concrete payload, not a category description.</p>
+      <p>Defense-in-depth spans eight layers from the SSO proxy boundary through serving endpoint ACLs, static tool registry enforcement, fact verification on memory writes, append-only audit guarantees, and AI Gateway safety and PII filtering confirmed active. Twenty-five findings had been mitigated at the creation of this document. All findings documented here have since been remediated.</p>
+    </div>
+    <div class="about-divider"></div>
+    <a class="about-cta" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
+      View STRIDE Threat Model
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+
+</div>
 </div>
 
 <!-- ══════════════ PIPELINE TAB ══════════════ -->
@@ -673,6 +782,17 @@ function showTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('visible');
   btn.classList.add('active');
   if (name === 'pipeline') { drawLines(); }
+  adjustCanvasTop();
+}
+
+function switchToTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('tab-' + name).classList.add('visible');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(name));
+  });
+  if (name === 'pipeline') { drawLines(); }
+  adjustCanvasTop();
 }
 
 function toggleMobileNav() {
@@ -687,21 +807,22 @@ function mobileShowTab(name) {
   document.getElementById('tab-' + name).classList.add('visible');
   document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
   document.getElementById('mnav-' + name).classList.add('active');
-  const subtitles = { pipeline: 'Multi-Agent Pipeline', infra: 'Infrastructure' };
+  const subtitles = { about: 'About', pipeline: 'Multi-Agent Pipeline', infra: 'Infrastructure' };
   document.getElementById('topbar-title').innerHTML = '<span>Agentic Framework</span><span class="sep"> · </span><span class="sub">' + subtitles[name] + '</span>';
   if (name === 'pipeline') { drawLines(); }
+  adjustCanvasTop();
 }
 
 function adjustCanvasTop() {
   const topbarH = document.getElementById('topbar').offsetHeight;
-  // Infra canvas (position:fixed) — shift down
   const infra = document.getElementById('canvas-infra');
   if (infra) infra.style.top = topbarH + 'px';
-  // Pipeline tab on mobile is a fixed scroller — set padding so content clears topbar
   const pip = document.getElementById('tab-pipeline');
   if (pip && window.getComputedStyle(pip).position === 'fixed') {
     pip.style.paddingTop = topbarH + 'px';
   }
+  const about = document.getElementById('tab-about');
+  if (about) about.style.top = topbarH + 'px';
 }
 
 window.addEventListener('resize', adjustCanvasTop);
