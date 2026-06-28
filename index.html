@@ -65,9 +65,9 @@ html, body {
     width: 100%;
   }
 
-  /* Infrastructure: single-column grid to prevent horizontal overflow */
+  /* Infrastructure: single-column to prevent horizontal overflow */
   #world-infra {
-    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
   }
 
   /* Infra 3-col sub-grids → single col */
@@ -130,39 +130,13 @@ html, body {
 /* ── EXTERNAL LINK BUTTON ── */
 .tab-btn-ext {
   font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.06em;
-  text-transform:uppercase; padding:6px 14px; border-radius:5px;
-  cursor:pointer; border:1px solid rgba(109,40,217,0.35);
-  color:var(--purple); background:transparent;
-  text-decoration:none; display:inline-flex; align-items:center; gap:5px;
-  transition:all 0.18s; white-space:nowrap;
-}
-.tab-btn-ext:hover { background:rgba(109,40,217,0.06); border-color:var(--purple); }
-.tab-btn-ext svg { flex-shrink:0; }
-
-/* ── GREEN TAB (About) ── */
-.tab-btn-green {
-  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.06em;
-  text-transform:uppercase; padding:6px 18px; border-radius:5px;
-  cursor:pointer; border:1px solid rgba(21,128,61,0.35);
-  color:var(--green); background:transparent;
-  transition:all 0.18s;
-}
-.tab-btn-green:hover { background:rgba(21,128,61,0.06); border-color:var(--green); }
-.tab-btn-green.active {
-  background:rgba(21,128,61,0.08);
-  border-color:var(--green); color:var(--green-hi);
-}
-
-/* ── RED TAB (Infrastructure) ── */
-.tab-btn-red {
-  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.06em;
   text-transform:uppercase; padding:6px 18px; border-radius:5px;
   cursor:pointer; border:1px solid rgba(185,28,28,0.35);
   color:var(--red); background:transparent;
   transition:all 0.18s;
 }
-.tab-btn-red:hover { background:rgba(185,28,28,0.06); border-color:var(--red); }
-.tab-btn-red.active {
+.tab-btn-ext:hover { background:rgba(185,28,28,0.06); border-color:var(--red); }
+.tab-btn-ext.active {
   background:rgba(185,28,28,0.07);
   border-color:var(--red); color:var(--red);
 }
@@ -249,7 +223,7 @@ html, body {
   #tab-about { top:0; padding-top:90px; }
 }
 .about-page {
-  max-width:760px; margin:0 auto; padding:40px 28px 60px;
+  max-width:760px; margin:0 auto; padding:24px 28px 60px;
 }
 .about-section {
   background:var(--panel); border:1px solid var(--border);
@@ -297,7 +271,9 @@ html, body {
 
 /* ── WORLDS ── */
 #world-pipeline { position:relative; width:3310px; height:750px; background:var(--bg2); }
-#world-infra    { width:100%; min-height:100%; background:var(--bg2); display:grid; grid-template-columns:repeat(auto-fill,minmax(440px,1fr)); gap:18px; padding:24px; align-content:start; box-sizing:border-box; }
+#world-infra    { width:100%; min-height:100%; background:var(--bg2); display:flex; flex-direction:row; align-items:flex-start; gap:18px; padding:24px; box-sizing:border-box; }
+.infra-col      { flex:1; min-width:0; display:flex; flex-direction:column; gap:18px; }
+.infra-panel   { break-inside:avoid; }
 #lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
 
 /* ── STAGE ── */
@@ -457,9 +433,9 @@ html, body {
 <div class="topbar" id="topbar">
   <div class="topbar-title" id="topbar-title"><span>Agentic Framework</span><span class="sep"> · </span><span class="sub">Multi-Agent Pipeline</span></div>
   <div class="tab-nav">
-    <button class="tab-btn-green" onclick="showTab('about',this)">About</button>
+    <button class="tab-btn" onclick="showTab('about',this)">About</button>
     <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
-    <button class="tab-btn-red" onclick="showTab('infra',this)">Infrastructure</button>
+    <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
     <a class="tab-btn-ext" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
       STRIDE Threat Model
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -525,7 +501,7 @@ html, body {
 <svg id="lines" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <!-- S1: CAPTURE -->
-<div class="stage" id="s1" style="left:60px;top:30px;">
+<div class="stage" id="s1" style="left:60px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Capture</div>
   <div class="stage-subtitle">um_demo/input/ · Responses API</div>
   <div class="card">
@@ -538,7 +514,7 @@ html, body {
 </div>
 
 <!-- S2: TRIAGE -->
-<div class="stage" id="s2" style="left:378px;top:30px;">
+<div class="stage" id="s2" style="left:378px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Classify</div>
   <div class="stage-subtitle">classification agent · LangGraph endpoint</div>
   <div class="card">
@@ -551,7 +527,7 @@ html, body {
 </div>
 
 <!-- S3: ROUTE (ORCHESTRATOR) -->
-<div class="stage w260" id="s3" style="left:706px;top:30px;">
+<div class="stage w260" id="s3" style="left:706px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Orchestrate</div>
   <div class="stage-subtitle">orchestrator agent · LLM tool routing</div>
   <div class="card">
@@ -564,7 +540,7 @@ html, body {
 </div>
 
 <!-- S4: MEMORY -->
-<div class="stage w260" id="s4" style="left:1072px;top:30px;">
+<div class="stage w260" id="s4" style="left:1072px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Memory</div>
   <div class="stage-subtitle">agent_framework.memory</div>
   <div class="card">
@@ -585,7 +561,7 @@ html, body {
 </div>
 
 <!-- S5: GUARDRAILS -->
-<div class="stage w260" id="s5" style="left:1436px;top:30px;">
+<div class="stage w260" id="s5" style="left:1436px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Guardrails</div>
   <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
   <div class="card">
@@ -602,7 +578,7 @@ html, body {
 </div>
 
 <!-- S6: PROCESS -->
-<div class="stage w280" id="s6" style="left:1800px;top:30px;">
+<div class="stage w280" id="s6" style="left:1800px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Process</div>
   <div class="stage-subtitle">parallel_orchestrator.py · scope enforcement</div>
   <div class="card">
@@ -623,7 +599,7 @@ html, body {
 </div>
 
 <!-- S7: HUMAN GATE -->
-<div class="stage w260" id="s7" style="left:2194px;top:30px;">
+<div class="stage w260" id="s7" style="left:2194px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Human Gate</div>
   <div class="stage-subtitle">hitl_engine.py · confidence &lt; 0.70</div>
   <div class="badge b-pink" style="margin-bottom:10px">HUMAN IN THE LOOP</div>
@@ -652,7 +628,7 @@ html, body {
 </div>
 
 <!-- S8: DECISION -->
-<div class="stage w280" id="s8" style="left:2568px;top:30px;">
+<div class="stage w280" id="s8" style="left:2568px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Decision</div>
   <div class="stage-subtitle">orchestrator aggregates · audit_trail.py · any outcome</div>
   <div class="card">
@@ -669,7 +645,7 @@ html, body {
 </div>
 
 <!-- S9: OUTPUT -->
-<div class="stage w260" id="s9" style="left:2966px;top:30px;">
+<div class="stage w260" id="s9" style="left:2966px;top:16px;">
   <div class="stage-title" style="color:var(--blue)">Output</div>
   <div class="stage-subtitle">MLflow traces · feedback</div>
   <div class="card">
@@ -695,6 +671,8 @@ html, body {
 <div id="tab-infra" class="tab-panel">
 <div class="stage-canvas" id="canvas-infra">
 <div id="world-infra">
+
+<div class="infra-col">
 
 <!-- MEMORY -->
 <div class="infra-panel">
@@ -751,6 +729,9 @@ html, body {
   </div>
 </div>
 
+</div><!-- /infra-col left -->
+<div class="infra-col">
+
 <div class="infra-panel">
   <div class="infra-title" style="color:var(--purple)">agent_framework</div>
   <div class="infra-sub">8 agent subpackages · 50+ modules</div>
@@ -799,6 +780,8 @@ html, body {
   <div class="mono-box" style="font-size:11px">experiment: [experiment-id]<br>assessment: user_satisfaction &#8594; MLflow Assessments<br>audit: hash-chained Delta · HIPAA/CMS/NCQA</div>
 </div>
 
+</div><!-- /infra-col right -->
+
 </div><!-- /world-infra -->
 </div><!-- /canvas-infra -->
 </div><!-- /tab-infra -->
@@ -806,7 +789,7 @@ html, body {
 <script>
 function showTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.querySelectorAll('.tab-btn, .tab-btn-green, .tab-btn-red').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('visible');
   btn.classList.add('active');
   if (name === 'pipeline') { drawLines(); }
@@ -816,7 +799,7 @@ function showTab(name, btn) {
 function switchToTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
   document.getElementById('tab-' + name).classList.add('visible');
-  document.querySelectorAll('.tab-btn, .tab-btn-green, .tab-btn-red').forEach(b => {
+  document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(name));
   });
   if (name === 'pipeline') { drawLines(); }
