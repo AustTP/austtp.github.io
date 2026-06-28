@@ -48,7 +48,7 @@ html, body {
 /* Mobile header elements hidden by default on desktop */
 
 /* ── MOBILE LAYOUT FIXES ── */
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   /* Pipeline: make tab-panel and canvas scroll naturally */
   #tab-pipeline {
     position: fixed;
@@ -127,7 +127,19 @@ html, body {
   border-color:var(--brite); color:var(--teal);
 }
 
-@media (max-width: 760px) {
+/* ── EXTERNAL LINK BUTTON ── */
+.tab-btn-ext {
+  font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.06em;
+  text-transform:uppercase; padding:6px 14px; border-radius:5px;
+  cursor:pointer; border:1px solid rgba(109,40,217,0.35);
+  color:var(--purple); background:transparent;
+  text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+  transition:all 0.18s; white-space:nowrap;
+}
+.tab-btn-ext:hover { background:rgba(109,40,217,0.06); border-color:var(--purple); }
+.tab-btn-ext svg { flex-shrink:0; }
+
+@media (max-width: 900px) {
   /* Switch to hamburger layout */
   .tab-nav { display:none; }
   .hamburger-btn { display:flex; }
@@ -159,7 +171,7 @@ html, body {
   box-shadow:0 4px 16px rgba(15,23,42,0.10);
   z-index:99; flex-direction:column;
 }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .mobile-nav-dropdown.open { display:flex; }
 }
 .mobile-nav-link {
@@ -350,6 +362,10 @@ html, body {
   <div class="tab-nav">
     <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
     <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
+    <a class="tab-btn-ext" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
+      STRIDE Threat Model
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
   </div>
   <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -359,6 +375,10 @@ html, body {
 <div class="mobile-nav-dropdown" id="mobile-nav">
   <button class="mobile-nav-link active" id="mnav-pipeline" onclick="mobileShowTab('pipeline')" style="padding:17px 22px 14px 22px">Pipeline</button>
   <button class="mobile-nav-link" id="mnav-infra" onclick="mobileShowTab('infra')">Infrastructure</button>
+  <a class="mobile-nav-link" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:6px;color:var(--purple);text-decoration:none;">
+    STRIDE Threat Model
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
 </div>
 
 <!-- ══════════════ PIPELINE TAB ══════════════ -->
