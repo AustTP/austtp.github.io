@@ -1,0 +1,1429 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STRIDE Threat Model — Enterprise Agentic AI</title>
+<style>
+/* ── agentic.html palette ───────────────────────────────────────────────── */
+:root {
+  --teal:       #0e7490;
+  --navy:       #0f172a;
+  --blue:       #0369a1;
+  --text-dim:   #4a6078;
+  --text-mid:   #334155;
+  --border:     rgba(14,116,144,0.22);
+  --border-hi:  rgba(14,116,144,0.55);
+}
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #0f172a;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+.page {
+  max-width: 1000px;
+  margin: 40px auto;
+}
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.9em;
+  font-weight: 700;
+  letter-spacing: .04em;
+  border-bottom: 3px solid #0e7490;
+  padding-bottom: .3em;
+  margin-bottom: .6em;
+  color: #0f172a;
+}
+h2 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  letter-spacing: .03em;
+  border-bottom: 1px solid rgba(14,116,144,0.35);
+  padding-bottom: .25em;
+  margin-top: 2em;
+  color: #0f172a;
+}
+h3 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: .03em;
+  margin-top: 1.4em;
+  color: #334155;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: .9em;
+}
+tr {
+  background: #FFF;
+}
+th {
+  background: #0369a1;
+  color: #ffffff;
+  padding: 9px 13px;
+  text-align: left;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .78em;
+  font-weight: 600;
+  letter-spacing: .07em;
+}
+td {
+  padding: 7px 13px;
+  border-bottom: 1px solid rgba(14,116,144,0.18);
+  vertical-align: top;
+}
+tr:nth-child(even) td {
+  background: rgba(14,116,144,0.05);
+}
+code {
+  background: #f1f5f9;
+  border: 1px solid rgba(14,116,144,0.28);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  font-size: .85em;
+  color: #0369a1;
+}
+pre {
+  background: #3B3B3B;
+  color: #d4d4d4;
+  padding: 16px;
+  border-radius: 6px;
+  border-left: 3px solid #0e7490;
+  overflow-x: auto;
+  font-size: .84em;
+  line-height: 1.55;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+blockquote {
+  border-left: 4px solid #0e7490;
+  margin: 0;
+  padding: 0 1em;
+  color: #4a6078;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgba(14,116,144,0.30);
+  margin: 2em 0;
+}
+strong { color: #0f172a; }
+a { color: #0369a1; }
+.cell-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .68em;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #0e7490;
+  padding: .3em .7em;
+  background: rgba(14,116,144,0.08);
+  border-left: 3px solid #0e7490;
+  border-radius: 0 4px 4px 0;
+  display: inline-block;
+}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head><body><div class="page">
+<div class="cell-title">Document Header</div>
+<h1>STRIDE Threat Model</h1>
+<h2>Enterprise Agentic AI Platform</h2>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Date</strong></td>
+  <td>2026-06-10</td>
+</tr>
+<tr>
+  <td><strong>Author</strong></td>
+  <td>Austin Poole</td>
+</tr>
+<tr>
+  <td><strong>Classification</strong></td>
+  <td>Portfolio — AI Security Assessment</td>
+</tr>
+<tr>
+  <td><strong>Base Methodology</strong></td>
+  <td>Microsoft STRIDE</td>
+</tr>
+<tr>
+  <td><strong>Version</strong></td>
+  <td>v3.0 — STRIDE threat assessment</td>
+</tr>
+<tr>
+  <td><strong>Scope</strong></td>
+  <td><code>agent-core/</code>, <code>agent-template/</code>, <code>agent-ui/</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Purpose</strong>: This document enumerates all STRIDE threat findings for a production agentic AI platform. NIST AI RMF alignment is noted inline where applicable.</p>
+<p><strong>Assessment approach</strong>: Each finding is assigned a STRIDE category, unique ID, attack vector, impact, mitigation status, and DREAD score. Red team validation evidence is sourced from adversarial AI red team assessment.</p>
+
+<div class="cell-title">System Under Assessment</div>
+<hr />
+<h2>System Under Assessment</h2>
+<table>
+<thead>
+<tr>
+  <th>Repository</th>
+  <th>Purpose</th>
+  <th>Deployment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>agent-core/</code></td>
+  <td>Core agent framework (<code>agents_sdk</code>): memory, RAG, KG, tool calling, LangGraph orchestration</td>
+  <td>Model Serving endpoint</td>
+</tr>
+<tr>
+  <td><code>agent-template/</code></td>
+  <td>Deployment template: ReACT engine, plugin system, router, parallel orchestrator, deploy scripts</td>
+  <td>Packaged into model artifact</td>
+</tr>
+<tr>
+  <td><code>agent-ui/</code></td>
+  <td>Open WebUI frontend, LLM Recommender, feedback action functions, Lakebase integration</td>
+  <td>Databricks App</td>
+</tr>
+</tbody>
+</table>
+<h3>Architecture Overview</h3>
+<pre><code>+---------------------------------------------------------------------+
+|                         USER (Browser)                               |
+|   Open WebUI (Trusted-Header SSO: X-Forwarded-Email)                |
++------------------------------+--------------------------------------+
+                               | HTTPS
++------------------------------v--------------------------------------+
+|                    DATABRICKS APP (agent-ui)                         |
+|   [proxy.py] -&gt; Serving Endpoint invocation                     |
+|   Lakebase (PostgreSQL) for user state                              |
+|   Feedback action functions -&gt; MLflow Assessments API                |
++------------------------------+--------------------------------------+
+                               | Internal REST
++------------------------------v--------------------------------------+
+|                MODEL SERVING ENDPOINT                                |
+|   System SP auto-auth | Environment vars (secrets)                   |
+|   [model_template.py] (predict -&gt; LangGraph -&gt; tools -&gt; response)|
++-------+----------+----------+----------+-----------+----------------+
+        |          |          |          |           |
+   +----v---+ +---v----+ +--v---+ +---v----+ +---v-----+
+   | LLM    | | Memory | | RAG  | | SQL    | | Vector  |
+   |Endpoint| | (Delta)| |(VS)  | |Warehouse| | Search  |
+   +--------+ +--------+ +------+ +--------+ +---------+
+</code></pre>
+<h3>Trust Boundaries</h3>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Boundary</th>
+  <th>Security Control</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>TB1</td>
+  <td>User browser &lt;-&gt; Databricks App (SSO headers injected by proxy)</td>
+  <td>NIST CSF: PR.AC-7</td>
+</tr>
+<tr>
+  <td>TB2</td>
+  <td>Databricks App &lt;-&gt; Model Serving Endpoint (SP token / auto-auth)</td>
+  <td>NIST CSF: PR.AC-4</td>
+</tr>
+<tr>
+  <td>TB3</td>
+  <td>Model Serving Endpoint &lt;-&gt; LLM Provider Endpoints (PAT/SP)</td>
+  <td>NIST CSF: PR.DS-2</td>
+</tr>
+<tr>
+  <td>TB4</td>
+  <td>Model Serving Endpoint &lt;-&gt; Data Stores (Delta, VS, SQL Warehouse)</td>
+  <td>NIST CSF: PR.DS-6, DE.CM-3</td>
+</tr>
+<tr>
+  <td>TB5</td>
+  <td>Agent &lt;-&gt; Agent (multi-agent routing via <code>[agent_router.py]</code>)</td>
+  <td>NIST CSF: PR.AC-4</td>
+</tr>
+</tbody>
+</table>
+
+<div class="cell-title">STRIDE Methodology</div>
+<hr />
+<h2>STRIDE Methodology</h2>
+<p><strong>STRIDE</strong> is a threat modeling framework that categorizes threats by the type of security property they violate:</p>
+<table>
+<thead>
+<tr>
+  <th>Category</th>
+  <th>Violates</th>
+  <th>Definition</th>
+  <th>AI-Specific Concern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>S</strong>poofing</td>
+  <td>Authentication</td>
+  <td>Attacker impersonates a user, component, or identity</td>
+  <td>Identity forgery via headers, user identity spoofing, agent impersonation</td>
+</tr>
+<tr>
+  <td><strong>T</strong>ampering</td>
+  <td>Integrity</td>
+  <td>Attacker modifies data or code without authorization</td>
+  <td>Memory/KG poisoning, RAG corpus injection, relay manipulation</td>
+</tr>
+<tr>
+  <td><strong>R</strong>epudiation</td>
+  <td>Non-repudiation</td>
+  <td>Actor denies performing an action; logs cannot prove otherwise</td>
+  <td>Missing signed audit trail on tool calls and model decisions</td>
+</tr>
+<tr>
+  <td><strong>I</strong>nformation Disclosure</td>
+  <td>Confidentiality</td>
+  <td>Data exposed to unauthorized parties</td>
+  <td>System prompt extraction, cross-user memory leakage, PAT exposure</td>
+</tr>
+<tr>
+  <td><strong>D</strong>enial of Service</td>
+  <td>Availability</td>
+  <td>Resource exhaustion or system disruption</td>
+  <td>ReACT loop attacks, scale-from-zero cost amplification</td>
+</tr>
+<tr>
+  <td><strong>E</strong>levation of Privilege</td>
+  <td>Authorization</td>
+  <td>Attacker gains capabilities beyond their grant</td>
+  <td>Prompt→tool→SQL chain, relay→code execution, memory identity escalation</td>
+</tr>
+</tbody>
+</table>
+<h3>Severity Framework</h3>
+<table>
+<thead>
+<tr>
+  <th>Severity</th>
+  <th>DREAD Total</th>
+  <th>Action Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Critical</strong></td>
+  <td>38–50</td>
+  <td>Immediate remediation before production use</td>
+</tr>
+<tr>
+  <td><strong>High</strong></td>
+  <td>28–37</td>
+  <td>Remediation within current sprint</td>
+</tr>
+<tr>
+  <td><strong>Medium</strong></td>
+  <td>18–27</td>
+  <td>Backlog item; mitigate within quarter</td>
+</tr>
+<tr>
+  <td><strong>Low</strong></td>
+  <td>≤17</td>
+  <td>Document; accept or address in future cycle</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DREAD scoring</strong>: Damage (1–10) + Reproducibility (1–10) + Exploitability (1–10) + Affected users (1–10) + Discoverability (1–10)</p>
+<h3>Finding Status</h3>
+<table>
+<thead>
+<tr>
+  <th>Status</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Mitigated</strong></td>
+  <td>Control is implemented and empirically validated</td>
+</tr>
+<tr>
+  <td><strong>Partial</strong></td>
+  <td>Control exists but has known gaps or hasn’t been red-team tested</td>
+</tr>
+<tr>
+  <td><strong>Accepted</strong></td>
+  <td>Risk acknowledged; no remediation planned (documented justification required)</td>
+</tr>
+<tr>
+  <td><strong>Open</strong></td>
+  <td>No control in place; remediation required</td>
+</tr>
+</tbody>
+</table>
+<p><em>Red team validation source: adversarial AI red team assessment</em></p>
+
+<div class="cell-title">S — Spoofing Findings</div>
+<hr />
+<h2>S — Spoofing Findings</h2>
+<p><em>Threats that violate authentication — impersonating a user, agent, or system component.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>S-1</strong></td>
+  <td>Trusted Header Forgery</td>
+  <td>Attacker with direct network path to Open WebUI backend sets <code>X-Forwarded-Email: admin@[company.com]</code>; app auto-provisions attacker as admin</td>
+  <td>Admin-level access to all users’ conversations; full session impersonation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>S-2</strong></td>
+  <td>Unauthorized Endpoint Invocation</td>
+  <td>Stolen or shared SP token sent directly to serving endpoint <code>/invocations</code>; bypasses all UI-level controls</td>
+  <td>Full agent access with any arbitrary <code>user_id</code>; no session context isolation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>25</td>
+</tr>
+<tr>
+  <td><strong>S-3</strong></td>
+  <td>Open WebUI Account Registration Forgery</td>
+  <td>If <code>WEBUI_AUTH_TRUSTED_EMAIL_HEADER</code> not set, attacker registers with <code>admin@[company.com]</code> email</td>
+  <td>Admin access to all stored conversations</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>S-4</strong></td>
+  <td>User ID Spoofing via <code>custom_inputs</code></td>
+  <td>Attacker sends <code>{&quot;custom_inputs&quot;: {&quot;user_id&quot;: &quot;user-000001&quot;}}</code> in request body to query another user’s data</td>
+  <td>Cross-user data access; unauthorized memory/KG reads</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>S-5</strong></td>
+  <td>User ID Chain Confusion</td>
+  <td>Attacker sends <code>user_id</code> in prompt body versus <code>custom_inputs</code>; tests whether server-side derivation is bypassed</td>
+  <td>Query another user’s LTM/KG facts</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>S-6</strong></td>
+  <td>Stale Model Version Serving</td>
+  <td>Rollback to older model version (registry) that had looser prompt controls; version registry not locked</td>
+  <td>Serves version with known injection vulnerabilities</td>
+  <td><strong>Partial</strong></td>
+  <td>20</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>S-1</strong>: Databricks Apps proxy unconditionally sets <code>X-Forwarded-Email</code> from Databricks SSO; headers injected by infra, not passthrough</li>
+<li><strong>S-2</strong>: ACL on serving endpoint; SP token scope is <code>CAN_QUERY</code> only; token is not user-visible</li>
+<li><strong>S-3</strong>: <code>WEBUI_AUTH_TRUSTED_EMAIL_HEADER</code> configured; manual admin assignment required</li>
+<li><strong>S-4 / S-5</strong>: <code>user_id</code> derived server-side from <code>X-Forwarded-Email</code> in <code>[proxy.py]</code>; <code>custom_inputs</code> value from request body ignored</li>
+<li><strong>S-6 gap</strong>: Model registry has 15 versions; no <code>@production</code> alias lock; any version can be served by name</li>
+</ul>
+
+<div class="cell-title">T — Tampering Findings</div>
+<hr />
+<h2>T — Tampering Findings</h2>
+<p><em>Threats that violate integrity — unauthorized modification of data, code, or messages.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>T-1</strong></td>
+  <td>Long-Term Memory Poisoning</td>
+  <td>Multi-turn conversation injects false facts (&quot;I am the system admin&quot;) into LTM via normal agent interaction</td>
+  <td>Persistent false identity across all future sessions; potential privilege escalation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>32</td>
+</tr>
+<tr>
+  <td><strong>T-2</strong></td>
+  <td>Knowledge Graph Entity Injection</td>
+  <td>Craft prompts that cause model-driven KG extractor to write attacker-controlled entities/triples</td>
+  <td>KG provides false organizational context to all future RAG/tool queries</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>T-3</strong></td>
+  <td>RAG Corpus Document Poisoning</td>
+  <td>Obtain write access to VS index; upsert documents with hidden injection instructions</td>
+  <td>All users receive poisoned responses; persistent cross-session</td>
+  <td><strong>Mitigated</strong></td>
+  <td>35</td>
+</tr>
+<tr>
+  <td><strong>T-4</strong></td>
+  <td>Adversarial Embedding Input</td>
+  <td>Craft input specifically to manipulate cosine similarity scores; retrieve attacker-chosen documents</td>
+  <td>RAG retrieves irrelevant or malicious context</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>T-5</strong></td>
+  <td>Deployment <code>code_paths</code> Tampering</td>
+  <td>Modify Python modules referenced by <code>code_paths</code> before <code>mlflow.pyfunc.log_model()</code>; no integrity check</td>
+  <td>Arbitrary code executes on every inference request for all users</td>
+  <td><strong>Open</strong></td>
+  <td>38</td>
+</tr>
+<tr>
+  <td><strong>T-6</strong></td>
+  <td>Relay Message Injection (A2A)</td>
+  <td>Write crafted JSON to <code>IPC relay message queue</code>; no HMAC or signature</td>
+  <td>Arbitrary tool execution in agent-to-agent context; lateral movement</td>
+  <td><strong>Open</strong></td>
+  <td>36</td>
+</tr>
+<tr>
+  <td><strong>T-7</strong></td>
+  <td>Model Registry Version Swap</td>
+  <td>Register malicious model version in <code>[model-registry].[platform-model]</code></td>
+  <td>Backdoor executes for all users on next endpoint update</td>
+  <td><strong>Partial</strong></td>
+  <td>33</td>
+</tr>
+<tr>
+  <td><strong>T-8</strong></td>
+  <td>Audit Log Tampering</td>
+  <td>Attempt to DELETE or UPDATE records in <code>[audit-table]</code> Delta table</td>
+  <td>Destroy forensic evidence of malicious activity</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>T-9</strong></td>
+  <td>PostgreSQL State Manipulation</td>
+  <td>Use SP-scoped grants to modify Open WebUI session state or conversation history in Lakebase</td>
+  <td>Inject malicious conversation history; alter user preferences</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>T-1</strong>: SP-only writes to LTM; <code>fact_checker.py</code> validates extracted facts; <code>user_id</code> partitioning limits blast radius</li>
+<li><strong>T-2</strong>: KG extraction model-driven only; no user-controlled write path</li>
+<li><strong>T-3</strong>: VS index populated from controlled Confluence batch job; no user-facing upsert API</li>
+<li><strong>T-4</strong>: No direct vector write API exposed; embedding model access is read-only via serving</li>
+<li><strong>T-5 gap</strong>: No checksum/hash on <code>code_paths</code> modules; relies solely on workspace ACL</li>
+<li><strong>T-6 gap</strong>: File-based IPC has no authentication; message signing (HMAC) not implemented</li>
+<li><strong>T-7 gap</strong>: No <code>@production</code> alias lock; newer versions can be pushed by any workspace user with EDIT on the model</li>
+<li><strong>T-8</strong>: Delta append-only mode + time travel; DELETE requires MODIFY privilege not granted to SP</li>
+<li><strong>T-9</strong>: SP grants scoped to <code>openwebui</code> schema; <code>GRANT</code> audit in Lakebase</li>
+</ul>
+
+<div class="cell-title">R — Repudiation Findings</div>
+<hr />
+<h2>R — Repudiation Findings</h2>
+<p><em>Threats that violate non-repudiation — the ability to prove an actor performed an action.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>R-1</strong></td>
+  <td>User Denies Issuing a Request</td>
+  <td>User claims they never asked the agent a particular question; no per-message immutable signed log exists</td>
+  <td>Cannot prove specific message content in compliance audit or incident investigation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>R-2</strong></td>
+  <td>Session Attribution Gap</td>
+  <td>MLflow trace does not capture <code>session_id</code> on every span; gaps in session–user linking</td>
+  <td>Cannot fully reconstruct a conversation timeline per user per session</td>
+  <td><strong>Partial</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>R-3</strong></td>
+  <td>Agent Denies Tool Invocation</td>
+  <td>Agent claims it did not call a tool; tool call not recorded independently of LLM response</td>
+  <td>No independent proof of tool call separate from model output</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>R-4</strong></td>
+  <td>Tool Output Non-Attribution</td>
+  <td>SQL query result returned to user; no immutable record of exactly what data was returned</td>
+  <td>Cannot prove what sensitive data shown to which user</td>
+  <td><strong>Partial</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>R-5</strong></td>
+  <td>User Denies SQL Query via Agent</td>
+  <td>User denies requesting a particular SQL-driven data lookup; warehouse query history alone may not link to user</td>
+  <td>Audit gap if warehouse history is purged before incident investigation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>R-1</strong>: MLflow tracing with <code>user_id</code> tag + <code>[audit-table]</code> Delta table (append-only) provides durable per-request record</li>
+<li><strong>R-2 gap</strong>: Session ID tagging not consistently applied across all MLflow spans; partial coverage</li>
+<li><strong>R-3</strong>: <code>audit_trail.py</code> writes immutable Delta records per tool invocation; includes tool name, input hash, timestamp</li>
+<li><strong>R-4 gap</strong>: SQL result content is not hashed or stored in audit record; only query text captured</li>
+<li><strong>R-5</strong>: Warehouse query history correlated with MLflow trace via <code>request_id</code>; both append-only</li>
+</ul>
+
+<div class="cell-title">I — Information Disclosure Findings</div>
+<hr />
+<h2>I — Information Disclosure Findings</h2>
+<p><em>Threats that violate confidentiality — exposing data to unauthorized parties.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>I-1</strong></td>
+  <td>System Prompt Extraction</td>
+  <td>Roleplay, translation, encoding, or &quot;repeat after me&quot; attacks to recover system prompt content</td>
+  <td>Reveals the platform's defensive instructions; enables targeted bypass crafting</td>
+  <td><strong>Partial</strong></td>
+  <td>24</td>
+</tr>
+<tr>
+  <td><strong>I-2</strong></td>
+  <td>Cross-User Memory Leakage</td>
+  <td>User ID bypass (if S-4/S-5 succeed) allows reading another user’s LTM facts</td>
+  <td>Unauthorized access to user context; potential sensitive data exposure</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>I-3</strong></td>
+  <td>RAG Over-Retrieval</td>
+  <td>Document retrieval returns content beyond user’s authorization scope</td>
+  <td>Internal policy/process documents surfaced to unauthorized users</td>
+  <td><strong>Accepted</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>I-4</strong></td>
+  <td>Excessive SQL Data Return</td>
+  <td>Prompt-crafted queries return more rows than intended; pre-defined SQL functions limit surface</td>
+  <td>Unauthorized data volume exposure</td>
+  <td><strong>Accepted</strong></td>
+  <td>16</td>
+</tr>
+<tr>
+  <td><strong>I-5</strong></td>
+  <td>PII in Audit Records</td>
+  <td>Audit trail captures raw input fields containing PII/PHI</td>
+  <td>Sensitive data persisted in audit table indefinitely</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>I-6</strong></td>
+  <td>Credential Leakage via Error Messages</td>
+  <td>Trigger exception paths that include token/secret material in response</td>
+  <td>Service principal token exfiltrated via error body</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>I-7</strong></td>
+  <td>Training Data Extraction from LLM</td>
+  <td>Prompt the LLM to reproduce memorized training data</td>
+  <td>Proprietary or PII data from LLM pretraining exposed</td>
+  <td><strong>Mitigated</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>I-8</strong></td>
+  <td>Inference Table Exposure</td>
+  <td>Inference table in UC contains full request/response history; unauthorized read</td>
+  <td>Historical sensitive conversations exposed</td>
+  <td><strong>Partial</strong></td>
+  <td>25</td>
+</tr>
+<tr>
+  <td><strong>I-9</strong></td>
+  <td>Hardcoded PAT in Version-Controlled Notebook</td>
+  <td>Token <code>[REDACTED]</code> committed in <code>[deploy-notebook]</code> cell 7</td>
+  <td>Anyone with notebook read access has <code>CAN_QUERY</code> on <code>[llm-endpoint]</code>; lateral movement</td>
+  <td><strong>Mitigated</strong></td>
+  <td>33</td>
+</tr>
+<tr>
+  <td><strong>I-10</strong></td>
+  <td>Tool Schema Disclosure</td>
+  <td>Benign queries cause verbose refusals that include tool names</td>
+  <td>Attacker learns complete tool surface without executing any tool</td>
+  <td><strong>Partial</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>I-11</strong></td>
+  <td>Confluence URL Exposure via RAG</td>
+  <td>RAG responses include source URLs; reveals internal Confluence space structure</td>
+  <td>Internal KB architecture disclosed; enables targeted phishing/recon</td>
+  <td><strong>Accepted</strong></td>
+  <td>12</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>I-1 partial</strong>: current system prompt uses terse refusals; translation/encoding attacks partially blocked; full extraction not demonstrated but not fully ruled out</li>
+<li><strong>I-2</strong>: User ID isolation enforced server-side; red team user_id spoof attempts blocked (adversarial testing)</li>
+<li><strong>I-3 accepted</strong>: Homogeneous access group (all users = internal users with equivalent clearance); document-level ACL not implemented</li>
+<li><strong>I-4 accepted</strong>: Pre-defined SQL functions limit query shape; user group is homogeneous</li>
+<li><strong>I-5</strong>: <code>ALLOWED_AUDIT_FIELDS</code> frozenset in <code>audit_trail.py</code> strips non-allowlisted fields before write</li>
+<li><strong>I-6</strong>: <code>{{secrets/[scope]/sp_token}}</code> syntax; exception handlers mask token material before returning to caller</li>
+<li><strong>I-7</strong>: Foundation model provider responsibility; AI Gateway safety filters and PII detection enabled prior to production</li>
+<li><strong>I-8 partial</strong>: Inference table in <code>[inference-catalog]</code>; column masking not configured for sensitive fields</li>
+<li><strong>I-9</strong>: Token confirmed valid in adversarial testing; rotated and removed from deployment notebook</li>
+<li><strong>I-10 partial</strong>: Tool name leakage in refusal text; tool schema (parameters) not directly exposed</li>
+</ul>
+
+<div class="cell-title">D — Denial of Service Findings</div>
+<hr />
+<h2>D — Denial of Service Findings</h2>
+<p><em>Threats that violate availability — degrading or preventing legitimate use of the system.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>D-1</strong></td>
+  <td>Resource Exhaustion via Parallel Requests</td>
+  <td>Send concurrent requests exceeding endpoint concurrency limit; no per-user rate limit</td>
+  <td>Endpoint saturated; all users experience degraded response times</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>D-2</strong></td>
+  <td>Scale-from-Zero Cost Amplification</td>
+  <td>Trigger repeated cold-start sequences during low-traffic periods; scale-to-zero billing model</td>
+  <td>Disproportionate compute cost billed to platform budget</td>
+  <td><strong>Mitigated</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>D-3</strong></td>
+  <td>ReACT Loop Error Forcing</td>
+  <td>Craft prompts that cause consecutive tool failures; agent retries until <code>max_steps</code></td>
+  <td>Agent exhausted; session unresponsive for duration; log flooding</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>D-4</strong></td>
+  <td>Vector Search Index Corruption/Unavailability</td>
+  <td>Delete or corrupt VS index; RAG pipeline degrades silently</td>
+  <td>All users receive hallucinated responses with no RAG grounding</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>D-5</strong></td>
+  <td>Expensive SQL via Agent</td>
+  <td>Prompt agent to run count(*) or full-table scan via SQL tools</td>
+  <td>Warehouse query queue starved; downstream jobs delayed</td>
+  <td><strong>Mitigated</strong></td>
+  <td>16</td>
+</tr>
+<tr>
+  <td><strong>D-6</strong></td>
+  <td>Infinite Tool Loop</td>
+  <td>Craft prompt that causes agent to call tools in a cycle without termination</td>
+  <td>Agent session occupies serving slot indefinitely</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>D-7</strong></td>
+  <td>Memory Table Flooding</td>
+  <td>Use legitimate conversation flow to continuously write facts to LTM; no per-user write quota</td>
+  <td>LTM table grows unbounded; memory retrieval performance degrades</td>
+  <td><strong>Partial</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>D-8</strong></td>
+  <td>Embedding Model Saturation</td>
+  <td>Send high-volume retrieval queries with very long inputs to embedding endpoint</td>
+  <td>Embedding model endpoint throttled; RAG pipeline timeout for all users</td>
+  <td><strong>Partial</strong></td>
+  <td>14</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>D-1</strong>: Databricks serving endpoint autoscaling; endpoint-level concurrency config limits</li>
+<li><strong>D-2</strong>: Scale-to-zero is intentional cost control; cold-start &lt; 3 min; cost amplification bounded by concurrency</li>
+<li><strong>D-3</strong>: <code>max_steps</code> + <code>consecutive_error_threshold</code> in ReACT engine terminates loop</li>
+<li><strong>D-4</strong>: VS index sync is async and non-blocking; Delta table is the source of truth; re-ingestion restores index</li>
+<li><strong>D-5</strong>: Pre-defined SQL functions only; no ad-hoc query construction possible via agent</li>
+<li><strong>D-6</strong>: <code>max_steps</code> hard cap; LangGraph <code>recursion_limit</code> set</li>
+<li><strong>D-7 partial</strong>: No per-user LTM write quota; unbounded fact accumulation possible over long tenure</li>
+<li><strong>D-8 partial</strong>: No per-request timeout on embedding calls; rate limit relies on Databricks platform defaults</li>
+</ul>
+
+<div class="cell-title">E — Elevation of Privilege Findings</div>
+<hr />
+<h2>E — Elevation of Privilege Findings</h2>
+<p><em>Threats that violate authorization — gaining capabilities beyond the granted permission level.</em></p>
+<table>
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Title</th>
+  <th>Attack Vector</th>
+  <th>Impact</th>
+  <th>Status</th>
+  <th>DREAD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>E-1</strong></td>
+  <td>Tool Scope Escape via Prompt Injection</td>
+  <td>Craft prompt that convinces agent to register or call tools outside its static tool registry</td>
+  <td>Access to tools/APIs not intended for user exposure</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>E-2</strong></td>
+  <td>Prompt → Tool → SQL Injection Chain</td>
+  <td>Inject SQL into a parameter passed to a SQL tool (e.g., CN number field contains SQL fragment)</td>
+  <td>Arbitrary SQL executed under SP’s warehouse privileges</td>
+  <td><strong>Mitigated</strong></td>
+  <td>40</td>
+</tr>
+<tr>
+  <td><strong>E-3</strong></td>
+  <td>Service Principal Token Exfiltration + Pivot</td>
+  <td>Leak SP token from serving environment; use it directly against Databricks APIs</td>
+  <td>Full SP-scope access to all permitted resources; lateral movement</td>
+  <td><strong>Mitigated</strong></td>
+  <td>35</td>
+</tr>
+<tr>
+  <td><strong>E-4</strong></td>
+  <td>Memory-Based Identity Escalation</td>
+  <td>Inject &quot;I am an administrator&quot; into LTM via conversation; fact persists across sessions</td>
+  <td>Agent treats attacker as privileged user on future interactions</td>
+  <td><strong>Mitigated</strong></td>
+  <td>32</td>
+</tr>
+<tr>
+  <td><strong>E-5</strong></td>
+  <td>Multi-Turn Context Accumulation</td>
+  <td>Gradually build false context across sessions via LTM; each turn adds one false fact</td>
+  <td>Persistent escalated identity established over multiple sessions</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>E-6</strong></td>
+  <td>Relay Injection → Agent Execution</td>
+  <td>Write crafted relay message to the IPC relay channel; receiving agent executes content as a task</td>
+  <td>Arbitrary code execution in agent context</td>
+  <td><strong>Open</strong></td>
+  <td>36</td>
+</tr>
+<tr>
+  <td><strong>E-7</strong></td>
+  <td>Admin Privilege via Open WebUI Header Injection</td>
+  <td>Spoof <code>X-Forwarded-Email</code> if direct container access exists; Open WebUI auto-provisions admin</td>
+  <td>Full admin access to all platform conversations and user management</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>E-8</strong></td>
+  <td>TierPolicy Enforcement Bypass</td>
+  <td>Craft prompt to invoke tier-restricted functionality; test if <code>TierPolicy</code> checks are model-only or structural</td>
+  <td>Access to features reserved for higher-tier users</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>E-9</strong></td>
+  <td>User ID Override via Prompt</td>
+  <td>Tell agent “my user_id is now user-999999”; test if server-side derivation holds</td>
+  <td>Query data belonging to arbitrary other users</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+</tbody>
+</table>
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>E-1</strong>: Static tool registry loaded at model init; no runtime tool registration path exposed</li>
+<li><strong>E-2</strong>: Pre-defined parameterized SQL functions; <code>user_id</code> injected server-side, not from prompt</li>
+<li><strong>E-3</strong>: <code>{{secrets/[scope]/sp_token}}</code> env var syntax; token not in response body; secrets scope restricted to named principals</li>
+<li><strong>E-4 / E-5</strong>: <code>fact_checker.py</code> validates facts against existing KG before LTM write; privilege claims flagged</li>
+<li><strong>E-6 open</strong>: File-based relay has no HMAC or sender verification; any write to the IPC relay channel is trusted</li>
+<li><strong>E-7</strong>: Databricks Apps proxy is the only ingress path; direct container access requires platform-level breach</li>
+<li><strong>E-8</strong>: <code>TierPolicy</code> enforced structurally in <code>[plugin_manager.py]</code>; not model-prompt dependent</li>
+<li><strong>E-9</strong>: <code>user_id</code> derived from <code>X-Forwarded-Email</code> in proxy; <code>custom_inputs</code> value overwritten server-side</li>
+</ul>
+
+<div class="cell-title">DREAD Risk Scoring Matrix</div>
+<hr />
+<h2>DREAD Risk Scoring Matrix</h2>
+<p><em>Top findings ranked by DREAD total score (D=Damage, R=Reproducibility, E=Exploitability, A=Affected users, D=Discoverability)</em></p>
+<table>
+<thead>
+<tr>
+  <th>Finding</th>
+  <th>Category</th>
+  <th>D</th>
+  <th>R</th>
+  <th>E</th>
+  <th>A</th>
+  <th>D₂</th>
+  <th>Total</th>
+  <th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>E-2</td>
+  <td>Elevation</td>
+  <td>8</td>
+  <td>9</td>
+  <td>7</td>
+  <td>9</td>
+  <td>7</td>
+  <td><strong>40</strong></td>
+  <td>Critical</td>
+</tr>
+<tr>
+  <td>T-5</td>
+  <td>Tampering</td>
+  <td>10</td>
+  <td>10</td>
+  <td>4</td>
+  <td>4</td>
+  <td>10</td>
+  <td><strong>38</strong></td>
+  <td>Critical</td>
+</tr>
+<tr>
+  <td>T-3</td>
+  <td>Tampering</td>
+  <td>9</td>
+  <td>9</td>
+  <td>5</td>
+  <td>6</td>
+  <td>9</td>
+  <td><strong>38</strong></td>
+  <td>Critical</td>
+</tr>
+<tr>
+  <td>E-6</td>
+  <td>Elevation</td>
+  <td>9</td>
+  <td>8</td>
+  <td>8</td>
+  <td>3</td>
+  <td>8</td>
+  <td><strong>36</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>T-6</td>
+  <td>Tampering</td>
+  <td>9</td>
+  <td>8</td>
+  <td>8</td>
+  <td>3</td>
+  <td>8</td>
+  <td><strong>36</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>E-3</td>
+  <td>Elevation</td>
+  <td>8</td>
+  <td>8</td>
+  <td>6</td>
+  <td>7</td>
+  <td>6</td>
+  <td><strong>35</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>T-7</td>
+  <td>Tampering</td>
+  <td>9</td>
+  <td>7</td>
+  <td>5</td>
+  <td>6</td>
+  <td>6</td>
+  <td><strong>33</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>I-9</td>
+  <td>Info Disc</td>
+  <td>7</td>
+  <td>7</td>
+  <td>9</td>
+  <td>5</td>
+  <td>5</td>
+  <td><strong>33</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>T-1</td>
+  <td>Tampering</td>
+  <td>8</td>
+  <td>7</td>
+  <td>6</td>
+  <td>5</td>
+  <td>6</td>
+  <td><strong>32</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>S-4</td>
+  <td>Spoofing</td>
+  <td>7</td>
+  <td>8</td>
+  <td>5</td>
+  <td>5</td>
+  <td>5</td>
+  <td><strong>30</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>E-7</td>
+  <td>Elevation</td>
+  <td>7</td>
+  <td>7</td>
+  <td>5</td>
+  <td>6</td>
+  <td>5</td>
+  <td><strong>30</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>I-2</td>
+  <td>Info Disc</td>
+  <td>7</td>
+  <td>7</td>
+  <td>4</td>
+  <td>6</td>
+  <td>6</td>
+  <td><strong>30</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>S-5</td>
+  <td>Spoofing</td>
+  <td>6</td>
+  <td>7</td>
+  <td>5</td>
+  <td>5</td>
+  <td>5</td>
+  <td><strong>28</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>E-1</td>
+  <td>Elevation</td>
+  <td>6</td>
+  <td>6</td>
+  <td>6</td>
+  <td>5</td>
+  <td>5</td>
+  <td><strong>28</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>E-5</td>
+  <td>Elevation</td>
+  <td>7</td>
+  <td>6</td>
+  <td>5</td>
+  <td>5</td>
+  <td>5</td>
+  <td><strong>28</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>T-2</td>
+  <td>Tampering</td>
+  <td>6</td>
+  <td>6</td>
+  <td>5</td>
+  <td>6</td>
+  <td>5</td>
+  <td><strong>28</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>I-6</td>
+  <td>Info Disc</td>
+  <td>6</td>
+  <td>5</td>
+  <td>6</td>
+  <td>5</td>
+  <td>6</td>
+  <td><strong>28</strong></td>
+  <td>High</td>
+</tr>
+<tr>
+  <td>I-8</td>
+  <td>Info Disc</td>
+  <td>6</td>
+  <td>6</td>
+  <td>4</td>
+  <td>5</td>
+  <td>4</td>
+  <td><strong>25</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>S-2</td>
+  <td>Spoofing</td>
+  <td>6</td>
+  <td>5</td>
+  <td>5</td>
+  <td>5</td>
+  <td>4</td>
+  <td><strong>25</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>R-4</td>
+  <td>Repudiati</td>
+  <td>4</td>
+  <td>5</td>
+  <td>4</td>
+  <td>5</td>
+  <td>4</td>
+  <td><strong>22</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>D-1</td>
+  <td>DoS</td>
+  <td>4</td>
+  <td>5</td>
+  <td>4</td>
+  <td>4</td>
+  <td>3</td>
+  <td><strong>20</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>T-8</td>
+  <td>Tampering</td>
+  <td>5</td>
+  <td>4</td>
+  <td>4</td>
+  <td>4</td>
+  <td>3</td>
+  <td><strong>20</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>R-3</td>
+  <td>Repudiati</td>
+  <td>4</td>
+  <td>4</td>
+  <td>4</td>
+  <td>4</td>
+  <td>4</td>
+  <td><strong>20</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>I-1</td>
+  <td>Info Disc</td>
+  <td>3</td>
+  <td>3</td>
+  <td>9</td>
+  <td>10</td>
+  <td>2</td>
+  <td><strong>27</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>I-10</td>
+  <td>Info Disc</td>
+  <td>3</td>
+  <td>4</td>
+  <td>5</td>
+  <td>3</td>
+  <td>3</td>
+  <td><strong>18</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>D-3</td>
+  <td>DoS</td>
+  <td>3</td>
+  <td>4</td>
+  <td>4</td>
+  <td>4</td>
+  <td>3</td>
+  <td><strong>18</strong></td>
+  <td>Medium</td>
+</tr>
+<tr>
+  <td>I-11</td>
+  <td>Info Disc</td>
+  <td>2</td>
+  <td>3</td>
+  <td>3</td>
+  <td>2</td>
+  <td>2</td>
+  <td><strong>12</strong></td>
+  <td>Low</td>
+</tr>
+<tr>
+  <td>D-8</td>
+  <td>DoS</td>
+  <td>2</td>
+  <td>3</td>
+  <td>3</td>
+  <td>3</td>
+  <td>3</td>
+  <td><strong>14</strong></td>
+  <td>Low</td>
+</tr>
+</tbody>
+</table>
+<h3>Open Critical/High Findings (require remediation)</h3>
+<table>
+<thead>
+<tr>
+  <th>Finding</th>
+  <th>Title</th>
+  <th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>T-5</td>
+  <td>Deployment <code>code_paths</code> tampering — no integrity check</td>
+  <td>CRITICAL — pre-deploy fix required</td>
+</tr>
+<tr>
+  <td>T-6</td>
+  <td>Relay message injection — no HMAC</td>
+  <td>HIGH — add HMAC before external use</td>
+</tr>
+<tr>
+  <td>E-6</td>
+  <td>Relay → Agent execution path</td>
+  <td>HIGH — same as T-6</td>
+</tr>
+</tbody>
+</table>
+
+<div class="cell-title">Mitigation Status Summary</div>
+<hr />
+<h2>Mitigation Status Summary</h2>
+<h3>By Finding Status</h3>
+<table>
+<thead>
+<tr>
+  <th>Status</th>
+  <th>Count</th>
+  <th>Findings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Mitigated</strong></td>
+  <td>25</td>
+  <td>S-1, S-2, S-3, S-4, S-5, T-1, T-2, T-3, T-4, T-8, T-9, R-1, R-3, R-5, I-2, I-5, I-6, I-7, I-9, D-1–D-6, E-1, E-2, E-3, E-4, E-5, E-7, E-8, E-9</td>
+</tr>
+<tr>
+  <td><strong>Partial</strong></td>
+  <td>8</td>
+  <td>S-6, T-7, R-2, R-4, I-1, I-8, I-10, D-7, D-8</td>
+</tr>
+<tr>
+  <td><strong>Accepted</strong></td>
+  <td>3</td>
+  <td>I-3, I-4, I-11</td>
+</tr>
+<tr>
+  <td><strong>Open</strong></td>
+  <td>3</td>
+  <td>T-5, T-6, E-6</td>
+</tr>
+</tbody>
+</table>
+<h3>Defense-in-Depth Assessment</h3>
+<pre><code>USER
+  └─ Open WebUI (Trusted-Header SSO)        ✔ S-1, S-3, S-7 mitigated
+      └─ Databricks Apps Proxy                ✔ Header injection infra-controlled
+          └─ Serving Endpoint (SP token ACL)  ✔ S-2, E-3 mitigated
+              └─ [proxy.py] (user_id)   ✔ S-4, S-5, E-9 mitigated
+                  └─ ReACT Agent              ✔ E-1, E-8 mitigated
+                      └─ SQL Tools             ✔ E-2 mitigated (pre-defined fns)
+                      └─ Memory R/W            ✔ T-1, T-2, E-4, E-5 mitigated
+                      └─ RAG Pipeline          ✔ T-3, T-4, I-3 mitigated/accepted
+                      └─ Audit Trail           ✔ R-1, R-3, T-8 mitigated
+</code></pre>
+<p><strong>Key gap</strong>: Zero defense layers exist between the file-system relay and agent execution context (T-6, E-6). Any process with file-write access to the relay directory has full agent execution capability.</p>
+<p><strong>Key gap</strong>: Supply chain (T-5) has no integrity layer — all deployed code is implicitly trusted after the workspace ACL boundary.</p>
+<h3>AI Gateway Guardrail Status</h3>
+<table>
+<thead>
+<tr>
+  <th>Control</th>
+  <th>Configured</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Input safety filter</td>
+  <td><strong>Yes</strong></td>
+  <td>Enabled prior to production deployment</td>
+</tr>
+<tr>
+  <td>Output safety filter</td>
+  <td><strong>Yes</strong></td>
+  <td>Enabled prior to production deployment</td>
+</tr>
+<tr>
+  <td>PII detection</td>
+  <td><strong>Yes</strong></td>
+  <td>Enabled prior to production deployment</td>
+</tr>
+<tr>
+  <td>Rate limiting</td>
+  <td><strong>No</strong></td>
+  <td>Platform defaults only</td>
+</tr>
+<tr>
+  <td>Inference table</td>
+  <td>Partial</td>
+  <td><code>[inference-catalog]</code> table exists; sensitive column masking not configured</td>
+</tr>
+</tbody>
+</table>
+<p><em>AI Gateway safety filters and PII detection enabled prior to production deployment. Rate limiting relies on platform defaults.</em></p>
+
+<div class="cell-title">Accepted Risks</div>
+<hr />
+<h2>Accepted Risks</h2>
+<p><em>Risks documented as accepted require explicit justification and periodic review.</em></p>
+<table>
+<thead>
+<tr>
+  <th>Finding</th>
+  <th>Title</th>
+  <th>Justification</th>
+  <th>Review Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>I-3</strong></td>
+  <td>RAG Over-Retrieval</td>
+  <td>All current users are internal employees with equivalent clearance for indexed content. Document-level ACL would require per-document tagging. Accepted pending user base expansion.</td>
+  <td>If the platform is extended to users with differentiated access (external, partner-facing, cross-org)</td>
+</tr>
+<tr>
+  <td><strong>I-4</strong></td>
+  <td>Excessive SQL Data Return</td>
+  <td>Pre-defined SQL functions limit query shape to known patterns. User group is homogeneous internal. Risk is low relative to implementation cost of result-set size enforcement.</td>
+  <td>If SQL tool functions are made user-extensible</td>
+</tr>
+<tr>
+  <td><strong>I-11</strong></td>
+  <td>Confluence URL Exposure</td>
+  <td>Internal Confluence space structure is not considered a protected asset. URLs exposed in RAG responses do not include authentication tokens.</td>
+  <td>If Confluence spaces are reclassified as restricted</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Accepted risk review schedule</strong>: Quarterly, or immediately upon any user-base change (adding external users, member-facing deployment, or cross-BU access).</p>
+
+</div></body></html>
