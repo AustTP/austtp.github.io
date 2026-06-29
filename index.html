@@ -271,7 +271,7 @@ html, body {
 .stage-canvas:active { cursor:grabbing; }
 
 /* ── WORLDS ── */
-#world-pipeline { position:relative; width:3310px; height:750px; background:var(--bg2); }
+#world-pipeline { position:relative; width:4560px; height:820px; background:var(--bg2); }
 #world-infra    { width:100%; min-height:100%; background:var(--bg2); display:flex; flex-direction:row; align-items:flex-start; gap:18px; padding:24px; box-sizing:border-box; }
 .infra-col      { flex:1; min-width:0; display:flex; flex-direction:column; gap:18px; }
 .infra-panel   { break-inside:avoid; }
@@ -281,6 +281,7 @@ html, body {
 .stage { position:absolute; width:238px; top:30px; }
 .stage.w260 { width:264px; }
 .stage.w280 { width:285px; }
+.stage.w300 { width:308px; }
 @media (max-width: 1100px) {
   .stage { top:20px; }
 }
@@ -308,8 +309,65 @@ html, body {
   text-transform:uppercase; margin-bottom:11px;
 }
 
-/* input rows */
-.input-item { display:flex; align-items:center; gap:14px; padding:5px 0; font-size:15px; color:var(--text-mid); }
+/* ── HOOK ANNOTATION ── */
+.hook-bar {
+  display:flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--orange); background:rgba(180,93,9,0.07);
+  border:1px solid rgba(180,93,9,0.25); border-radius:4px;
+  padding:4px 8px; margin-bottom:7px;
+}
+.hook-bar.green { color:var(--green-hi); background:rgba(21,128,61,0.07); border-color:rgba(21,128,61,0.25); }
+.hook-bar.purple { color:var(--purple); background:rgba(109,40,217,0.07); border-color:rgba(109,40,217,0.25); }
+
+/* ── PARALLEL BRANCH ── */
+.par-row {
+  display:flex; gap:7px; margin:8px 0 6px;
+}
+.par-task {
+  flex:1; background:var(--panel2); border:1px solid var(--border);
+  border-radius:5px; padding:7px 9px;
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--text-mid); line-height:1.6;
+}
+.par-task-title {
+  font-family:'IBM Plex Sans','Inter',sans-serif; font-size:11px;
+  font-weight:700; color:var(--blue); margin-bottom:4px;
+}
+.par-synth {
+  background:rgba(14,116,144,0.06); border:1px solid var(--border);
+  border-radius:5px; padding:7px 10px; margin-top:6px;
+  font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-mid);
+}
+
+/* ── RAG PIPELINE ── */
+.rag-step {
+  display:flex; align-items:flex-start; gap:7px;
+  padding:5px 0; border-bottom:1px solid rgba(14,116,144,0.10);
+}
+.rag-step:last-child { border-bottom:none; }
+.rag-num {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:#fff; background:var(--teal); border-radius:3px;
+  padding:1px 5px; flex-shrink:0; margin-top:1px;
+}
+.rag-detail {
+  font-family:'JetBrains Mono',monospace; font-size:10px;
+  color:var(--text-mid); line-height:1.6;
+}
+.rag-detail strong { color:var(--text); font-weight:600; }
+
+/* ── ERROR / FALLBACK TIERS ── */
+.err-tier {
+  display:flex; align-items:flex-start; gap:8px;
+  padding:6px 0; border-bottom:1px solid rgba(14,116,144,0.10);
+}
+.err-tier:last-child { border-bottom:none; }
+.err-dot-h { width:8px; height:8px; border-radius:50%; background:var(--red); flex-shrink:0; margin-top:4px; }
+.err-dot-m { width:8px; height:8px; border-radius:50%; background:var(--orange); flex-shrink:0; margin-top:4px; }
+.err-dot-l { width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; margin-top:4px; }
+.err-label { font-family:'IBM Plex Sans','Inter',sans-serif; font-size:11px; font-weight:700; color:var(--text); }
+.err-desc { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-mid); line-height:1.55; }
 .input-item .i { font-size:13px; opacity:0.75; }
 .input-item.hi {
   background:rgba(200,120,80,0.14); border:1px solid rgba(200,120,80,0.38);
@@ -564,8 +622,38 @@ html, body {
   </div>
 </div>
 
+<!-- S4b: RAG PIPELINE -->
+<div class="stage w280" id="s4b" style="left:1440px;">
+  <div class="stage-title" style="color:var(--blue)">RAG Pipeline</div>
+  <div class="stage-subtitle">base_rag_agent.py · Vector Search · hybrid ranking</div>
+  <div class="card">
+    <div class="hook-bar green">↳ pre_retrieval hook fires here</div>
+    <div class="rag-step">
+      <span class="rag-num">1</span>
+      <div class="rag-detail"><strong>Embed query</strong><br>embedding.py · Databricks<br>embedding endpoint</div>
+    </div>
+    <div class="rag-step">
+      <span class="rag-num">2</span>
+      <div class="rag-detail"><strong>Vector Search</strong><br>VectorSearchRetrieverTool<br>top-k=5 · similarity threshold</div>
+    </div>
+    <div class="rag-step">
+      <span class="rag-num">3</span>
+      <div class="rag-detail"><strong>Hybrid Ranking</strong><br>BM25 + dense retrieval<br>chunking.py · entity-enriched</div>
+    </div>
+    <div class="rag-step">
+      <span class="rag-num">4</span>
+      <div class="rag-detail"><strong>Context injection</strong><br>dynamic prompt templating<br>context_manager.py</div>
+    </div>
+    <div class="rag-step">
+      <span class="rag-num">5</span>
+      <div class="rag-detail"><strong>Trace</strong><br>rag_tracing_helper.py<br>MLflow span · retrieval logged</div>
+    </div>
+    <div class="mono-box" style="margin-top:8px;font-size:10px"><span class="mk">single_turn_rag_agent.py</span><br>or <span class="mk">multi_turn_rag_agent.py</span><br>fallback: graceful_degradation<br>→ respond without context</div>
+  </div>
+</div>
+
 <!-- S5: GUARDRAILS -->
-<div class="stage w260" id="s5" style="left:1436px;">
+<div class="stage w260" id="s5" style="left:1840px;">
   <div class="stage-title" style="color:var(--blue)">Guardrails</div>
   <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
   <div class="card">
@@ -582,7 +670,7 @@ html, body {
 </div>
 
 <!-- S6: PROCESS -->
-<div class="stage w280" id="s6" style="left:1800px;">
+<div class="stage w280" id="s6" style="left:2204px;">
   <div class="stage-title" style="color:var(--blue)">Process</div>
   <div class="stage-subtitle">parallel_orchestrator.py · scope enforcement</div>
   <div class="card">
@@ -602,8 +690,38 @@ html, body {
   </div>
 </div>
 
+<!-- S6b: PARALLEL ORCHESTRATION -->
+<div class="stage w300" id="s6b" style="left:2602px;">
+  <div class="stage-title" style="color:var(--blue)">Parallel Orchestration</div>
+  <div class="stage-subtitle">parallel_orchestrator.py · complexity-gated</div>
+  <div class="card">
+    <div class="hook-bar purple">↳ parallel_plugin.py · pre_llm hook</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mid);margin-bottom:8px">ComplexityClassifier gates parallel path<br>(heuristic score — no extra LLM call)</div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Phase 1 · Decompose</div>
+    <div class="mono-box" style="font-size:10px;margin-bottom:8px">TaskPlanner (LLM) → ExecutionPlan<br>topological_groups → parallel batches<br>est. sequential: 180s → parallel: 65s</div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Phase 2 · Execute (asyncio.gather)</div>
+    <div class="par-row">
+      <div class="par-task">
+        <div class="par-task-title">worker_1</div>
+        clinical_policy<br>lookup · 45s
+      </div>
+      <div class="par-task">
+        <div class="par-task-title">worker_2</div>
+        pharmacy<br>formulary · 38s
+      </div>
+      <div class="par-task">
+        <div class="par-task-title">worker_3</div>
+        member<br>history · 22s
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin:6px 0 5px">Phase 3 · Synthesize</div>
+    <div class="par-synth">ResultSynthesizer → coherent response<br>failed tasks: documented in output<br>metrics: speedup · tasks_succeeded</div>
+    <div class="mono-box" style="margin-top:7px;font-size:10px">max_workers: 5 · WorkerAgent pool<br>dependency-aware: task DAG respected<br>serial fallback: score &lt; threshold</div>
+  </div>
+</div>
+
 <!-- S7: HUMAN GATE -->
-<div class="stage w260" id="s7" style="left:2194px;">
+<div class="stage w260" id="s7" style="left:2994px;">
   <div class="stage-title" style="color:var(--blue)">Human Gate</div>
   <div class="stage-subtitle">hitl_engine.py · confidence &lt; 0.70</div>
   <div class="badge b-pink" style="margin-bottom:10px">HUMAN IN THE LOOP</div>
@@ -632,7 +750,7 @@ html, body {
 </div>
 
 <!-- S8: DECISION -->
-<div class="stage w280" id="s8" style="left:2568px;">
+<div class="stage w280" id="s8" style="left:3388px;">
   <div class="stage-title" style="color:var(--blue)">Decision</div>
   <div class="stage-subtitle">orchestrator aggregates · audit_trail.py · any outcome</div>
   <div class="card">
@@ -649,7 +767,7 @@ html, body {
 </div>
 
 <!-- S9: OUTPUT -->
-<div class="stage w260" id="s9" style="left:2966px;">
+<div class="stage w260" id="s9" style="left:3786px;">
   <div class="stage-title" style="color:var(--blue)">Output</div>
   <div class="stage-subtitle">MLflow traces · feedback</div>
   <div class="card">
@@ -664,6 +782,44 @@ html, body {
       <div class="hbtn hbtn-a" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center">👍 Good</div>
       <div class="hbtn hbtn-r" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center;color:#721c24;border:1px solid #f5c6cb;border-radius:6px;">👎 Bad</div>
     </div>
+  </div>
+</div>
+
+<!-- S10: ERROR HANDLING & GRACEFUL DEGRADATION -->
+<div class="stage w300" id="s10" style="left:4184px;">
+  <div class="stage-title" style="color:var(--blue)">Error Handling</div>
+  <div class="stage-subtitle">llm_resilience.py · fallback.py · react_engine.py</div>
+  <div class="card">
+    <div class="hook-bar" style="color:var(--red);background:rgba(185,28,28,0.07);border-color:rgba(185,28,28,0.25)">TierPolicy · immutable · structurally enforced</div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">LLM Resilience · call_with_resilience()</div>
+    <div class="err-tier">
+      <div class="err-dot-h"></div>
+      <div><div class="err-label">UPSTREAM_5XX / EVAL_FAILURE</div><div class="err-desc">TierPolicy: HIGH → BLOCK<br>max_retries: 3 · exponential backoff<br>audit: write_audit_failure() → Delta<br>user: safe message · no internals</div></div>
+    </div>
+    <div class="err-tier">
+      <div class="err-dot-m"></div>
+      <div><div class="err-label">RATE_LIMITED / MALFORMED</div><div class="err-desc">TierPolicy: MEDIUM → BLOCK_RETRY<br>backoff_factor: 2.0 · retryable<br>classify_exception() → taxonomy</div></div>
+    </div>
+    <div class="err-tier">
+      <div class="err-dot-l"></div>
+      <div><div class="err-label">NETWORK_ERROR / LLM_TIMEOUT</div><div class="err-desc">TierPolicy: LOW → PASSTHROUGH<br>reduced safety checks disclosed<br>one-strike: failed service blocked</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:8px">
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">ReACT Recovery · react_engine.py</div>
+    <div class="err-tier">
+      <div class="err-dot-m"></div>
+      <div><div class="err-label">One-Strike Rule</div><div class="err-desc">failed service added to blocked set<br>never retried · try alternative tool</div></div>
+    </div>
+    <div class="err-tier">
+      <div class="err-dot-m"></div>
+      <div><div class="err-label">Consecutive Error Recovery</div><div class="err-desc">2+ errors → extended thinking trigger<br>ReflectionEngine: should_replan()?<br>strategy switch · not repeat pattern</div></div>
+    </div>
+    <div class="err-tier">
+      <div class="err-dot-l"></div>
+      <div><div class="err-label">RAG Graceful Degradation</div><div class="err-desc">Vector Search failure → respond<br>without context · fallback.py<br>audit record written either way</div></div>
+    </div>
+    <div class="mono-box" style="margin-top:8px;font-size:10px">ContextCompressor: window exceeded<br>→ compress + keep last 8 messages<br>MessageValidator: orphaned tool_calls<br>→ auto-fix before LLM send</div>
   </div>
 </div>
 
@@ -853,7 +1009,7 @@ function drawLines() {
   if (!svg) return;
   svg.innerHTML = '';
   const color = '#0369a1';
-  const stages = ['s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+  const stages = ['s1','s2','s3','s4','s4b','s5','s6','s6b','s7','s8','s9','s10'];
   for (let i = 0; i < stages.length - 1; i++) {
     const a = document.getElementById(stages[i]), b = document.getElementById(stages[i+1]);
     if (!a || !b) continue;
