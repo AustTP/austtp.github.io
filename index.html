@@ -224,7 +224,7 @@ html, body {
   #tab-about { top:0; }
 }
 .about-page {
-  max-width:760px; margin:0 auto; padding:24px 28px 60px;
+  max-width:760px; margin:0 auto; padding:24px 28px 0px;
 }
 .about-section {
   background:var(--panel); border:1px solid var(--border);
@@ -278,9 +278,12 @@ html, body {
 #lines { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
 
 /* ── STAGE ── */
-.stage { position:absolute; width:238px; }
+.stage { position:absolute; width:238px; top:30px; }
 .stage.w260 { width:264px; }
 .stage.w280 { width:285px; }
+@media (max-width: 1100px) {
+  .stage { top:20px; }
+}
 
 /* No eyebrow — title is first element */
 .stage-title {
@@ -434,9 +437,9 @@ html, body {
 <div class="topbar" id="topbar">
   <div class="topbar-title" id="topbar-title"><span>Agentic Framework</span><span class="sep"> · </span><span class="sub">Multi-Agent Pipeline</span></div>
   <div class="tab-nav">
-    <button class="tab-btn" onclick="showTab('about',this)">About</button>
-    <button class="tab-btn active" onclick="showTab('pipeline',this)">Pipeline</button>
-    <button class="tab-btn" onclick="showTab('infra',this)">Infrastructure</button>
+    <button class="tab-btn" onclick="showTab('about')">About</button>
+    <button class="tab-btn active" onclick="showTab('pipeline')">Pipeline</button>
+    <button class="tab-btn" onclick="showTab('infra')">Infrastructure</button>
     <a class="tab-btn-ext" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
       STRIDE Threat Model
       <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -502,7 +505,7 @@ html, body {
 <svg id="lines" xmlns="http://www.w3.org/2000/svg"></svg>
 
 <!-- S1: CAPTURE -->
-<div class="stage" id="s1" style="left:60px;top:30px;">
+<div class="stage" id="s1" style="left:60px;">
   <div class="stage-title" style="color:var(--blue)">Capture</div>
   <div class="stage-subtitle">um_demo/input/ · Responses API</div>
   <div class="card">
@@ -515,7 +518,7 @@ html, body {
 </div>
 
 <!-- S2: TRIAGE -->
-<div class="stage" id="s2" style="left:378px;top:30px;">
+<div class="stage" id="s2" style="left:378px;">
   <div class="stage-title" style="color:var(--blue)">Classify</div>
   <div class="stage-subtitle">classification agent · LangGraph endpoint</div>
   <div class="card">
@@ -528,7 +531,7 @@ html, body {
 </div>
 
 <!-- S3: ROUTE (ORCHESTRATOR) -->
-<div class="stage w260" id="s3" style="left:706px;top:30px;">
+<div class="stage w260" id="s3" style="left:706px;">
   <div class="stage-title" style="color:var(--blue)">Orchestrate</div>
   <div class="stage-subtitle">orchestrator agent · LLM tool routing</div>
   <div class="card">
@@ -541,7 +544,7 @@ html, body {
 </div>
 
 <!-- S4: MEMORY -->
-<div class="stage w260" id="s4" style="left:1072px;top:30px;">
+<div class="stage w260" id="s4" style="left:1072px;">
   <div class="stage-title" style="color:var(--blue)">Memory</div>
   <div class="stage-subtitle">agent_framework.memory</div>
   <div class="card">
@@ -562,7 +565,7 @@ html, body {
 </div>
 
 <!-- S5: GUARDRAILS -->
-<div class="stage w260" id="s5" style="left:1436px;top:30px;">
+<div class="stage w260" id="s5" style="left:1436px;">
   <div class="stage-title" style="color:var(--blue)">Guardrails</div>
   <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
   <div class="card">
@@ -579,7 +582,7 @@ html, body {
 </div>
 
 <!-- S6: PROCESS -->
-<div class="stage w280" id="s6" style="left:1800px;top:30px;">
+<div class="stage w280" id="s6" style="left:1800px;">
   <div class="stage-title" style="color:var(--blue)">Process</div>
   <div class="stage-subtitle">parallel_orchestrator.py · scope enforcement</div>
   <div class="card">
@@ -600,7 +603,7 @@ html, body {
 </div>
 
 <!-- S7: HUMAN GATE -->
-<div class="stage w260" id="s7" style="left:2194px;top:30px;">
+<div class="stage w260" id="s7" style="left:2194px;">
   <div class="stage-title" style="color:var(--blue)">Human Gate</div>
   <div class="stage-subtitle">hitl_engine.py · confidence &lt; 0.70</div>
   <div class="badge b-pink" style="margin-bottom:10px">HUMAN IN THE LOOP</div>
@@ -629,7 +632,7 @@ html, body {
 </div>
 
 <!-- S8: DECISION -->
-<div class="stage w280" id="s8" style="left:2568px;top:30px;">
+<div class="stage w280" id="s8" style="left:2568px;">
   <div class="stage-title" style="color:var(--blue)">Decision</div>
   <div class="stage-subtitle">orchestrator aggregates · audit_trail.py · any outcome</div>
   <div class="card">
@@ -646,7 +649,7 @@ html, body {
 </div>
 
 <!-- S9: OUTPUT -->
-<div class="stage w260" id="s9" style="left:2966px;top:30px;">
+<div class="stage w260" id="s9" style="left:2966px;">
   <div class="stage-title" style="color:var(--blue)">Output</div>
   <div class="stage-subtitle">MLflow traces · feedback</div>
   <div class="card">
@@ -788,24 +791,34 @@ html, body {
 </div><!-- /tab-infra -->
 
 <script>
-function showTab(name, btn) {
+/* Unified tab switcher — syncs desktop nav, mobile nav, and about-page links */
+function setActiveTab(name) {
+  const subtitles = { about: 'About', pipeline: 'Multi-Agent Pipeline', infra: 'Infrastructure' };
+
+  /* panels */
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('visible');
-  btn.classList.add('active');
+
+  /* desktop tab buttons */
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(name));
+  });
+
+  /* mobile nav links */
+  document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
+  const mLink = document.getElementById('mnav-' + name);
+  if (mLink) mLink.classList.add('active');
+
+  /* topbar subtitle */
+  document.getElementById('topbar-title').innerHTML =
+    '<span>Agentic Framework</span><span class="sep"> · </span><span class="sub">' + subtitles[name] + '</span>';
+
   if (name === 'pipeline') { drawLines(); }
   adjustCanvasTop();
 }
 
-function switchToTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.getElementById('tab-' + name).classList.add('visible');
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(name));
-  });
-  if (name === 'pipeline') { drawLines(); }
-  adjustCanvasTop();
-}
+function showTab(name) { setActiveTab(name); }
+function switchToTab(name) { setActiveTab(name); }
 
 function toggleMobileNav() {
   const nav = document.getElementById('mobile-nav');
@@ -815,14 +828,7 @@ function toggleMobileNav() {
 
 function mobileShowTab(name) {
   document.getElementById('mobile-nav').classList.remove('open');
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('visible'));
-  document.getElementById('tab-' + name).classList.add('visible');
-  document.querySelectorAll('.mobile-nav-link').forEach(l => l.classList.remove('active'));
-  document.getElementById('mnav-' + name).classList.add('active');
-  const subtitles = { about: 'About', pipeline: 'Multi-Agent Pipeline', infra: 'Infrastructure' };
-  document.getElementById('topbar-title').innerHTML = '<span>Agentic Framework</span><span class="sep"> · </span><span class="sub">' + subtitles[name] + '</span>';
-  if (name === 'pipeline') { drawLines(); }
-  adjustCanvasTop();
+  setActiveTab(name);
 }
 
 function adjustCanvasTop() {
