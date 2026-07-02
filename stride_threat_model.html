@@ -556,7 +556,7 @@ a { color: #0369a1; }
   <td>Supply Chain Vulnerabilities</td>
   <td>T-5, T-7, S-6</td>
   <td>Not directly tested in automated suite - requires workspace-level access</td>
-  <td>T-5 Open (code_paths integrity); T-7 Partial (registry alias lock); S-6 Partial (version rollback)</td>
+  <td>T-5 Mitigated (SHA-256 manifest + load_context verify); T-7 Partial (registry alias lock); S-6 Partial (version rollback)</td>
 </tr>
 <tr>
   <td><strong>LLM04</strong></td>
@@ -655,7 +655,7 @@ a { color: #0369a1; }
   <td><strong>AML.T0031</strong> - Erode ML Model Integrity</td>
   <td>Impact</td>
   <td>T-1, T-2, T-4 (LTM/KG poisoning); T-5 (supply chain)</td>
-  <td>T-5 Open (code_paths no integrity check); T-1/T-4 Partial (pre-write validation gap)</td>
+  <td>T-5 Mitigated (code_paths manifest + load_context verification); T-1/T-4 Partial (pre-write validation gap)</td>
 </tr>
 <tr>
   <td><strong>AML.T0034</strong> - Cost Harvesting</td>
@@ -673,7 +673,7 @@ a { color: #0369a1; }
   <td><strong>AML.T0010</strong> - ML Supply Chain Compromise</td>
   <td>Persistence</td>
   <td>T-5, T-7, S-6</td>
-  <td>T-5 Open - most significant open finding; relies solely on workspace ACL for code integrity</td>
+  <td>T-5 Mitigated - SHA-256 integrity manifest computed at deploy time; verified in <code>load_context()</code> before serving begins; fails closed on tamper</td>
 </tr>
 </tbody>
 </table></div>
@@ -697,7 +697,7 @@ a { color: #0369a1; }
 <tr>
   <td><strong>GOVERN</strong></td>
   <td>Policies, accountability, culture</td>
-  <td>The STRIDE methodology and adversarial testing program establish a repeatable governance framework for AI security risk. Trust boundary definitions (TB1–TB5) document the authorization model. Accepted risks (I-3, I-4, I-11) carry documented justification and review triggers. Open findings (T-5, T-6, E-6) have explicit ownership and remediation priorities.</td>
+  <td>The STRIDE methodology and adversarial testing program establish a repeatable governance framework for AI security risk. Trust boundary definitions (TB1–TB5) document the authorization model. Accepted risks (I-3, I-4, I-11) carry documented justification and review triggers. All previously open findings (T-5, T-6, E-6) have been remediated.</td>
 </tr>
 <tr>
   <td><strong>MAP</strong></td>
@@ -712,7 +712,7 @@ a { color: #0369a1; }
 <tr>
   <td><strong>MANAGE</strong></td>
   <td>Prioritize, respond, monitor</td>
-  <td>Each finding's status - Mitigated, Partial, Accepted, or Open - tracks response actions. Three Open findings (T-5, T-6, E-6) have explicit remediation priorities. The confirmed direct endpoint exposure finding is added to the remediation backlog. Accepted risks carry documented review triggers, and the AI Gateway guardrail status table tracks control deployment.</td>
+  <td>Each finding's status - Mitigated, Partial, Accepted, or Open - tracks response actions. All critical and high open findings (T-5, T-6, E-6) have been remediated and closed. The confirmed direct endpoint exposure finding is added to the remediation backlog. Accepted risks carry documented review triggers, and the AI Gateway guardrail status table tracks control deployment.</td>
 </tr>
 </tbody>
 </table></div>
@@ -926,7 +926,7 @@ a { color: #0369a1; }
   <td>Deployment <code>code_paths</code> Tampering</td>
   <td>Modify Python modules referenced by <code>code_paths</code> before <code>mlflow.pyfunc.log_model()</code>; no integrity check on bundled artifacts</td>
   <td>Arbitrary code executes on every inference request for all users</td>
-  <td><strong>Open</strong></td>
+  <td><strong>Mitigated</strong></td>
   <td>38</td>
 </tr>
 <tr>
@@ -934,7 +934,7 @@ a { color: #0369a1; }
   <td>Relay Message Injection (A2A)</td>
   <td>Write crafted JSON to the IPC relay message queue; no HMAC or signature on relay messages</td>
   <td>Arbitrary tool execution in agent-to-agent context; lateral movement</td>
-  <td><strong>Open</strong></td>
+  <td><strong>Mitigated</strong></td>
   <td>36</td>
 </tr>
 <tr>
@@ -969,8 +969,8 @@ a { color: #0369a1; }
 <li><strong>T-2</strong>: KG extraction is model-driven only; no user-controlled write path exposed</li>
 <li><strong>T-3</strong>: Vector search index populated from controlled batch job; no user-facing upsert API</li>
 <li><strong>T-4</strong>: No direct vector write API exposed; embedding model access is read-only via serving endpoint</li>
-<li><strong>T-5 gap</strong>: No checksum/hash on <code>code_paths</code> modules; relies solely on workspace ACL</li>
-<li><strong>T-6 gap</strong>: File-based IPC has no authentication; HMAC signing not implemented</li>
+<li><strong>T-5</strong>: <code>compute_code_paths_manifest()</code> in <code>deploy.py</code> SHA-256 hashes every <code>code_paths</code> file at deploy time and stores the manifest as a named MLflow artifact; <code>_verify_code_paths_manifest()</code> in <code>load_context()</code> re-hashes each file before any user code runs and fails closed on mismatch (<code>MAGI_STRICT_INTEGRITY=0</code> to demote to warning)</li>
+<li><strong>T-6</strong>: HMAC-SHA256 signing added to relay <code>_post()</code> via <code>_sign_relay()</code>; <code>_verify_relay()</code> in <code>_read()</code> rejects unsigned or tampered messages when <code>RELAY_HMAC_SECRET</code> env var is set; direct filesystem injection path closed</li>
 <li><strong>T-7 gap</strong>: No production alias lock; newer versions can be pushed by any workspace user with EDIT on the model</li>
 <li><strong>T-8</strong>: Delta append-only mode + time travel; DELETE requires MODIFY privilege not granted to SP</li>
 <li><strong>T-9</strong>: SP grants scoped to application schema; grant audit in managed PostgreSQL</li>
@@ -1310,7 +1310,7 @@ a { color: #0369a1; }
   <td>Relay Injection → Agent Execution</td>
   <td>Write crafted relay message to IPC relay channel; receiving agent executes content as a task</td>
   <td>Arbitrary code execution in agent context</td>
-  <td><strong>Open</strong></td>
+  <td><strong>Mitigated</strong></td>
   <td>36</td>
 </tr>
 <tr>
@@ -1345,7 +1345,7 @@ a { color: #0369a1; }
 <li><strong>E-2</strong>: Pre-defined parameterized SQL functions; user identifier injected server-side; red team E-2a and E-2b both confirmed clean</li>
 <li><strong>E-3</strong>: Secrets scope syntax prevents token exposure in response body; secrets scope restricted to named principals</li>
 <li><strong>E-4 / E-5</strong>: Fact-checker validates facts against existing context before LTM write; privilege claims flagged - though T-1 pre-write gap is the residual concern</li>
-<li><strong>E-6 open</strong>: File-based IPC relay has no HMAC or sender verification; any process with file-write access to the relay directory has full agent execution capability</li>
+<li><strong>E-6</strong>: Same fix as T-6 — HMAC-SHA256 relay signing in <code>app.py</code>; <code>_verify_relay()</code> rejects unsigned relay messages at read time; closes the arbitrary agent execution path via filesystem write</li>
 <li><strong>E-7</strong>: Platform proxy is the only ingress path; direct container access requires platform-level breach</li>
 <li><strong>E-8</strong>: TierPolicy enforced structurally in plugin manager; not model-prompt dependent</li>
 <li><strong>E-9</strong>: User identifier derived from SSO header in proxy module; <code>custom_inputs</code> value overwritten server-side; red team E-3a (confused deputy) was not applicable - delegation chain and security plugin address multi-agent confused deputy structurally; <code>ToolGateway.authorize()</code> fires on the PRE_TOOL hook (before execution); chain links carry TTL enforcement (300s default, configurable per hop)</li>
@@ -1401,9 +1401,9 @@ a { color: #0369a1; }
 <div class="table-wrap"><table>
 <thead><tr><th>Finding</th><th>Title</th><th>Priority</th></tr></thead>
 <tbody>
-<tr><td>T-5</td><td>Deployment <code>code_paths</code> tampering - no integrity check</td><td>CRITICAL - pre-deploy fix required</td></tr>
-<tr><td>T-6</td><td>Relay message injection - no HMAC</td><td>HIGH - add HMAC before external / multi-agent use</td></tr>
-<tr><td>E-6</td><td>Relay → Agent execution path</td><td>HIGH - same as T-6</td></tr>
+<tr><td>T-5</td><td>Deployment <code>code_paths</code> tampering - integrity manifest</td><td>CLOSED &#x2713; — SHA-256 manifest at deploy; <code>_verify_code_paths_manifest()</code> in <code>load_context()</code></td></tr>
+<tr><td>T-6</td><td>Relay message injection - HMAC signing</td><td>CLOSED &#x2713; — <code>_sign_relay()</code> / <code>_verify_relay()</code> in relay <code>app.py</code></td></tr>
+<tr><td>E-6</td><td>Relay → Agent execution path</td><td>CLOSED &#x2713; — same fix as T-6; filesystem injection rejected at read time</td></tr>
 <tr><td>S-2</td><td>Direct endpoint invocation via user PAT</td><td>MEDIUM - restrict invocation to App SP only to collapse S-4, S-5, I-2 attack surface</td></tr>
 <tr><td>T-1</td><td>LTM pre-write validation gap</td><td>MEDIUM - move fact-check to synchronous pre-write guard</td></tr>
 </tbody>
@@ -1421,8 +1421,8 @@ a { color: #0369a1; }
 <tbody>
 <tr>
   <td><strong>Mitigated</strong></td>
-  <td>31</td>
-  <td>S-1, S-3, S-4, S-5, T-2, T-3, T-4, T-8, T-9, R-1, R-3, R-5, I-2, I-5, I-6, I-7, I-9, D-1 through D-6, E-1, E-2, E-3, E-4, E-5, E-7, E-8, E-9</td>
+  <td>34</td>
+  <td>S-1, S-3, S-4, S-5, T-2, T-3, T-4, T-5, T-6, T-8, T-9, R-1, R-3, R-5, I-2, I-5, I-6, I-7, I-9, D-1 through D-6, E-1, E-2, E-3, E-4, E-5, E-6, E-7, E-8, E-9</td>
 </tr>
 <tr>
   <td><strong>Partial</strong></td>
@@ -1436,8 +1436,8 @@ a { color: #0369a1; }
 </tr>
 <tr>
   <td><strong>Open</strong></td>
-  <td>3</td>
-  <td>T-5, T-6, E-6</td>
+  <td>0</td>
+  <td>—</td>
 </tr>
 </tbody>
 </table></div>
@@ -1455,10 +1455,12 @@ a { color: #0369a1; }
                       └─ RAG Pipeline          ✔ T-3, T-4, I-3 mitigated/accepted
                       └─ Plugin Hooks          ✔ TierPolicy structural; E-5a red team = FP
                       └─ Delegation Chain      ✔ E-3a (confused deputy) addressed by HMAC + TTL + PRE_TOOL
-                      └─ Audit Trail           ✔ R-1, R-3, T-8 mitigated</code></pre>
+                      └─ Audit Trail           ✔ R-1, R-3, T-8 mitigated
+                      └─ code_paths Integrity  ✔ T-5 SHA-256 manifest verified at load_context()
+                      └─ Relay HMAC            ✔ T-6/E-6 _sign_relay() + _verify_relay() in app.py</code></pre>
 
-<p><strong>Key gap</strong>: Zero defense layers exist between the file-system relay and agent execution context (T-6, E-6). Any process with file-write access to the relay directory has full agent execution capability.</p>
-<p><strong>Key gap</strong>: Supply chain (T-5) has no integrity layer - all deployed code is implicitly trusted after the workspace ACL boundary.</p>
+<p><strong>Resolved (T-6, E-6)</strong>: Relay messages are HMAC-SHA256 signed at write time; <code>_verify_relay()</code> rejects unsigned or tampered messages at read time. Direct filesystem injection no longer reaches agent execution.</p>
+<p><strong>Resolved (T-5)</strong>: <code>compute_code_paths_manifest()</code> hashes all <code>code_paths</code> files at deploy; <code>_verify_code_paths_manifest()</code> re-hashes at <code>load_context()</code> startup and fails closed on any mismatch.</p>
 <p><strong>Key gap</strong>: Serving endpoint accepts direct personal access token invocations (S-2), allowing authenticated users to bypass all proxy-enforced controls and supply arbitrary custom_inputs.</p>
 
 <h3>AI Gateway Guardrail Status</h3>
