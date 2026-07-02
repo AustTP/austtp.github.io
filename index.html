@@ -528,7 +528,7 @@ html, body {
     <div class="about-body">
       <p>Built a production multi-agent AI framework designed to be reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
       <p>The framework ships with Delta-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A five-step RAG pipeline handles embedding, vector search, hybrid BM25 and dense retrieval ranking, context injection, and MLflow tracing. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
-      <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results into a coherent response. Plugin hooks at pre-retrieval, pre-LLM, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic. Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
+      <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results into a coherent response. Plugin hooks at pre-retrieval, pre-LLM, pre-tool, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic. Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
     </div>
     <div class="about-divider"></div>
     <div class="about-eyebrow" style="margin-bottom:6px">Explore the architecture</div>
@@ -658,7 +658,7 @@ html, body {
   <div class="stage-title" style="color:var(--blue)">Guardrails</div>
   <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
   <div class="card">
-    <div class="badge b-pink">pre_llm + post_tool · plugin_registry.py</div>
+    <div class="badge b-pink">pre_retrieval + pre_tool · plugin_registry.py</div>
     <div style="margin-top:10px">
       <div class="guard-row"><span class="gcheck">🛡</span><span class="gname">AI Gateway</span><span class="gstatus">✓ routing</span></div>
       <div class="guard-row"><span class="gcheck">🔒</span><span class="gname">DelegationChain</span><span class="gstatus">✓ HMAC-SHA256</span></div>
@@ -666,7 +666,7 @@ html, body {
       <div class="guard-row"><span class="gcheck">⏱</span><span class="gname">Rate Limiter</span><span class="gstatus">✓ ok</span></div>
       <div class="guard-row"><span class="gcheck">📋</span><span class="gname">Audit Trail</span><span class="gstatus">✓ hash-chained</span></div>
     </div>
-    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">security_plugin.py</span> → pre_llm<br><span class="mk">audit_plugin.py</span> → post_tool<br><span class="mk">rate_limiter.py</span> → 120 req/min<br><span class="mk">budget_enforcer.py</span> → enforced</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">security_plugin.py</span> → pre_retrieval + pre_tool<br><span class="mk">audit_plugin.py</span> → post_tool<br><span class="mk">rate_limiter.py</span> → 120 req/min<br><span class="mk">budget_enforcer.py</span> → enforced</div>
   </div>
 </div>
 
@@ -687,7 +687,7 @@ html, body {
     <div class="srow"><span class="sdot sg"></span>search_medical_policy<span class="sval sv-g">allowed</span></div>
     <div class="srow"><span class="sdot sg"></span>check_medical_necessity<span class="sval sv-g">allowed</span></div>
     <div class="srow"><span class="sdot so"></span>get_member_clinical_records<span class="sval sv-o">DENIED</span></div>
-    <div class="mono-box" style="margin-top:8px;font-size:11px">pharmacy scope: <span class="mo">pharmacy_read</span><br>clinical tool requires: <span class="mr">clinical_read</span><br>gateway: <span class="mr">ACCESS_DENIED</span> ← confused deputy blocked<br>react_engine: <span class="mn">tool loop · reflect · retry</span></div>
+    <div class="mono-box" style="margin-top:8px;font-size:11px">pharmacy scope: <span class="mo">pharmacy_read</span><br>clinical tool requires: <span class="mr">clinical_read</span><br>gateway: <span class="mr">ACCESS_DENIED</span> ← PRE_TOOL · confused deputy blocked<br>react_engine: <span class="mn">tool loop · reflect · retry</span></div>
   </div>
 </div>
 
@@ -863,11 +863,11 @@ html, body {
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">DelegationLink</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">caller_id<br>scope: policy_read<br>signed: HMAC-SHA256</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">caller_id<br>scope: policy_read<br>signed: HMAC-SHA256<br>ttl: 300s</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">ToolGateway</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">validates chain<br>scope-enforced<br>every tool call</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">validates chain<br>scope: PRE_TOOL<br>before execution</div>
     </div>
   </div>
   <div class="mono-box" style="font-size:11px">user &#8594; orchestrator &#8594; clinical_policy (scope: policy_read)<br>user &#8594; orchestrator &#8594; pharmacy (scope: pharmacy_read)<br><span class="mr">&#10005; confused deputy blocked</span>: orchestrator cannot invoke tools outside its own scope boundary</div>
