@@ -480,7 +480,7 @@ a { color: #0369a1; }
 <tr>
   <td>E-3a Confused deputy</td><td>STRIDE-E</td><td>🚨 VULNERABLE</td>
   <td><span class="badge badge-na">Not Applicable - Architectural Control</span></td>
-  <td>The delegation chain module and security plugin directly address confused deputy in multi-agent contexts via HMAC-signed message headers. In single-agent mode, the security plugin correctly passes through. <code>get_endpoint_status</code> requires a specific endpoint name and cannot enumerate; structural keywords "endpoint," "state" in normal responses fired the detector. The real concern here is direct API exposure - see the confirmed finding below.</td>
+  <td>The delegation chain module and security plugin directly address confused deputy in multi-agent contexts via HMAC-signed message headers. <code>ToolGateway.authorize()</code> is wired to the PRE_TOOL hook — scope checks fire before tool execution, so a denied tool never produces side effects. Delegation chain links carry a TTL (300s default); expired or replayed chains are rejected at <code>verify()</code>. In single-agent mode, the security plugin correctly passes through. <code>get_endpoint_status</code> requires a specific endpoint name and cannot enumerate; structural keywords "endpoint," "state" in normal responses fired the detector. The real concern here is direct API exposure - see the confirmed finding below.</td>
 </tr>
 <tr>
   <td>E-5a Plugin hook bypass</td><td>STRIDE-E</td><td>🚨 VULNERABLE</td>
@@ -1348,7 +1348,7 @@ a { color: #0369a1; }
 <li><strong>E-6 open</strong>: File-based IPC relay has no HMAC or sender verification; any process with file-write access to the relay directory has full agent execution capability</li>
 <li><strong>E-7</strong>: Platform proxy is the only ingress path; direct container access requires platform-level breach</li>
 <li><strong>E-8</strong>: TierPolicy enforced structurally in plugin manager; not model-prompt dependent</li>
-<li><strong>E-9</strong>: User identifier derived from SSO header in proxy module; <code>custom_inputs</code> value overwritten server-side; red team E-3a (confused deputy) was not applicable - delegation chain and security plugin address multi-agent confused deputy structurally</li>
+<li><strong>E-9</strong>: User identifier derived from SSO header in proxy module; <code>custom_inputs</code> value overwritten server-side; red team E-3a (confused deputy) was not applicable - delegation chain and security plugin address multi-agent confused deputy structurally; <code>ToolGateway.authorize()</code> fires on the PRE_TOOL hook (before execution); chain links carry TTL enforcement (300s default, configurable per hop)</li>
 </ul>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -1454,7 +1454,7 @@ a { color: #0369a1; }
                       └─ Memory R/W            ✔ E-4, E-5 mitigated; ⚠ T-1 partial (pre-write)
                       └─ RAG Pipeline          ✔ T-3, T-4, I-3 mitigated/accepted
                       └─ Plugin Hooks          ✔ TierPolicy structural; E-5a red team = FP
-                      └─ Delegation Chain      ✔ E-3a (confused deputy) addressed by HMAC
+                      └─ Delegation Chain      ✔ E-3a (confused deputy) addressed by HMAC + TTL + PRE_TOOL
                       └─ Audit Trail           ✔ R-1, R-3, T-8 mitigated</code></pre>
 
 <p><strong>Key gap</strong>: Zero defense layers exist between the file-system relay and agent execution context (T-6, E-6). Any process with file-write access to the relay directory has full agent execution capability.</p>
