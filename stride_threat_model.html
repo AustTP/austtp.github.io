@@ -188,7 +188,7 @@ a { color: #0369a1; }
 <p><strong>Purpose</strong>: Enumerates STRIDE threat findings for a production agentic AI platform, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. Adversarial red team assessment conducted 2026-06-10 using Garak, PyRIT, and Counterfit, reconciled against known architectural controls.</p>
 <blockquote style="border-left: 4px solid #0e7490; background: #f0f9ff; padding: 1em 1.2em; margin: 1em 0;">
 <p style="margin:0 0 .4em 0;"><strong>Publication Notice</strong></p>
-<p style="margin:0;">Sanitized portfolio artifact. Architecture, methodology, and findings are reproduced. Proprietary source, credentials, endpoint URLs, workspace and experiment identifiers, and member data are not. The prior-authorization scenario is a demonstration use case built to exercise the framework, not a production configuration. All findings are closed or formally accepted as of 2026-07-15. See Remediation Status.</p>
+<p style="margin:0;">Sanitized portfolio artifact. Architecture, methodology, and findings are reproduced. Proprietary source, credentials, endpoint URLs, workspace and experiment identifiers, and member data are not. The prior-authorization scenario is a demonstration use case built to exercise the framework, not a production configuration. All findings are closed or formally accepted as of 2026-06-30. See Remediation Status.</p>
 </blockquote>
 <p><strong>Assessment approach</strong>: Each finding carries a STRIDE category, unique ID, attack vector, impact, mitigation status, and DREAD score. Red team findings are reconciled with verdicts - <span class="badge badge-conf">Confirmed</span> <span class="badge badge-part">Partial</span> <span class="badge badge-na">Not Applicable in Production</span> <span class="badge badge-fp">False Positive</span> - based on code-level analysis of the deployed framework.</p>
 
@@ -348,7 +348,7 @@ a { color: #0369a1; }
 <p style="margin:0 0 .5em 0; font-size:1.05em;"><strong>Executive Verdict</strong></p>
 <p style="margin:0 0 .4em 0;">Raw results: <strong>42 tests executed</strong> · 26 flagged VULNERABLE/LEAKED/EVADED · 4 RESISTANT · 12 NEUTRAL/OBSERVED. 36 are documented row-by-row below; the other 6 are accounted for in <em>Scope and Limitations</em>.</p>
 <p style="margin:0 0 .4em 0; font-size:1.1em;"><strong>After manual code-level review of the 26 flagged: 18 false positives</strong> from keyword detection, <strong>7 not exploitable in production</strong> (5 direct-PAT only, 1 architectural control, 1 intended behavior), <strong>1 confirmed partial gap</strong> (T-4a, LTM pre-write).</p>
-<p style="margin:0;">With S-2 (direct endpoint exposure, confirmed from assessment context rather than one test row), <strong>2 findings carry forward</strong>. Both remediated as of 2026-07-15; see Remediation Status.</p>
+<p style="margin:0;">With S-2 (direct endpoint exposure, confirmed from assessment context rather than one test row), <strong>2 findings carry forward</strong>. Both remediated as of 2026-06-30; see Remediation Status.</p>
 </blockquote>
 
 <div class="table-wrap"><table>
@@ -1478,10 +1478,10 @@ a { color: #0369a1; }
 </table></div>
 <p><em>Point-in-time residual risk as of 2026-06-10, not a remediation commitment. Whether these are actioned is the platform owner's decision. The accepted-risk review triggers below apply to them.</em></p>
 
-<h3>Remediation Status - 2026-07-15</h3>
+<h3>Remediation Status - 2026-06-30</h3>
 <p>Addendum recording state after the assessment date. Findings above are preserved as recorded on 2026-06-10. A point-in-time threat model is not rewritten retroactively; subsequent state is appended.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Finding</th><th>Title</th><th>Status 2026-06-10</th><th>Status 2026-07-15</th></tr></thead>
+<thead><tr><th>Finding</th><th>Title</th><th>Status 2026-06-10</th><th>Status 2026-06-30</th></tr></thead>
 <tbody>
 <tr><td><strong>T-1</strong></td><td>LTM pre-write validation gap</td><td>Partial</td><td><strong>Remediated</strong></td></tr>
 <tr><td><strong>S-2</strong></td><td>Direct endpoint invocation via user PAT</td><td>Partial</td><td><strong>Remediated</strong></td></tr>
