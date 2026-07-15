@@ -271,7 +271,7 @@ html, body {
 .stage-canvas:active { cursor:grabbing; }
 
 /* ── WORLDS ── */
-#world-pipeline { position:relative; width:4560px; height:820px; background:var(--bg2); }
+#world-pipeline { position:relative; width:4892px; height:730px; background:var(--bg2); }
 #world-infra    { width:100%; min-height:100%; background:var(--bg2); display:flex; flex-direction:row; align-items:flex-start; gap:18px; padding:24px; box-sizing:border-box; }
 .infra-col      { flex:1; min-width:0; display:flex; flex-direction:column; gap:18px; }
 .infra-panel   { break-inside:avoid; }
@@ -282,6 +282,10 @@ html, body {
 .stage.w260 { width:264px; }
 .stage.w280 { width:285px; }
 .stage.w300 { width:308px; }
+.stage.w640 { width:640px; }
+/* two-column layout for parallel subsystem cards (S10) */
+.err-cols { display:grid; grid-template-columns:1fr 1fr; gap:9px; align-items:start; }
+.err-cols > .card { margin-bottom:0; }
 @media (max-width: 1100px) {
   .stage { top:20px; }
 }
@@ -526,9 +530,10 @@ html, body {
     <div class="about-eyebrow">Enterprise Multi-Agent AI Framework</div>
     <div class="about-title">Agentic Framework</div>
     <div class="about-body">
-      <p>Built a production multi-agent AI framework designed to be reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
+      <p>Built a production multi-agent AI framework, reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
       <p>The framework ships with Delta-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A five-step RAG pipeline handles embedding, vector search, hybrid BM25 and dense retrieval ranking, context injection, and MLflow tracing. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
-      <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results into a coherent response. Plugin hooks at pre-retrieval, pre-LLM, pre-tool, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic. Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
+      <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results. Plugin hooks at pre-retrieval, pre-LLM, pre-tool, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic.</p>
+      <p>Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
     </div>
     <div class="about-divider"></div>
     <div class="about-eyebrow" style="margin-bottom:6px">Explore the architecture</div>
@@ -543,9 +548,9 @@ html, body {
     <div class="about-title">STRIDE Threat Model</div>
     <div class="about-body">
       <p>Built and adversarially tested a production agentic AI platform using STRIDE across all six threat categories. Forty-eight findings total. Each was assigned a unique attack vector, a DREAD score calibrated individually across five dimensions, and validation through adversarial red team testing. Nothing was scored Critical without a tested attack path.</p>
-      <p>The adversarial assessment ran 42 test cases across Garak, PyRIT, Counterfit, and a custom STRIDE harness. Raw results flagged 26 findings as vulnerable. After manual code-level review: 2 confirmed, 21 not applicable in production, 7 false positives from keyword detection artifacts. 21 of the flagged items are only reachable via direct API and do not represent exploitable conditions for authenticated application users.</p>
+      <p>The adversarial assessment ran 42 test cases across Garak, PyRIT, Counterfit, and a custom STRIDE harness. Raw results flagged 26 as vulnerable. After manual code-level review: 18 false positives from keyword detection artifacts, 7 not exploitable in production, 1 confirmed partial gap. Five are reachable only via direct API and do not represent exploitable conditions for authenticated application users. Two findings carry forward as residual risk.</p>
       <p>Agentic systems have a threat surface that standard frameworks do not cover. Memory poisoning that persists false identity across sessions, RAG corpus tampering via controlled ingestion pipelines, identity chain confusion where user context derives from injectable headers, relay injection between agent-to-agent handoffs with no message signing, and supply chain attacks against deployed model artifacts. Everything is enumerated with a concrete payload, not a category description.</p>
-      <p>Defense-in-depth spans eight layers from the SSO proxy boundary through serving endpoint ACLs, static tool registry enforcement, fact verification on memory writes, append-only audit guarantees, and AI Gateway safety and PII filtering confirmed active. Findings are cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. Thirty-one findings mitigated. Eleven partial. Three accepted with documented justification and review triggers. Three open at time of publication. All findings documented here have since been remediated.</p>
+      <p>Defense-in-depth spans eight layers from the SSO proxy boundary through serving endpoint ACLs, static tool registry enforcement, fact verification on memory writes, append-only audit guarantees, and AI Gateway safety and PII filtering confirmed active. Findings are cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. Thirty-four findings mitigated. Eleven partial. Three accepted with documented justification and review triggers. None open. The three open at time of publication (T-5, T-6, E-6) have since been remediated.</p>
     </div>
     <div class="about-divider"></div>
     <a class="about-cta" href="https://austtp.github.io/stride_threat_model.html" target="_blank" rel="noopener noreferrer">
@@ -787,11 +792,12 @@ html, body {
 </div>
 
 <!-- S10: ERROR HANDLING & GRACEFUL DEGRADATION -->
-<div class="stage w300" id="s10" style="left:4184px;">
+<div class="stage w640" id="s10" style="left:4184px;">
   <div class="stage-title" style="color:var(--blue)">Error Handling</div>
   <div class="stage-subtitle">llm_resilience.py · fallback.py · react_engine.py</div>
+  <div class="err-cols">
   <div class="card">
-    <div class="hook-bar" style="color:var(--red);background:rgba(185,28,28,0.07);border-color:rgba(185,28,28,0.25)">TierPolicy · immutable</div>
+    <div class="hook-bar" style="color:var(--red);background:rgba(185,28,28,0.07);border-color:rgba(185,28,28,0.25)">TierPolicy · immutable · structurally enforced</div>
     <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">LLM Resilience · call_with_resilience()</div>
     <div class="err-tier">
       <div class="err-dot-h"></div>
@@ -806,7 +812,7 @@ html, body {
       <div><div class="err-label">NETWORK_ERROR / LLM_TIMEOUT</div><div class="err-desc">TierPolicy: LOW → PASSTHROUGH<br>reduced safety checks disclosed<br>one-strike: failed service blocked</div></div>
     </div>
   </div>
-  <div class="card" style="margin-top:8px">
+  <div class="card">
     <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">ReACT Recovery · react_engine.py</div>
     <div class="err-tier">
       <div class="err-dot-m"></div>
@@ -822,6 +828,7 @@ html, body {
     </div>
     <div class="mono-box" style="margin-top:8px;font-size:10px">ContextCompressor: window exceeded<br>→ compress + keep last 8 messages<br>MessageValidator: orphaned tool_calls<br>→ auto-fix before LLM send</div>
   </div>
+  </div><!-- /err-cols -->
 </div>
 
 </div><!-- /world-pipeline -->
