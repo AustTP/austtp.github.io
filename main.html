@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Disciplined Framework for Agentic AI Red-Teaming</title>
+<style>
+  :root{
+    --ink:#161512;
+    --ink-soft:#4a463f;
+    --ink-faint:#78726733;
+    --paper:#f6f4ef;
+    --paper-2:#efece4;
+    --rule:#d8d3c7;
+    --signal:#1c5d4c;      /* gate green - the one signal color */
+    --signal-soft:#1c5d4c14;
+    --kill:#9a3016;        /* verdict accent, used sparingly */
+    --kill-soft:#9a301612;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:19px; line-height:1.62; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 26px}
+  ::selection{background:var(--signal); color:var(--paper)}
+
+  /* ---- type roles ---- */
+  .mono{font-family:"SFMono-Regular",ui-monospace,"JetBrains Mono","IBM Plex Mono",Menlo,monospace}
+  .eyebrow{
+    font-family:ui-monospace,"JetBrains Mono",Menlo,monospace;
+    font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--signal); font-weight:600;
+  }
+
+  /* ---- masthead ---- */
+  header.top{border-bottom:1px solid var(--rule); background:var(--paper-2)}
+  header.top .wrap{padding-top:54px; padding-bottom:46px}
+  h1{
+    font-size:clamp(34px,6vw,54px); line-height:1.04; margin:.35em 0 .3em;
+    letter-spacing:-.015em; font-weight:600;
+  }
+  .dek{font-size:21px; color:var(--ink-soft); margin:0 0 22px; max-width:60ch}
+  .byline{
+    font-family:ui-monospace,Menlo,monospace; font-size:13px; color:var(--ink-soft);
+    display:flex; flex-wrap:wrap; gap:6px 18px; border-top:1px solid var(--rule);
+    padding-top:18px; margin-top:26px;
+  }
+  .byline b{color:var(--ink); font-weight:600}
+
+  /* ---- section rhythm ---- */
+  section{padding:44px 0; border-bottom:1px solid var(--rule)}
+  h2{
+    font-size:26px; letter-spacing:-.01em; margin:0 0 6px; font-weight:600;
+    display:flex; align-items:baseline; gap:12px;
+  }
+  h2 .num{
+    font-family:ui-monospace,Menlo,monospace; font-size:13px; color:var(--signal);
+    font-weight:600; letter-spacing:.05em;
+  }
+  h3{font-size:19px; margin:30px 0 4px; font-weight:600; letter-spacing:-.005em}
+  p{margin:14px 0}
+  .lead{font-size:20px; color:var(--ink)}
+  a{color:var(--signal); text-underline-offset:3px; text-decoration-thickness:1px}
+  strong{font-weight:600}
+  em{font-style:italic}
+
+  .note{
+    font-size:16px; color:var(--ink-soft); background:var(--paper-2);
+    border-left:2px solid var(--signal); padding:14px 18px; margin:22px 0;
+    font-family:ui-monospace,Menlo,monospace; line-height:1.55;
+  }
+
+  /* ---- gate diagram (the signature) ---- */
+  .gate{margin:30px 0 8px; background:var(--paper-2); border:1px solid var(--rule); border-radius:8px; padding:24px 22px}
+  .gate-title{font-family:ui-monospace,Menlo,monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:18px}
+  .flow{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .node{
+    font-family:ui-monospace,Menlo,monospace; font-size:13px; font-weight:600;
+    padding:9px 13px; border-radius:6px; border:1px solid var(--rule); background:var(--paper);
+    white-space:nowrap;
+  }
+  .node.candidate{border-style:dashed; color:var(--ink-soft)}
+  .node.gate-node{border-color:var(--signal); color:var(--signal); background:var(--signal-soft)}
+  .arrow{font-family:ui-monospace,Menlo,monospace; color:var(--ink-soft); font-size:14px}
+  .verdicts{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:16px}
+  @media(max-width:560px){.verdicts{grid-template-columns:1fr}}
+  .verdict{
+    font-family:ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.4;
+    padding:11px 13px; border-radius:6px; border:1px solid var(--rule); background:var(--paper);
+  }
+  .verdict b{display:block; font-size:13px; letter-spacing:.04em; margin-bottom:3px}
+  .verdict.pass b{color:var(--signal)}
+  .verdict.kill b{color:var(--kill)}
+  .verdict.kill{background:var(--kill-soft); border-color:#9a301633}
+
+  /* ---- layered architecture ---- */
+  .stack{margin:26px 0 6px; border:1px solid var(--rule); border-radius:8px; overflow:hidden}
+  .layer{padding:16px 20px; border-bottom:1px solid var(--rule); background:var(--paper)}
+  .layer:last-child{border-bottom:none}
+  .layer:nth-child(odd){background:var(--paper-2)}
+  .layer .lab{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--signal); font-weight:600}
+  .layer .ttl{font-weight:600; font-size:18px; margin:2px 0 3px}
+  .layer .desc{font-size:15.5px; color:var(--ink-soft); line-height:1.5}
+
+  /* ---- two-column compare ---- */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:24px 0 6px}
+  @media(max-width:560px){.cols{grid-template-columns:1fr}}
+  .col{border:1px solid var(--rule); border-radius:8px; padding:18px 18px 8px; background:var(--paper-2)}
+  .col h4{margin:0 0 2px; font-size:16px; font-family:ui-monospace,Menlo,monospace; letter-spacing:.02em}
+  .col .opt{font-size:13px; color:var(--ink-soft); font-family:ui-monospace,Menlo,monospace; margin-bottom:10px}
+  .col ul{margin:0 0 12px; padding-left:18px}
+  .col li{font-size:15px; line-height:1.5; margin:5px 0; color:var(--ink-soft)}
+
+  /* ---- alignment chips ---- */
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 4px}
+  .chip{
+    font-family:ui-monospace,Menlo,monospace; font-size:12.5px; color:var(--ink);
+    border:1px solid var(--rule); border-radius:20px; padding:5px 13px; background:var(--paper-2);
+  }
+
+  /* ---- scope banner ---- */
+  .scope{
+    background:var(--ink); color:var(--paper); border-radius:8px; padding:20px 22px; margin:8px 0 0;
+  }
+  .scope .eyebrow{color:#8fcbb9}
+  .scope p{margin:8px 0 0; font-size:16px; color:#e8e4da; line-height:1.55}
+  .scope .disclaimer{
+    font-family:ui-monospace,"JetBrains Mono",Menlo,monospace;
+    font-size:13px; color:#8fcbb9; margin:14px 0 0; padding-top:14px;
+    border-top:1px solid #ffffff1f; line-height:1.5; letter-spacing:.01em;
+  }
+
+  footer{padding:40px 0 70px}
+  footer p{font-family:ui-monospace,Menlo,monospace; font-size:13px; color:var(--ink-soft); margin:6px 0}
+
+  @media (prefers-reduced-motion: no-preference){
+    section{opacity:0; transform:translateY(8px); animation:rise .6s ease forwards}
+    @keyframes rise{to{opacity:1; transform:none}}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">AI Security &middot; Methodology</div>
+    <h1>A Disciplined Framework for Agentic AI Red-Teaming</h1>
+    <p class="dek">How I built a skills-based system for testing LLM applications, and why its most important components are the two that stop it from producing noise.</p>
+    <div class="byline">
+      <span><b>Austin Poole</b></span>
+      <span>AI Security Engineering</span>
+      <span>Methodology overview &middot; no operational payloads</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <p class="lead">Most write-ups about AI red-teaming are lists of attacks. This one is about the opposite: the judgment layer that decides which candidate findings are real, which are noise, and when the correct answer is <em>&ldquo;this target is clean, submit nothing.&rdquo;</em></p>
+    <p>I built a structured framework for adversarially testing LLM-integrated applications: product chatbots, agentic platforms, model-provider tooling, and the AI infrastructure underneath them. It is organized as a library of composable <strong>skills</strong> (one technique domain per file), a <strong>router</strong> that selects the right specialists for a given target, and the part I care most about, two <strong>governance layers</strong> that gate everything the framework produces.</p>
+    <p>This page describes the architecture and that discipline. It deliberately contains no attack payloads, no exploit code, and no target-specific detail. The framework is only ever run against systems I am authorized to test.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">01</span> The problem it solves</h2>
+    <p>Triage teams for AI bug-bounty programs are drowning. Generative tooling makes it trivial to produce confident, official-looking &ldquo;findings&rdquo; that fall apart under scrutiny: a jailbreak that only yields disallowed text, a system-prompt &ldquo;leak&rdquo; that reveals nothing sensitive, an isolation &ldquo;bug&rdquo; provable only against your own account. The scarce skill is not generating attacks. It is <strong>judgment</strong>: knowing what constitutes reportable impact, and having the discipline to discard everything that does not.</p>
+    <p>So I designed the framework around a hard constraint: <strong>no candidate finding reaches a report without passing an explicit gate, and concluding a target is secure is a successful outcome, not a failure.</strong> The technique coverage, the routing, and the taxonomy alignment all exist to serve that constraint.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">02</span> The kill-switch</h2>
+    <p>Before any finding is written up, it runs a seven-question gate. The questions test for real attacker gain, in-scope assets, accepted-impact classes, plausible privilege assumptions, provable evidence, novelty, and exclusion lists. The output is one of four verdicts, and two of them stop the finding cold.</p>
+
+    <div class="gate">
+      <div class="gate-title">Candidate finding &rarr; gate &rarr; verdict</div>
+      <div class="flow">
+        <span class="node candidate">candidate&nbsp;finding</span>
+        <span class="arrow">&rarr;</span>
+        <span class="node gate-node">7-question gate</span>
+        <span class="arrow">&rarr;</span>
+        <span class="node">verdict</span>
+      </div>
+      <div class="verdicts">
+        <div class="verdict pass"><b>PASS</b>All checks clear. Write the report at full severity.</div>
+        <div class="verdict"><b>DOWNGRADE</b>Real bug, weaker evidence. Write it honestly, lower severity, no inflation.</div>
+        <div class="verdict"><b>CHAIN&#8209;REQUIRED</b>Real primitive, not reportable alone. Hold it, find the second half.</div>
+        <div class="verdict kill"><b>KILL</b>Fails a structural check. Drop it, log why, move on.</div>
+      </div>
+    </div>
+
+    <p>The verdict I built the whole system to respect is the last one. On a hardened target, most candidates should die here. The professional move is to <strong>close the target as clean</strong> with an honest non-finding summary, rather than manufacture a bug that is not there. A framework that cannot say &ldquo;nothing to report&rdquo; is a framework that floods triage and burns its own credibility.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">03</span> Treating the framework&rsquo;s own knowledge as an untrusted supply chain</h2>
+    <p>The framework is designed to learn: completed engagements can be summarized into new lessons or new skill files. That capability is also a threat. An LLM asked to summarize or generate technique documentation will produce confident, specific-looking claims (exact win-rates, quoted model output, version numbers) whether or not any of it happened.</p>
+    <p>So every piece of content entering the knowledge base, whether self-generated or imported from an outside source, passes a <strong>verification gate</strong> before it is trusted. It checks provenance, resolves every checkable fact (CVEs, product and model names, version strings), demands real evidence behind any &ldquo;confirmed&rdquo; claim, and scans imported files for the same injection and unicode-smuggling tricks the framework studies in its targets. The dispositions mirror the kill-switch:</p>
+    <div class="cols">
+      <div class="col">
+        <h4>PASS</h4>
+        <div class="opt">verified</div>
+        <ul><li>Provenance traces to a real engagement or primary source</li><li>Facts resolve; evidence exists</li><li>Merge as-is</li></ul>
+      </div>
+      <div class="col">
+        <h4>DOWNGRADE</h4>
+        <div class="opt">real idea, unverifiable specifics</div>
+        <ul><li>Keep the underlying technique</li><li>Strip fabricated numbers, quotes, version claims</li><li>Mark &ldquo;untested, validate per target&rdquo;</li></ul>
+      </div>
+    </div>
+    <p style="margin-top:18px">This is the research on agent-skill supply-chain compromise applied to my own pipeline rather than only to targets. It is also the reason I trust the framework&rsquo;s output: the self-improvement loop cannot quietly promote a plausible fabrication into a &ldquo;fact.&rdquo;</p>
+    <div class="note">A concrete instance: a technique catalog imported from an external CTF context carried specific &ldquo;confirmed&rdquo; win-rates and model-version claims that had been self-simulated against a toy challenge. The gate kept the generalizable technique principles and stripped every fabricated benchmark before merge.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">04</span> Architecture</h2>
+    <p>Underneath the two governance layers, the framework is organized so that a target is <em>classified before it is attacked</em>. The routing decision matters more than any single technique.</p>
+    <div class="stack">
+      <div class="layer">
+        <div class="lab">Layer 1 &middot; Router</div>
+        <div class="ttl">Archetype &amp; observation routing</div>
+        <div class="desc">Classifies the target (product-embedded AI, model provider, or AI infrastructure), then maps what it observes (a connector, a RAG pipeline, an MCP server, a reasoning trace) to the right specialist skills. Prevents defaulting to one familiar playbook.</div>
+      </div>
+      <div class="layer">
+        <div class="lab">Layer 2 &middot; Specialists</div>
+        <div class="ttl">Composable technique domains</div>
+        <div class="desc">One domain per skill: enumeration, indirect injection, data-flow analysis, tool and connector abuse, cross-tenant isolation, output handling, supply chain, and observability exposure. Each documents where impact comes from and how to prove it, and cross-references the others so findings compose into chains.</div>
+      </div>
+      <div class="layer">
+        <div class="lab">Layer 3 &middot; Coverage map</div>
+        <div class="ttl">Taxonomy alignment</div>
+        <div class="desc">A coverage checklist built on an open prompt-injection taxonomy, so a hunt can be audited for completeness rather than stopping at the three techniques one reaches for by habit. Findings carry taxonomy codes that cross-map to industry standards.</div>
+      </div>
+      <div class="layer">
+        <div class="lab">Layer 4 &middot; Governance</div>
+        <div class="ttl">Kill-switch &amp; verification gate</div>
+        <div class="desc">The two layers above. Nothing is reported without passing the seven-question gate; nothing enters the knowledge base without passing verification. This is the layer that makes the rest safe to trust.</div>
+      </div>
+    </div>
+    <p style="margin-top:20px">A parallel, slimmer variant exists for CTF contexts, tuned for speed rather than reportability. The contrast clarified, by opposition, exactly what the bug-bounty gate is <em>for</em>. Optimizing one system for &ldquo;capture the flag fast&rdquo; and another for &ldquo;never submit noise&rdquo; makes the reportability discipline legible in a way neither does alone.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">05</span> Standards alignment</h2>
+    <p>Findings are framed against the vocabularies triage and audit teams already use, so a report maps cleanly onto an established risk register rather than inventing its own:</p>
+    <div class="chips">
+      <span class="chip">OWASP LLM Top 10</span>
+      <span class="chip">MITRE ATLAS</span>
+      <span class="chip">NIST AI RMF</span>
+      <span class="chip">STRIDE (agentic threat surface)</span>
+      <span class="chip">CVSS-informed severity</span>
+    </div>
+    <p style="margin-top:18px">The same alignment underpins a companion artifact: a full STRIDE threat model and adversarial assessment of a production agentic platform, with a reconciliation pass that separated confirmed findings from detector false positives. That document is the applied counterpart to the methodology described here.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="num">06</span> What I take from it</h2>
+    <p>The through-line across every layer is the same: <strong>in security, the discipline to discard is worth more than the ability to generate.</strong> Anyone can assemble attack techniques from public research. The parts that took real judgment to build are the ones that throw work away: the gate that kills a weak finding, the verification pass that refuses to trust an unverified claim, the honest &ldquo;this target is clean&rdquo; summary. That is the posture I bring to securing agentic AI systems.</p>
+
+    <div class="scope">
+      <div class="eyebrow">Scope &amp; ethics</div>
+      <p>This framework is run only against systems I am authorized to test: published bug-bounty and vulnerability-disclosure programs, my own infrastructure, and explicit engagements. Its built-in triage gate enforces scope as its second question.</p>
+      <p class="disclaimer">Methodology overview only. No operational payloads, exploit code, or target-specific detail.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Austin Poole &middot; AI Security Engineering</p>
+    <p>Methodology overview. Full framework available privately, under NDA, on request.</p>
+  </div>
+</footer>
+
+</body>
+</html>
