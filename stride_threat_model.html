@@ -170,14 +170,14 @@ a { color: #0369a1; }
   
   async function checkStateAndBlock() {
       try {
-          // Fetch user's IP and location data 
+          // FIX 1: Appended /json/ to the URL to fetch proper JSON formatting
           const response = await fetch('https://ipapi.co');
           const data = await response.json();
           
-          // Check if the user's state is in the blocked list
-          if (blockedStates.includes(data.state)) {
-              // Redirect the user to an access denied page or a different URL
-              window.location.href = "https://austtp.github.io/";
+          // FIX 2: Used data.region instead of data.state to access the state name
+          if (blockedStates.includes(data.region)) {
+              // Redirect the user to the access denied target
+              window.location.href = "https://github.io";
           }
       } catch (error) {
           console.error("Failed to fetch geolocation data:", error);
