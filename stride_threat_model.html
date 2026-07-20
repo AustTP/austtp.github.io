@@ -22,6 +22,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  visibility: hidden;
+  opacity: 0;
 }
 .page {
   max-width: 1000px;
@@ -193,8 +195,21 @@ a { color: #0369a1; }
               });
       }, 1000);
   }
-  
-  checkLocationAndRedirect();
+
+  function revealPage() {
+        checkLocationAndRedirect();
+        const style = document.createElement('style');
+        style.innerHTML = `
+            body {
+                visibility: visible;
+                opacity: 1;
+                transition: opacity 0.3s ease-in;
+            }
+        `;
+        document.head.appendChild(style);
+  }
+
+  revealPage();
 </script>
 </head><body><div class="page">
 
