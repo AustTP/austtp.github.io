@@ -178,18 +178,13 @@ a { color: #0369a1; }
                   return response.json();
               })
               .then(data => {
-                  // ipapi.co returns the state/region name in the 'region' property 
-                  // (e.g., "Missouri", "North Carolina") 
-                  // and the code in 'region_code' (e.g., "MO", "NC")
                   const state = data.region;
                   const stateCode = data.region_code;
   
                   console.log(`Detected State: ${state} (${stateCode})`);
   
-                  // Define your target redirect URL
-                  const redirectUrl = 'https://your-target-page.com/restricted';
+                  const redirectUrl = 'https://austtp.github.io/';
   
-                  // Check if user is in Missouri (MO) or North Carolina (NC)
                   if (stateCode === 'MO' || stateCode === 'NC' || 
                       state === 'Missouri' || state === 'North Carolina') {
                       
