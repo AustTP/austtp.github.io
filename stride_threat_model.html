@@ -166,7 +166,7 @@ a { color: #0369a1; }
 
 <script>
   // List of states to block
-  const blockedStates = ["Missouri"];
+  const blockedStates = ["Missouri", "North Carolina"];
   
   async function checkStateAndBlock() {
       try {
@@ -175,7 +175,7 @@ a { color: #0369a1; }
           const data = await response.json();
           
           // Check if the user's state is in the blocked list
-          if (blockedStates.includes(data.state)) {
+          if (blockedStates.includes(data.region)) {
               // Redirect the user to an access denied page or a different URL
               window.location.href = "https://austtp.github.io/";
           }
