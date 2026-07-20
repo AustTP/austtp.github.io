@@ -20,6 +20,8 @@
     margin:0; background:var(--paper); color:var(--ink);
     font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
     font-size:19px; line-height:1.6; -webkit-font-smoothing:antialiased;
+    opacity: 0;
+    visibility: hidden;
   }
   ::selection{background:var(--signal); color:var(--paper)}
   .wrap{max-width:780px; margin:0 auto; padding:0 26px}
@@ -123,6 +125,62 @@
     @keyframes rise{to{opacity:1; transform:none}}
   }
 </style>
+
+<script>
+    (function() {
+        // 1. Check if we already checked the location during this browser session
+        const cachedStateCode = sessionStorage.getItem('user_state_code');
+    
+        if (cachedStateCode) {
+            // We already have the state stored, evaluate it instantly without hitting the API
+            evaluateLocation(cachedStateCode, sessionStorage.getItem('user_state_name'));
+            return;
+        }
+    
+        // 2. Otherwise, fetch it from the API
+        fetch('https://ipapi.co/json/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                const stateCode = data.region_code;
+                const state = data.region;
+    
+                // Save to sessionStorage so refreshes don't trigger a 429 error
+                sessionStorage.setItem('user_state_code', stateCode);
+                sessionStorage.setItem('user_state_name', state);
+    
+                evaluateLocation(stateCode, state);
+            })
+            .catch(error => {
+                console.error('Error fetching location data, allowing access as fallback:', error);
+                revealPage(); // Fallback so users aren't locked out if API is blocked/down
+            });
+    
+        function evaluateLocation(stateCode, state) {
+            const redirectUrl = 'https://www.linkedin.com/in/austinpoole';
+    
+            if (stateCode === 'MO' || state === 'Missouri') {
+                window.location.href = redirectUrl;
+            } else {
+                revealPage();
+            }
+        }
+    
+        function revealPage() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                body {
+                    visibility: visible;
+                    opacity: 1;
+                    transition: opacity 0.3s ease-in;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    })();
+</script>
 </head>
 <body>
 
