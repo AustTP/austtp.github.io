@@ -197,7 +197,6 @@ a { color: #0369a1; }
   }
 
   function revealPage() {
-        checkLocationAndRedirect();
         const style = document.createElement('style');
         style.innerHTML = `
             body {
@@ -209,6 +208,7 @@ a { color: #0369a1; }
         document.head.appendChild(style);
   }
 
+  checkLocationAndRedirect();
   revealPage();
 </script>
 </head><body><div class="page">
