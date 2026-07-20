@@ -22,6 +22,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  visibility: hidden;
+  opacity: 0;
 }
 .page {
   max-width: 1000px;
@@ -165,36 +167,60 @@ a { color: #0369a1; }
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=Crimson+Pro:ital,wght@0,400;0,500;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 
 <script>
-  function checkLocationAndRedirect() {
-      setTimeout(() => {
-          fetch('https://ipapi.co/json/')
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error('Network response was not ok');
-                  }
-                  return response.json();
-              })
-              .then(data => {
-                  const state = data.region;
-                  const stateCode = data.region_code;
-  
-                  console.log(`Detected State: ${state} (${stateCode})`);
-  
-                  const redirectUrl = 'https://austtp.github.io/';
-  
-                  if (stateCode === 'MO' || stateCode === 'NC' || 
-                      state === 'Missouri' || state === 'North Carolina') {
-                      
-                      window.location.href = redirectUrl;
-                  }
-              })
-              .catch(error => {
-                  console.error('Error fetching location data:', error);
-              });
-      }, 1000);
-  }
-
-  checkLocationAndRedirect();
+    (function() {
+        // 1. Check if we already checked the location during this browser session
+        const cachedStateCode = sessionStorage.getItem('user_state_code');
+    
+        if (cachedStateCode) {
+            // We already have the state stored, evaluate it instantly without hitting the API
+            evaluateLocation(cachedStateCode, sessionStorage.getItem('user_state_name'));
+            return;
+        }
+    
+        // 2. Otherwise, fetch it from the API
+        fetch('https://ipapi.co/json/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                const stateCode = data.region_code;
+                const state = data.region;
+    
+                // Save to sessionStorage so refreshes don't trigger a 429 error
+                sessionStorage.setItem('user_state_code', stateCode);
+                sessionStorage.setItem('user_state_name', state);
+    
+                evaluateLocation(stateCode, state);
+            })
+            .catch(error => {
+                console.error('Error fetching location data, allowing access as fallback:', error);
+                revealPage(); // Fallback so users aren't locked out if API is blocked/down
+            });
+    
+        function evaluateLocation(stateCode, state) {
+            const redirectUrl = 'https://your-target-page.com/restricted';
+    
+            if (stateCode === 'MO' || stateCode === 'NC' || 
+                state === 'Missouri' || state === 'North Carolina') {
+                window.location.href = redirectUrl;
+            } else {
+                revealPage();
+            }
+        }
+    
+        function revealPage() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                body {
+                    visibility: visible;
+                    opacity: 1;
+                    transition: opacity 0.3s ease-in;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    })();
 </script>
 </head><body><div class="page">
 
