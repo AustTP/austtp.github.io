@@ -182,6 +182,9 @@ a { color: #0369a1; }
           const rawText = await response.text();
           console.log("Raw Server Response Text:", rawText);
 
+          data = JSON.parse(rawText);
+          console.log("Successfully Parsed JSON Data:", data);
+
           // 3. Try to parse it manually so it doesn't crash the script if it fails
           let data;
           try {
