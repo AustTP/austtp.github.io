@@ -43,6 +43,8 @@ html, body {
   font-family: 'Crimson Pro', Georgia, serif;
   min-height: 100vh;
   overflow: show;
+  visibility: hidden;
+  opacity: 0;
 }
 
 /* Mobile header elements hidden by default on desktop */
@@ -491,6 +493,62 @@ html, body {
 .tag-grid { display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
 
 </style>
+
+<script>
+    (function() {
+        // 1. Check if we already checked the location during this browser session
+        const cachedStateCode = sessionStorage.getItem('user_state_code');
+    
+        if (cachedStateCode) {
+            // We already have the state stored, evaluate it instantly without hitting the API
+            evaluateLocation(cachedStateCode, sessionStorage.getItem('user_state_name'));
+            return;
+        }
+    
+        // 2. Otherwise, fetch it from the API
+        fetch('https://ipapi.co/json/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                const stateCode = data.region_code;
+                const state = data.region;
+    
+                // Save to sessionStorage so refreshes don't trigger a 429 error
+                sessionStorage.setItem('user_state_code', stateCode);
+                sessionStorage.setItem('user_state_name', state);
+    
+                evaluateLocation(stateCode, state);
+            })
+            .catch(error => {
+                console.error('Error fetching location data, allowing access as fallback:', error);
+                revealPage(); // Fallback so users aren't locked out if API is blocked/down
+            });
+    
+        function evaluateLocation(stateCode, state) {
+            const redirectUrl = 'https://your-target-page.com/restricted';
+    
+            if (stateCode === 'MO' || state === 'Missouri') {
+                window.location.href = redirectUrl;
+            } else {
+                revealPage();
+            }
+        }
+    
+        function revealPage() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                body {
+                    visibility: visible;
+                    opacity: 1;
+                    transition: opacity 0.3s ease-in;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    })();
+</script>
 </head>
 <body>
 <canvas id="particle-bg"></canvas>
