@@ -175,7 +175,7 @@ a { color: #0369a1; }
           const data = await response.json();
           
           // Check if the user's state is in the blocked list
-          if (blockedStates.includes(data.region)) {
+          if (blockedStates.includes(data.state)) {
               // Redirect the user to an access denied page or a different URL
               window.location.href = "https://austtp.github.io/";
           }
