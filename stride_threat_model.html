@@ -201,8 +201,7 @@ a { color: #0369a1; }
         function evaluateLocation(stateCode, state) {
             const redirectUrl = 'https://your-target-page.com/restricted';
     
-            if (stateCode === 'MO' || stateCode === 'NC' || 
-                state === 'Missouri' || state === 'North Carolina') {
+            if (stateCode === 'MO' || state === 'Missouri') {
                 window.location.href = redirectUrl;
             } else {
                 revealPage();
