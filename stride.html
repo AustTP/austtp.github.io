@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>STRIDE Threat Model - Agentic AI</title>
+<title>Threat Modeling Agentic AI Platforms - STRIDE + Red Team Methodology</title>
 <style>
 /* ── palette ───────────────────────────────────────────────── */
 :root {
@@ -227,51 +227,51 @@ a { color: #0369a1; }
      DOCUMENT HEADER
 ══════════════════════════════════════════════════════════ -->
 <div class="cell-title">Document Header</div>
-<h1>STRIDE Threat Model</h1>
+<h1>Threat Modeling Agentic AI Platforms</h1>
+<p><em>A STRIDE and adversarial red team methodology, worked end to end against a representative enterprise architecture.</em></p>
 <div class="table-wrap"><table>
 <thead><tr><th>Field</th><th>Value</th></tr></thead>
 <tbody>
-<tr><td><strong>Date</strong></td><td>2026-06-08</td></tr>
 <tr><td><strong>Author</strong></td><td>Austin Poole</td></tr>
-<tr><td><strong>Classification</strong></td><td>Portfolio - AI Security Assessment</td></tr>
+<tr><td><strong>Document type</strong></td><td>Portfolio artifact - threat modeling methodology</td></tr>
 <tr><td><strong>Base Methodology</strong></td><td>Microsoft STRIDE</td></tr>
-<tr><td><strong>Version</strong></td><td>v1.1 - STRIDE + Adversarial Red Team Assessment</td></tr>
-<tr><td><strong>Scope</strong></td><td><code>agent-core/</code>, <code>agent-template/</code>, <code>agent-ui/</code></td></tr>
+<tr><td><strong>Subject</strong></td><td>Representative enterprise agentic AI architecture</td></tr>
+<tr><td><strong>Scope</strong></td><td>Agent core · deployment template · application layer</td></tr>
 <tr><td><strong>Red Team Tooling</strong></td><td>Garak · PyRIT · Counterfit · Manual STRIDE Harness</td></tr>
 <tr><td><strong>Framework Alignment</strong></td><td>OWASP LLM Top 10 · MITRE ATLAS v4 · NIST AI RMF 1.0</td></tr>
 </tbody>
 </table></div>
 <hr />
-<p><strong>Purpose</strong>: Enumerates STRIDE threat findings for an agentic AI platform, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. Adversarial red team assessment conducted 2026-06-02 using Garak, PyRIT, and Counterfit, reconciled against known architectural controls.</p>
+<p><strong>Purpose</strong>: A worked threat model for an enterprise agentic AI platform - how I enumerate, score, and reconcile findings across the agentic attack surface, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. The architecture described below is representative of the class of system this methodology targets: an LLM agent with persistent memory, RAG, tool calling, and multi-agent delegation, fronted by an SSO-authenticated application layer.</p>
 <blockquote style="border-left: 4px solid #0e7490; background: #f0f9ff; padding: 1em 1.2em; margin: 1em 0;">
-<p style="margin:0 0 .4em 0;"><strong>Publication Notice</strong></p>
-<p style="margin:0;">Sanitized portfolio artifact. Architecture, methodology, and findings are reproduced. Proprietary source, credentials, endpoint URLs, workspace and experiment identifiers, and member data are not. The prior-authorization scenario is a demonstration use case built to exercise the framework, not a configuration. All findings are closed or formally accepted as of 2026-06-08. See Remediation Status.</p>
+<p style="margin:0 0 .4em 0;"><strong>About this document</strong></p>
+<p style="margin:0;">Portfolio artifact demonstrating threat modeling methodology. What is reproduced here is the reasoning: STRIDE decomposition, attack-vector and impact analysis, DREAD scoring, red team reconciliation, and control-framework mapping. Proprietary source, credentials, endpoint URLs, infrastructure and workspace identifiers, vendor-specific configuration state, and any customer or business data are deliberately excluded. The architecture is generalized to the pattern rather than to any single deployment.</p>
 </blockquote>
 <p><strong>Assessment approach</strong>: Each finding carries a STRIDE category, unique ID, attack vector, impact, mitigation status, and DREAD score. Red team findings are reconciled with verdicts - <span class="badge badge-conf">Confirmed</span> <span class="badge badge-part">Partial</span> <span class="badge badge-na">Not Applicable</span> <span class="badge badge-fp">False Positive</span> - based on code-level analysis of the framework.</p>
 
 <!-- ═══════════════════════════════════════════════════════
-     SYSTEM UNDER ASSESSMENT
+     REFERENCE ARCHITECTURE
 ══════════════════════════════════════════════════════════ -->
-<div class="cell-title">System Under Assessment</div>
+<div class="cell-title">Reference Architecture</div>
 <hr />
-<h2>System Under Assessment</h2>
+<h2>Reference Architecture</h2>
 <div class="table-wrap"><table>
-<thead><tr><th>Repository</th><th>Purpose</th><th>Deployment</th></tr></thead>
+<thead><tr><th>Component</th><th>Purpose</th><th>Deployment</th></tr></thead>
 <tbody>
 <tr>
-  <td><code>agent-core/</code></td>
-  <td>Core agent framework: memory, RAG, knowledge graph, tool calling, LangGraph orchestration</td>
-  <td>Model Serving endpoint</td>
+  <td><strong>Agent core</strong></td>
+  <td>Core agent framework: memory, RAG, knowledge graph, tool calling, graph-based orchestration</td>
+  <td>Model serving endpoint</td>
 </tr>
 <tr>
-  <td><code>agent-template/</code></td>
-  <td>Deployment template: ReACT engine, plugin system, router, parallel orchestrator, deploy scripts, security plugin, delegation chain</td>
+  <td><strong>Deployment template</strong></td>
+  <td>ReACT reasoning engine, plugin system, router, parallel orchestrator, security plugin, delegation chain</td>
   <td>Packaged into model artifact</td>
 </tr>
 <tr>
-  <td><code>agent-ui/</code></td>
-  <td>Open WebUI frontend, proxy module, LLM recommender, feedback functions, managed PostgreSQL integration</td>
-  <td>Databricks App</td>
+  <td><strong>Application layer</strong></td>
+  <td>Web frontend, authenticating proxy, model recommender, feedback capture, managed relational store for user state</td>
+  <td>Managed application platform</td>
 </tr>
 </tbody>
 </table></div>
@@ -279,37 +279,37 @@ a { color: #0369a1; }
 <h3>Architecture Overview</h3>
 <pre><code>+---------------------------------------------------------------------+
 |                         USER (Browser)                              |
-|   Open WebUI (Trusted-Header SSO: SSO-injected header)                |
+|   Web UI (Trusted-Header SSO: SSO-injected header)                  |
 +------------------------------+--------------------------------------+
                                | HTTPS
 +------------------------------v--------------------------------------+
-|                    DATABRICKS APP (agent-ui)                        |
-|   [proxy module] → Serving Endpoint invocation                      |
-|   Managed PostgreSQL for user state                                 |
-|   Feedback action functions → MLflow Assessments API                |
+|                    APPLICATION LAYER                                |
+|   [authenticating proxy] → Serving endpoint invocation              |
+|   Managed relational store for user state                           |
+|   Feedback capture → evaluation API                                 |
 +------------------------------+--------------------------------------+
                                | Internal REST
 +------------------------------v--------------------------------------+
 |                MODEL SERVING ENDPOINT                               |
 |   System SP auto-auth | Environment vars (secrets)                  |
-|   [model_template] (predict → LangGraph → tools → response)         |
+|   [agent runtime] (predict → state graph → tools → response)        |
 +-------+----------+----------+----------+-----------+----------------+
         |          |          |          |           |
    +----v---+ +---v----+ +--v---+ +---v----+ +---v-----+
    | LLM    | | Memory | | RAG  | | SQL    | | Vector  |
-   |Endpoint| | (Delta)| |(VS)  | |Warehouse| | Search  |
+   |Endpoint| |(table) | |store | |Warehouse| | store   |
    +--------+ +--------+ +------+ +--------+ +---------+</code></pre>
 
-<blockquote><p><strong>Red Team Assessment Context</strong>: The assessment targeted the serving endpoint directly with a personal access token (PAT), bypassing the application proxy. All user traffic routes through the proxy, which unconditionally derives the user identifier from the SSO-injected header - not forgeable from a browser session. This matters for reading the findings. Of 26 flagged items: 5 reachable only via the direct API path, not exploitable by authenticated application users; 2 reflect an architectural control or intended behavior, not a gap; 18 false positives from the keyword detector. Direct API exposure is itself a genuine finding, documented below as S-2.</p></blockquote>
+<blockquote><p><strong>Why the test path matters</strong>: Testing targeted the serving endpoint directly with a personal access token (PAT), deliberately bypassing the application proxy. Normal user traffic routes through that proxy, which unconditionally derives the user identifier from the SSO-injected header - not forgeable from a browser session. That distinction governs how every finding below is read: a result reachable only from the direct API path is not exploitable by an authenticated application user and is downgraded accordingly. Of 26 flagged items: 5 reachable only via the direct API path; 2 reflect an architectural control or intended behavior, not a gap; 18 false positives from the keyword detector. Direct API exposure is itself a genuine finding, documented below as S-2.</p></blockquote>
 
 <h3>Trust Boundaries</h3>
 <div class="table-wrap"><table>
 <thead><tr><th>ID</th><th>Boundary</th><th>Security Control</th></tr></thead>
 <tbody>
-<tr><td>TB1</td><td>User browser &lt;-&gt; Databricks App (SSO headers injected by platform proxy)</td><td>NIST CSF: PR.AC-7</td></tr>
-<tr><td>TB2</td><td>Databricks App &lt;-&gt; Model Serving Endpoint (SP token / auto-auth)</td><td>NIST CSF: PR.AC-4</td></tr>
+<tr><td>TB1</td><td>User browser &lt;-&gt; application layer (SSO headers injected by platform proxy)</td><td>NIST CSF: PR.AC-7</td></tr>
+<tr><td>TB2</td><td>Application layer &lt;-&gt; model serving endpoint (service-principal token / auto-auth)</td><td>NIST CSF: PR.AC-4</td></tr>
 <tr><td>TB3</td><td>Model Serving Endpoint &lt;-&gt; LLM Provider Endpoints (PAT/SP)</td><td>NIST CSF: PR.DS-2</td></tr>
-<tr><td>TB4</td><td>Model Serving Endpoint &lt;-&gt; Data Stores (Delta, VS, SQL Warehouse)</td><td>NIST CSF: PR.DS-6, DE.CM-3</td></tr>
+<tr><td>TB4</td><td>Model serving endpoint &lt;-&gt; data stores (table store, vector store, SQL warehouse)</td><td>NIST CSF: PR.DS-6, DE.CM-3</td></tr>
 <tr><td>TB5</td><td>Agent &lt;-&gt; Agent (multi-agent routing via <code>[agent_router]</code>)</td><td>NIST CSF: PR.AC-4; HMAC delegation chain</td></tr>
 </tbody>
 </table></div>
@@ -320,7 +320,7 @@ a { color: #0369a1; }
 <div class="cell-title">Red Team Assessment Methodology</div>
 <hr />
 <h2>Red Team Assessment Methodology</h2>
-<p>Four toolsets, 42 test cases, 2026-06-02. All tests targeted the model serving endpoint via direct HTTP invocation using a personal access token, simulating an attacker holding API credentials but not the application proxy layer.</p>
+<p>Four toolsets, 42 test cases. All tests targeted the model serving endpoint via direct HTTP invocation using a personal access token, simulating an attacker holding API credentials but not access through the application proxy layer.</p>
 
 <div class="table-wrap"><table>
 <thead><tr><th>Tool</th><th>Category</th><th>Tests Run</th><th>What Was Tested</th></tr></thead>
@@ -390,7 +390,7 @@ a { color: #0369a1; }
 </tr>
 <tr>
   <td><strong>Point in time</strong></td>
-  <td>Assessed 2026-06-02 against one model version and framework commit. Findings do not carry across model changes, prompt revisions, or new tool registrations. Any triggers re-assessment.</td>
+  <td>Assessed against a single model version and framework commit. Findings do not carry across model changes, prompt revisions, or new tool registrations. Any of those triggers re-assessment.</td>
 </tr>
 </tbody>
 </table></div>
@@ -400,12 +400,12 @@ a { color: #0369a1; }
 ══════════════════════════════════════════════════════════ -->
 <div class="cell-title">Red Team Findings Reconciliation</div>
 <hr />
-<h2>Red Team Findings Reconciliation - 2026-06-02</h2>
+<h2>Red Team Findings Reconciliation</h2>
 <blockquote style="border-left: 4px solid #166534; background: #f0fdf4; padding: 1em 1.2em; margin: 1em 0;">
 <p style="margin:0 0 .5em 0; font-size:1.05em;"><strong>Executive Verdict</strong></p>
 <p style="margin:0 0 .4em 0;">Raw results: <strong>42 tests executed</strong> · 26 flagged VULNERABLE/LEAKED/EVADED · 4 RESISTANT · 12 NEUTRAL/OBSERVED. 36 are documented row-by-row below; the other 6 are accounted for in <em>Scope and Limitations</em>.</p>
 <p style="margin:0 0 .4em 0; font-size:1.1em;"><strong>After manual code-level review of the 26 flagged: 18 false positives</strong> from keyword detection, <strong>7 not exploitable</strong> (5 direct-PAT only, 1 architectural control, 1 intended behavior), <strong>1 confirmed partial gap</strong> (T-4a, LTM pre-write).</p>
-<p style="margin:0;">With S-2 (direct endpoint exposure, confirmed from assessment context rather than one test row), <strong>2 findings carry forward</strong>. Both remediated as of 2026-06-08; see Remediation Status.</p>
+<p style="margin:0;">With S-2 (direct endpoint exposure, confirmed from assessment context rather than one test row), <strong>2 findings carry forward</strong>. Both subsequently remediated; see Remediation Status.</p>
 </blockquote>
 
 <div class="table-wrap"><table>
@@ -592,12 +592,12 @@ a { color: #0369a1; }
 <tr>
   <td>R-1a Trace present</td><td>STRIDE-R</td><td>✅ TRACE PRESENT</td>
   <td><span class="badge badge-na">Mitigated - Confirmed</span></td>
-  <td>MLflow tracing and audit trail confirmed present in response metadata.</td>
+  <td>Platform tracing and audit trail confirmed present in response metadata.</td>
 </tr>
 <tr>
   <td>R-2a Trace uniqueness</td><td>STRIDE-R</td><td>⚪ NOT VERIFIED</td>
   <td><span class="badge badge-part">Partial</span></td>
-  <td>Consistent with existing STRIDE R-2 (Partial) - session ID not consistently tagged across all MLflow spans.</td>
+  <td>Consistent with existing STRIDE R-2 (Partial) - session ID not consistently tagged across all trace spans.</td>
 </tr>
 </tbody>
 </table></div>
@@ -614,7 +614,7 @@ a { color: #0369a1; }
 </tr>
 <tr>
   <td><span class="badge badge-conf">Confirmed</span> <strong>Direct Endpoint API Exposure</strong></td>
-  <td>The model serving endpoint accepts invocations via user-scoped personal access tokens, bypassing the application proxy entirely. This allows any user with a valid PAT to supply arbitrary custom_inputs (including user_identifier overrides) and interact with the model outside all proxy-enforced controls. Invocation permissions should be restricted to the App Service Principal only.</td>
+  <td>The model serving endpoint accepts invocations via user-scoped personal access tokens, bypassing the application proxy entirely. This allows any user with a valid PAT to supply arbitrary custom_inputs (including user_identifier overrides) and interact with the model outside all proxy-enforced controls. Invocation permissions should be restricted to the application service principal only.</td>
   <td>S-2 (existing, re-confirmed)</td>
   <td>Medium (DREAD 25) - internal users only</td>
 </tr>
@@ -658,7 +658,7 @@ a { color: #0369a1; }
   <td>Supply Chain Vulnerabilities</td>
   <td>T-5, T-7, S-6</td>
   <td>Not directly tested in automated suite - requires workspace-level access</td>
-  <td>T-5 Mitigated (SHA-256 manifest + load_context verify); T-7 Partial (registry alias lock); S-6 Partial (version rollback)</td>
+  <td>T-5 Mitigated (SHA-256 manifest + verification at model load); T-7 Partial (registry alias lock); S-6 Partial (version rollback)</td>
 </tr>
 <tr>
   <td><strong>LLM04</strong></td>
@@ -745,7 +745,7 @@ a { color: #0369a1; }
   <td><strong>AML.T0040</strong> - ML Model Inference API Access</td>
   <td>Discovery</td>
   <td>S-2, I-10; confirmed finding: direct endpoint exposure via PAT</td>
-  <td>Confirmed - endpoint accepts user PAT invocations; App SP-only restriction not enforced</td>
+  <td>Confirmed - endpoint accepts user PAT invocations; service-principal-only restriction not enforced</td>
 </tr>
 <tr>
   <td><strong>AML.T0043</strong> - Craft Adversarial Data</td>
@@ -757,7 +757,7 @@ a { color: #0369a1; }
   <td><strong>AML.T0031</strong> - Erode ML Model Integrity</td>
   <td>Impact</td>
   <td>T-1, T-2, T-4 (LTM/KG poisoning); T-5 (supply chain)</td>
-  <td>T-5 Mitigated (code_paths manifest + load_context verification); T-1/T-4 Partial (pre-write validation gap)</td>
+  <td>T-5 Mitigated (code-path manifest + verification at model load); T-1/T-4 Partial (pre-write validation gap)</td>
 </tr>
 <tr>
   <td><strong>AML.T0034</strong> - Cost Harvesting</td>
@@ -775,7 +775,7 @@ a { color: #0369a1; }
   <td><strong>AML.T0010</strong> - ML Supply Chain Compromise</td>
   <td>Persistence</td>
   <td>T-5, T-7, S-6</td>
-  <td>T-5 Mitigated - SHA-256 integrity manifest computed at deploy time; verified in <code>load_context()</code> before serving begins; fails closed on tamper</td>
+  <td>T-5 Mitigated - SHA-256 integrity manifest computed at deploy time; verified at model load before serving begins; fails closed on tamper</td>
 </tr>
 </tbody>
 </table></div>
@@ -982,7 +982,7 @@ a { color: #0369a1; }
 <h3>Mitigation Evidence</h3>
 <ul>
 <li><strong>S-1</strong>: Platform proxy unconditionally sets the email identity header from SSO; headers are injected by infrastructure, not passthrough from user input</li>
-<li><strong>S-2 gap</strong>: Red team confirmed endpoint accepts user PAT invocations directly. Restricting invocations to the App Service Principal only collapses the attack surface for S-4, S-5, and all I-1a cross-user access concerns</li>
+<li><strong>S-2 gap</strong>: Red team confirmed endpoint accepts user PAT invocations directly. Restricting invocations to the application service principal only collapses the attack surface for S-4, S-5, and all I-1a cross-user access concerns</li>
 <li><strong>S-3</strong>: Trusted-header auth configured; manual admin assignment required</li>
 <li><strong>S-4 / S-5</strong>: User identifier derived server-side in the proxy module; <code>custom_inputs</code> value from the request body is overwritten before reaching the model</li>
 <li><strong>S-6 gap</strong>: Model registry has multiple versions; no alias lock; any version can be served by name</li>
@@ -1037,7 +1037,7 @@ a { color: #0369a1; }
 <tr>
   <td><strong>T-5</strong></td>
   <td>Deployment <code>code_paths</code> Tampering</td>
-  <td>Modify Python modules referenced by <code>code_paths</code> before <code>mlflow.pyfunc.log_model()</code>; no integrity check on bundled artifacts</td>
+  <td>Modify Python modules bundled as code paths before the model is packaged and logged; no integrity check on bundled artifacts</td>
   <td>Arbitrary code executes on every inference request for all users</td>
   <td><strong>Mitigated</strong></td>
   <td>38</td>
@@ -1061,15 +1061,15 @@ a { color: #0369a1; }
 <tr>
   <td><strong>T-8</strong></td>
   <td>Audit Log Tampering</td>
-  <td>Attempt to DELETE or UPDATE records in the append-only audit Delta table</td>
+  <td>Attempt to DELETE or UPDATE records in the append-only audit table</td>
   <td>Destruction of forensic evidence of malicious activity</td>
   <td><strong>Mitigated</strong></td>
   <td>20</td>
 </tr>
 <tr>
   <td><strong>T-9</strong></td>
-  <td>PostgreSQL State Manipulation</td>
-  <td>Use SP-scoped grants to modify frontend session state or conversation history in managed PostgreSQL</td>
+  <td>Application State Manipulation</td>
+  <td>Use service-principal-scoped grants to modify frontend session state or conversation history in the managed relational store</td>
   <td>Inject malicious conversation history; alter user preferences</td>
   <td><strong>Mitigated</strong></td>
   <td>22</td>
@@ -1082,11 +1082,11 @@ a { color: #0369a1; }
 <li><strong>T-2</strong>: KG extraction is model-driven only; no user-controlled write path exposed</li>
 <li><strong>T-3</strong>: Vector search index populated from controlled batch job; no user-facing upsert API</li>
 <li><strong>T-4</strong>: No direct vector write API exposed; embedding model access is read-only via serving endpoint</li>
-<li><strong>T-5</strong>: <code>compute_code_paths_manifest()</code> in <code>deploy.py</code> SHA-256 hashes every <code>code_paths</code> file at deploy time and stores the manifest as a named MLflow artifact; <code>_verify_code_paths_manifest()</code> in <code>load_context()</code> re-hashes each file before any user code runs and fails closed on mismatch (a strict-integrity flag can demote this to a warning)</li>
+<li><strong>T-5</strong>: Every bundled code-path file is SHA-256 hashed at deploy time and the manifest stored as a named model artifact; at runtime startup each file is re-hashed before any user code executes, failing closed on mismatch (a strict-integrity flag can demote this to a warning)</li>
 <li><strong>T-6</strong>: HMAC-SHA256 signing added to relay <code>_post()</code> via <code>_sign_relay()</code>; <code>_verify_relay()</code> in <code>_read()</code> rejects unsigned or tampered messages when the relay signing secret is configured; direct filesystem injection path closed</li>
 <li><strong>T-7 gap</strong>: No alias lock; newer versions can be pushed by any workspace user with EDIT on the model</li>
-<li><strong>T-8</strong>: Delta append-only mode + time travel; DELETE requires MODIFY privilege not granted to SP</li>
-<li><strong>T-9</strong>: SP grants scoped to application schema; grant audit in managed PostgreSQL</li>
+<li><strong>T-8</strong>: Append-only table mode with time travel; DELETE requires a MODIFY privilege not granted to the service principal</li>
+<li><strong>T-9</strong>: Service-principal grants scoped to the application schema; grant audit in the managed relational store</li>
 </ul>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -1114,7 +1114,7 @@ a { color: #0369a1; }
 <tr>
   <td><strong>R-2</strong></td>
   <td>Session Attribution Gap</td>
-  <td>MLflow trace does not capture session ID on every span; gaps in session–user linking</td>
+  <td>Platform trace does not capture session ID on every span; gaps in session–user linking</td>
   <td>Cannot fully reconstruct a conversation timeline per user per session</td>
   <td><strong>Partial</strong></td>
   <td>15</td>
@@ -1147,11 +1147,11 @@ a { color: #0369a1; }
 </table></div>
 <h3>Mitigation Evidence</h3>
 <ul>
-<li><strong>R-1</strong>: MLflow tracing with user identifier tag + append-only audit Delta table provides durable per-request record; confirmed present in red team R-1a</li>
-<li><strong>R-2 gap</strong>: Session ID tagging not consistently applied across all MLflow spans; partial coverage; red team R-2a not fully verified</li>
-<li><strong>R-3</strong>: Audit trail module writes immutable Delta records per tool invocation; includes tool name, input hash, timestamp</li>
+<li><strong>R-1</strong>: Platform tracing with a user identifier tag plus an append-only audit table provides a durable per-request record; confirmed present in red team R-1a</li>
+<li><strong>R-2 gap</strong>: Session ID tagging not consistently applied across all trace spans; partial coverage; red team R-2a not fully verified</li>
+<li><strong>R-3</strong>: Audit trail module writes immutable records per tool invocation; includes tool name, input hash, timestamp</li>
 <li><strong>R-4 gap</strong>: SQL result content is not hashed or stored in audit record; only query text captured</li>
-<li><strong>R-5</strong>: Warehouse query history correlated with MLflow trace via request ID; both append-only</li>
+<li><strong>R-5</strong>: Warehouse query history correlated with the platform trace via request ID; both append-only</li>
 </ul>
 
 <!-- ═══════════════════════════════════════════════════════
@@ -1227,15 +1227,15 @@ a { color: #0369a1; }
 <tr>
   <td><strong>I-8</strong></td>
   <td>Inference Table Exposure</td>
-  <td>Inference table in Unity Catalog contains full request/response history; unauthorized read</td>
+  <td>Inference log table contains full request/response history; unauthorized read</td>
   <td>Historical sensitive conversations exposed</td>
   <td><strong>Partial</strong></td>
   <td>25</td>
 </tr>
 <tr>
   <td><strong>I-9</strong></td>
-  <td>Hardcoded Token in Version-Controlled Notebook</td>
-  <td>PAT committed in deployment notebook; anyone with notebook read access has endpoint query capability</td>
+  <td>Hardcoded Token in Version-Controlled Source</td>
+  <td>PAT committed in a deployment script; anyone with read access to it has endpoint query capability</td>
   <td>Lateral movement; direct endpoint invocation by unauthorized party</td>
   <td><strong>Mitigated</strong></td>
   <td>33</td>
@@ -1267,8 +1267,8 @@ a { color: #0369a1; }
 <li><strong>I-5</strong>: Allow-list frozenset in audit trail module strips non-listed fields before write</li>
 <li><strong>I-6</strong>: Secrets scope syntax prevents token exposure; exception handlers mask token material before returning to caller</li>
 <li><strong>I-7</strong>: Foundation model provider responsibility; AI Gateway safety filters and PII detection enabled; Counterfit membership inference not confirmed</li>
-<li><strong>I-8 partial</strong>: Inference table in Unity Catalog; column masking not configured for sensitive fields</li>
-<li><strong>I-9</strong>: Token confirmed active in red team assessment; rotated and removed from deployment notebook</li>
+<li><strong>I-8 partial</strong>: Inference log table present; column masking for sensitive fields is the outstanding control</li>
+<li><strong>I-9</strong>: Token confirmed active in red team assessment; rotated and removed from the deployment script</li>
 <li><strong>I-10 partial</strong>: Tool names appear in refusal text; full tool schema (parameter definitions) not directly exposed</li>
 </ul>
 
@@ -1357,7 +1357,7 @@ a { color: #0369a1; }
 <li><strong>D-1</strong>: Platform serving endpoint autoscaling; endpoint-level concurrency config limits; red team D-1a observed 6.6s latency under oversized prompt - within bounds</li>
 <li><strong>D-2</strong>: Scale-to-zero is intentional cost control; cold-start bounded; cost amplification bounded by concurrency</li>
 <li><strong>D-3</strong>: <code>max_steps</code> + <code>consecutive_error_threshold</code> in ReACT engine terminates loop; confirmed effective in red team D-2a</li>
-<li><strong>D-4</strong>: Vector index sync is async and non-blocking; Delta table is source of truth; re-ingestion restores index</li>
+<li><strong>D-4</strong>: Vector index sync is async and non-blocking; the backing table is source of truth; re-ingestion restores the index</li>
 <li><strong>D-5</strong>: Pre-defined SQL functions only; no ad-hoc query construction possible via agent</li>
 <li><strong>D-6</strong>: <code>max_steps</code> hard cap; LangGraph <code>recursion_limit</code> enforced</li>
 <li><strong>D-7 partial</strong>: No per-user LTM write quota; unbounded fact accumulation possible over long tenure</li>
@@ -1458,7 +1458,7 @@ a { color: #0369a1; }
 <li><strong>E-2</strong>: Pre-defined parameterized SQL functions; user identifier injected server-side; red team E-2a and E-2b both confirmed clean</li>
 <li><strong>E-3</strong>: Secrets scope syntax prevents token exposure in response body; secrets scope restricted to named principals</li>
 <li><strong>E-4 / E-5</strong>: Fact-checker validates facts against existing context before LTM write; privilege claims flagged - though T-1 pre-write gap is the residual concern</li>
-<li><strong>E-6</strong>: Same fix as T-6. HMAC-SHA256 relay signing in <code>app.py</code>; <code>_verify_relay()</code> rejects unsigned relay messages at read time; closes the arbitrary agent execution path via filesystem write</li>
+<li><strong>E-6</strong>: Same fix as T-6. HMAC-SHA256 relay signing on write with verification on read; unsigned relay messages are rejected, closing the arbitrary agent execution path via filesystem write</li>
 <li><strong>E-7</strong>: Platform proxy is the only ingress path; direct container access requires platform-level breach</li>
 <li><strong>E-8</strong>: TierPolicy enforced structurally in plugin manager; not model-prompt dependent</li>
 <li><strong>E-9</strong>: User identifier derived from SSO header in proxy module; <code>custom_inputs</code> value overwritten server-side; red team E-3a (confused deputy) was not applicable - delegation chain and security plugin address multi-agent confused deputy structurally; <code>ToolGateway.authorize()</code> fires on the PRE_TOOL hook (before execution); chain links carry TTL enforcement (300s default, configurable per hop)</li>
@@ -1529,16 +1529,16 @@ a { color: #0369a1; }
   <td>Partial</td>
   <td>Medium (DREAD 25)</td>
   <td>Medium</td>
-  <td>Restrict endpoint invocation to the App Service Principal only. Collapses the S-4, S-5, and I-2 attack surface in one change</td>
+  <td>Restrict endpoint invocation to the application service principal only. Collapses the S-4, S-5, and I-2 attack surface in one change</td>
 </tr>
 </tbody>
 </table></div>
-<p><em>Point-in-time residual risk as of 2026-06-08, not a remediation commitment. Whether these are actioned is the platform owner's decision. The accepted-risk review triggers below apply to them.</em></p>
+<p><em>Point-in-time residual risk, not a remediation commitment. Whether these are actioned is the platform owner's decision. The risk-acceptance review triggers below apply to them.</em></p>
 
-<h3>Remediation Status - 2026-06-08</h3>
-<p>Addendum recording state after the assessment date. Findings above are preserved as recorded on 2026-06-08. A point-in-time threat model is not rewritten retroactively; subsequent state is appended.</p>
+<h3>Remediation Status (Addendum)</h3>
+<p>Addendum recording state at follow-up. Findings above are preserved exactly as recorded at assessment time. A point-in-time threat model is not rewritten retroactively; subsequent state is appended.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Finding</th><th>Title</th><th>Status 2026-06-02</th><th>Status 2026-06-08</th></tr></thead>
+<thead><tr><th>Finding</th><th>Title</th><th>Status at assessment</th><th>Status at follow-up</th></tr></thead>
 <tbody>
 <tr><td><strong>T-1</strong></td><td>LTM pre-write validation gap</td><td>Partial</td><td><strong>Remediated</strong></td></tr>
 <tr><td><strong>S-2</strong></td><td>Direct endpoint invocation via user PAT</td><td>Partial</td><td><strong>Remediated</strong></td></tr>
@@ -1581,8 +1581,8 @@ a { color: #0369a1; }
 
 <h3>Defense-in-Depth Assessment</h3>
 <pre><code>USER
-  └─ Open WebUI (Trusted-Header SSO)          ✔ S-1, S-3, E-7 mitigated
-      └─ Platform Apps Proxy                   ✔ Header injection infra-controlled
+  └─ Web UI (Trusted-Header SSO)              ✔ S-1, S-3, E-7 mitigated
+      └─ Application proxy                     ✔ Header injection infra-controlled
           └─ Serving Endpoint (SP token ACL)   ✔ S-4, S-5, E-9 mitigated via proxy
               │                                ⚠ S-2 partial: direct PAT access not restricted
               └─ [proxy module] (user_id)      ✔ user identifier derived server-side
@@ -1593,59 +1593,60 @@ a { color: #0369a1; }
                       └─ Plugin Hooks          ✔ TierPolicy structural; E-5a red team = FP
                       └─ Delegation Chain      ✔ E-3a (confused deputy) addressed by HMAC + TTL + PRE_TOOL
                       └─ Audit Trail           ✔ R-1, R-3, T-8 mitigated
-                      └─ code_paths Integrity  ✔ T-5 SHA-256 manifest verified at load_context()
-                      └─ Relay HMAC            ✔ T-6/E-6 _sign_relay() + _verify_relay() in app.py</code></pre>
+                      └─ Code path integrity   ✔ T-5 SHA-256 manifest verified at load time
+                      └─ Relay HMAC            ✔ T-6/E-6 sign-on-write + verify-on-read</code></pre>
 
-<p><strong>Resolved (T-6, E-6)</strong>: Relay messages are HMAC-SHA256 signed at write time; <code>_verify_relay()</code> rejects unsigned or tampered messages at read time. Direct filesystem injection no longer reaches agent execution.</p>
-<p><strong>Resolved (T-5)</strong>: <code>compute_code_paths_manifest()</code> hashes all <code>code_paths</code> files at deploy; <code>_verify_code_paths_manifest()</code> re-hashes at <code>load_context()</code> startup and fails closed on any mismatch.</p>
-<p><strong>Key gap</strong>: Serving endpoint accepts direct personal access token invocations (S-2), allowing authenticated users to bypass all proxy-enforced controls and supply arbitrary custom_inputs.</p>
+<p><strong>Resolved (T-6, E-6)</strong>: Relay messages are HMAC-SHA256 signed at write time and verified at read time; unsigned or tampered messages are rejected. Direct filesystem injection no longer reaches agent execution.</p>
+<p><strong>Resolved (T-5)</strong>: All bundled code-path files are SHA-256 hashed into a manifest at deploy time; the manifest is re-hashed and verified at runtime startup before any user code executes, failing closed on any mismatch.</p>
+<p><strong>Key gap at assessment time</strong>: The serving endpoint accepted direct PAT invocation (S-2), allowing an authenticated user to bypass all proxy-enforced controls and supply arbitrary custom inputs. This is the finding the whole reconciliation turns on: it is what makes five other flagged items reachable at all.</p>
 
-<h3>AI Gateway Guardrail Status</h3>
+<h3>Gateway Guardrail Checklist</h3>
+<p>The control set I evaluate at the model gateway layer, and what each one is actually for. Per-deployment configuration state is omitted from the published version; the checklist itself is the transferable part.</p>
 <div class="table-wrap"><table>
-<thead><tr><th>Control</th><th>Configured</th><th>Notes</th></tr></thead>
+<thead><tr><th>Control</th><th>Threat addressed</th><th>Assessment note</th></tr></thead>
 <tbody>
-<tr><td>Input safety filter</td><td><strong>Yes</strong></td><td>Enabled prior to deployment</td></tr>
-<tr><td>Output safety filter</td><td><strong>Yes</strong></td><td>Enabled prior to deployment</td></tr>
-<tr><td>PII detection</td><td><strong>Yes</strong></td><td>Enabled prior to deployment</td></tr>
-<tr><td>Rate limiting</td><td><strong>No</strong></td><td>Platform defaults only; no per-user rate limit configured</td></tr>
-<tr><td>Inference table</td><td>Partial</td><td>Inference table exists; sensitive column masking not configured</td></tr>
+<tr><td>Input safety filter</td><td>Harmful or policy-violating content on ingress</td><td>Complements but never replaces prompt-level and tool-level controls; filter bypass is assumed, not excluded</td></tr>
+<tr><td>Output safety filter</td><td>Harmful content on egress (I- and T-category)</td><td>Catches model output that survived input filtering; the second half of a defense-in-depth pair</td></tr>
+<tr><td>PII detection</td><td>Sensitive data disclosure (I-category)</td><td>Must apply to both request and response paths to be meaningful</td></tr>
+<tr><td>Per-principal rate limiting</td><td>Unbounded consumption and cost amplification (D-category)</td><td>Platform defaults are rarely sufficient; the control that matters is a per-user limit, not a global one</td></tr>
+<tr><td>Inference logging with column masking</td><td>Repudiation (R-category) and log-based disclosure</td><td>Request/response history is itself sensitive - unmasked inference logs convert an audit control into a secondary exposure</td></tr>
 </tbody>
 </table></div>
 
 <!-- ═══════════════════════════════════════════════════════
      ACCEPTED RISKS
 ══════════════════════════════════════════════════════════ -->
-<div class="cell-title">Accepted Risks</div>
+<div class="cell-title">Risk Acceptance</div>
 <hr />
-<h2>Accepted Risks</h2>
-<p><em>Risks documented as accepted require explicit justification and periodic review.</em></p>
+<h2>Risk Acceptance</h2>
+<p><em>Not every finding warrants remediation, and a threat model that pretends otherwise is not useful to the people who have to fund it. Acceptance is a decision with three required parts: an explicit justification, a named owner, and a review trigger. The trigger is the important one - it is what stops an accepted risk from quietly becoming an unmanaged one when the system's assumptions change.</em></p>
 <div class="table-wrap"><table>
 <thead>
 <tr>
-  <th>Finding</th><th>Title</th><th>Justification</th><th>Review Trigger</th>
+  <th>Finding</th><th>Class</th><th>Basis for acceptance</th><th>Review trigger</th>
 </tr>
 </thead>
 <tbody>
 <tr>
   <td><strong>I-3</strong></td>
-  <td>RAG Over-Retrieval</td>
-  <td>All current users internal, equivalent clearance for indexed content. Document-level ACL requires per-document tagging. Accepted pending user base expansion.</td>
-  <td>If the platform is extended to users with differentiated access (external, partner-facing, cross-org)</td>
+  <td>RAG over-retrieval</td>
+  <td>Homogeneous user population holding equivalent clearance for all indexed content; document-level ACLs carry a per-document tagging cost disproportionate to risk under that assumption</td>
+  <td>Any differentiation of user access levels - external, partner-facing, or cross-organizational</td>
 </tr>
 <tr>
   <td><strong>I-4</strong></td>
-  <td>Excessive SQL Data Return</td>
-  <td>Pre-defined SQL functions limit query shape to known patterns. User group homogeneous internal. Risk low relative to implementation cost of result-set size enforcement.</td>
-  <td>If SQL tool functions are made user-extensible</td>
+  <td>Excessive result-set return</td>
+  <td>Pre-defined query functions constrain query shape to known patterns; result-size enforcement costs more than the residual risk under a fixed function set</td>
+  <td>Query functions become user-extensible or dynamically generated</td>
 </tr>
 <tr>
   <td><strong>I-11</strong></td>
-  <td>Knowledge Base URL Exposure</td>
-  <td>Internal knowledge base structure not a protected asset. URLs exposed in RAG responses carry no authentication tokens.</td>
-  <td>If knowledge base spaces are reclassified as restricted</td>
+  <td>Internal resource URL exposure</td>
+  <td>Knowledge base structure is not itself a protected asset; exposed URLs carry no authentication material and resolve only behind existing access controls</td>
+  <td>Knowledge base contents reclassified as restricted</td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Accepted risk review schedule</strong>: Quarterly, or immediately upon any user-base change (adding external users, member-facing deployment, or cross-organizational access).</p>
+<p><strong>Review cadence</strong>: Quarterly, or immediately on any change to the user population or access model. Each acceptance above rests on an assumption about who the users are; when that assumption moves, the acceptance is void and the finding returns to the queue.</p>
 
 </div></body></html>
