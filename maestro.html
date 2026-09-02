@@ -175,20 +175,20 @@ a { color: #0369a1; }
 ══════════════════════════════════════════════════════════ -->
 <div class="cell-title">Document Header</div>
 <h1>Threat Modeling Agentic AI Platforms</h1>
-<p><em>A MAESTRO methodology worked end to end against a representative enterprise agentic AI architecture, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0.</em></p>
+<p><em>A MAESTRO methodology worked end to end against a representative agentic AI architecture, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0.</em></p>
 <div class="table-wrap"><table>
 <thead><tr><th>Field</th><th>Value</th></tr></thead>
 <tbody>
 <tr><td><strong>Document type</strong></td><td>Threat model, MAESTRO layer decomposition</td></tr>
 <tr><td><strong>Base Methodology</strong></td><td>MAESTRO (Model, Application, Environment, System, Trust Relationships, Operations, Risk)</td></tr>
-<tr><td><strong>Subject</strong></td><td>Representative enterprise agentic AI architecture</td></tr>
+<tr><td><strong>Subject</strong></td><td>Representative agentic AI architecture</td></tr>
 <tr><td><strong>Scope</strong></td><td>Chat frontend proxy · agent runtime · memory/KG/RAG · SQL tools · multi-agent delegation chain</td></tr>
 <tr><td><strong>Assessment Method</strong></td><td>Static code inspection; adversarial red team testing; code-level analysis of the agent framework</td></tr>
 <tr><td><strong>Framework Alignment</strong></td><td>OWASP LLM Top 10 · MITRE ATLAS v4 · NIST AI RMF 1.0</td></tr>
 </tbody>
 </table></div>
 <hr />
-<p><strong>Purpose</strong>: A worked threat model for an enterprise agentic AI platform, enumerating and scoring threats across the agentic attack surface using the MAESTRO layer taxonomy. MAESTRO was designed for agentic AI systems; its seven layers map directly onto the class of system it targets: an LLM endpoint, proxy middleware, managed runtime, data integrations, delegation chain, and ReACT engine.</p>
+<p><strong>Purpose</strong>: A worked threat model for an agentic AI platform, enumerating and scoring threats across the agentic attack surface using the MAESTRO layer taxonomy. MAESTRO was designed for agentic AI systems; its seven layers map directly onto the class of system it targets: an LLM endpoint, proxy middleware, managed runtime, data integrations, delegation chain, and ReACT engine.</p>
 <blockquote style="border-left: 4px solid #0e7490; background: #f0f9ff; padding: 1em 1.2em; margin: 1em 0;">
 <p style="margin:0 0 .4em 0;"><strong>About this document</strong></p>
 <p style="margin:0;">Threat model derived from code-level inspection and adversarial red team testing of the agent framework. Proprietary credentials, endpoint URLs, infrastructure identifiers, vendor-specific configuration state, and customer data are deliberately excluded. The architecture is generalized to the pattern rather than to any single deployment.</p>
