@@ -519,10 +519,10 @@ html, body {
 <div class="about-page">
 
   <div class="about-section">
-    <div class="about-eyebrow">Enterprise Multi-Agent AI Framework</div>
+    <div class="about-eyebrow">Multi-Agent AI Framework</div>
     <div class="about-title">Agentic Framework</div>
     <div class="about-body">
-      <p>Built a production multi-agent AI framework, reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
+      <p>Built a multi-agent AI framework, reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
       <p>The framework ships with warehouse-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A five-step RAG pipeline handles embedding, vector search, hybrid BM25 and dense retrieval ranking, context injection, and trace logging. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
       <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results. Plugin hooks at pre-retrieval, pre-LLM, pre-tool, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic.</p>
       <p>Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. Every decision is traced end-to-end, and feedback routes back into the evaluation loop via custom action functions. The framework is now the standard agentic platform across the organization.</p>
@@ -537,7 +537,7 @@ html, body {
 
   <div class="about-section">
     <div class="about-body">
-      <p style="font-size:0.92em;opacity:0.8"><em>Sanitized portfolio artifact. No proprietary source, credentials, endpoint URLs, workspace identifiers, or member data are included. The expense-approval scenario is a demonstration use case built to exercise the framework, not a production configuration.</em></p>
+      <p style="font-size:0.92em;opacity:0.8"><em>Sanitized portfolio artifact. No proprietary source, credentials, endpoint URLs, workspace identifiers, or member data are included. The expense-approval scenario is a demonstration use case built to exercise the framework, not a configuration.</em></p>
     </div>
   </div>
 
