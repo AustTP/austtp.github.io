@@ -43,8 +43,6 @@ html, body {
   font-family: 'Crimson Pro', Georgia, serif;
   min-height: 100vh;
   overflow: show;
-  visibility: hidden;
-  opacity: 0;
 }
 
 /* Mobile header elements hidden by default on desktop */
@@ -493,62 +491,6 @@ html, body {
 .tag-grid { display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
 
 </style>
-
-<script>
-    (function() {
-        // 1. Check if we already checked the location during this browser session
-        const cachedStateCode = sessionStorage.getItem('user_state_code');
-    
-        if (cachedStateCode) {
-            // We already have the state stored, evaluate it instantly without hitting the API
-            evaluateLocation(cachedStateCode, sessionStorage.getItem('user_state_name'));
-            return;
-        }
-    
-        // 2. Otherwise, fetch it from the API
-        fetch('https://ipapi.co/json/')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                const stateCode = data.region_code;
-                const state = data.region;
-    
-                // Save to sessionStorage so refreshes don't trigger a 429 error
-                sessionStorage.setItem('user_state_code', stateCode);
-                sessionStorage.setItem('user_state_name', state);
-    
-                evaluateLocation(stateCode, state);
-            })
-            .catch(error => {
-                console.error('Error fetching location data, allowing access as fallback:', error);
-                revealPage(); // Fallback so users aren't locked out if API is blocked/down
-            });
-    
-        function evaluateLocation(stateCode, state) {
-            const redirectUrl = 'https://www.linkedin.com/in/austinpoole';
-    
-            if (stateCode === 'MO' || state === 'Missouri') {
-                window.location.href = redirectUrl;
-            } else {
-                revealPage();
-            }
-        }
-    
-        function revealPage() {
-            const style = document.createElement('style');
-            style.innerHTML = `
-                html, body {
-                    visibility: visible;
-                    opacity: 1;
-                    transition: opacity 0.3s ease-in;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    })();
-</script>
 </head>
 <body>
 <canvas id="particle-bg"></canvas>
@@ -560,10 +502,6 @@ html, body {
     <button class="tab-btn" onclick="showTab('about')">About</button>
     <button class="tab-btn active" onclick="showTab('pipeline')">Pipeline</button>
     <button class="tab-btn" onclick="showTab('infra')">Infrastructure</button>
-    <a class="tab-btn-ext" href="https://austtp.github.io/stride.html" target="_blank" rel="noopener noreferrer">
-      STRIDE Threat Model
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
   </div>
   <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileNav()" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -574,10 +512,6 @@ html, body {
   <button class="mobile-nav-link" id="mnav-about" onclick="mobileShowTab('about')" style="padding:17px 22px 14px 22px">About</button>
   <button class="mobile-nav-link active" id="mnav-pipeline" onclick="mobileShowTab('pipeline')">Pipeline</button>
   <button class="mobile-nav-link" id="mnav-infra" onclick="mobileShowTab('infra')">Infrastructure</button>
-  <a class="mobile-nav-link" href="https://austtp.github.io/stride.html" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:6px;color:var(--red);text-decoration:none;">
-    STRIDE Threat Model
-    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </a>
 </div>
 
 <!-- ══════════════ ABOUT TAB ══════════════ -->
@@ -589,9 +523,9 @@ html, body {
     <div class="about-title">Agentic Framework</div>
     <div class="about-body">
       <p>Built a production multi-agent AI framework, reusable across any LLM use case. At the core is a ReACT orchestration engine that coordinates specialized sub-agents as tools, routing work through delegation chains where each hop is scoped to minimum permissions and signed with HMAC-SHA256. ToolGateway enforces those scopes at every tool call, blocking confused deputy attacks at the framework level before they reach the model.</p>
-      <p>The framework ships with Delta-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A five-step RAG pipeline handles embedding, vector search, hybrid BM25 and dense retrieval ranking, context injection, and MLflow tracing. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
+      <p>The framework ships with warehouse-backed shared memory across endpoints: short-term session state, long-term user history, and a knowledge graph, all consistent regardless of which endpoint handles the request. A five-step RAG pipeline handles embedding, vector search, hybrid BM25 and dense retrieval ranking, context injection, and trace logging. A configurable HITL engine scores confidence as a composite of LLM self-assessment, source coverage, tool result consistency, category risk, and error history, escalating to a human reviewer only when the score falls below a threshold. Everything else runs autonomously.</p>
       <p>Complex requests are decomposed by a complexity classifier and executed in parallel across a worker pool using dependency-aware task DAGs, with a synthesizer aggregating results. Plugin hooks at pre-retrieval, pre-LLM, pre-tool, post-tool, pre-response, and post-response boundaries give any downstream use case auditing, rate limiting, budget enforcement, and security enforcement without touching agent logic.</p>
-      <p>Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. MLflow traces every decision end-to-end. Feedback routes back to MLflow Assessments via custom action functions, closing the evaluation loop. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
+      <p>Error handling is deterministic: immutable risk-tiered fallback policies, one-strike service blocking, consecutive error recovery with extended thinking, and graceful degradation paths documented at every failure class. Every decision is traced end-to-end, and feedback routes back into the evaluation loop via custom action functions. The framework is now the standard agentic platform across the organization with thirty-plus use cases building on top of it.</p>
     </div>
     <div class="about-divider"></div>
     <div class="about-eyebrow" style="margin-bottom:6px">Explore the architecture</div>
@@ -602,20 +536,9 @@ html, body {
   </div>
 
   <div class="about-section">
-    <div class="about-eyebrow">Security Assessment</div>
-    <div class="about-title">STRIDE Threat Model</div>
     <div class="about-body">
-      <p>Built and adversarially tested a production agentic AI platform using STRIDE across all six threat categories. Forty-eight findings total. Each was assigned a unique attack vector, a DREAD score calibrated individually across five dimensions, and validation through adversarial red team testing. Nothing was scored Critical without a tested attack path.</p>
-      <p>The adversarial assessment ran 42 test cases across Garak, PyRIT, Counterfit, and a custom STRIDE harness. Raw results flagged 26 as vulnerable. After manual code-level review: 18 false positives from keyword detection artifacts, 7 not exploitable in production, 1 confirmed partial gap. Five are reachable only via direct API and do not represent exploitable conditions for authenticated application users. Two findings carried forward as residual risk. Both have since been remediated.</p>
-      <p>Agentic systems have a threat surface that standard frameworks do not cover. Memory poisoning that persists false identity across sessions, RAG corpus tampering via controlled ingestion pipelines, identity chain confusion where user context derives from injectable headers, relay injection between agent-to-agent handoffs with no message signing, and supply chain attacks against deployed model artifacts. Everything is enumerated with a concrete payload, not a category description.</p>
-      <p>Defense-in-depth spans eight layers from the SSO proxy boundary through serving endpoint ACLs, static tool registry enforcement, fact verification on memory writes, append-only audit guarantees, and AI Gateway safety and PII filtering confirmed active. Findings are cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0. Thirty-four findings mitigated. Eleven partial. Three accepted with documented justification and review triggers. None open. The three open at time of publication (T-5, T-6, E-6) have since been remediated, as have the two carried forward (S-2, T-1). The three accepted risks remain accepted by design.</p>
-      <p style="font-size:0.92em;opacity:0.8"><em>Sanitized portfolio artifact. No proprietary source, credentials, endpoint URLs, workspace identifiers, or member data are included. The prior-authorization scenario is a demonstration use case built to exercise the framework, not a production configuration.</em></p>
+      <p style="font-size:0.92em;opacity:0.8"><em>Sanitized portfolio artifact. No proprietary source, credentials, endpoint URLs, workspace identifiers, or member data are included. The expense-approval scenario is a demonstration use case built to exercise the framework, not a production configuration.</em></p>
     </div>
-    <div class="about-divider"></div>
-    <a class="about-cta" href="https://austtp.github.io/stride.html" target="_blank" rel="noopener noreferrer">
-      View STRIDE Threat Model
-      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L9 2M9 2H4.5M9 2V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
   </div>
 
 </div>
@@ -630,13 +553,13 @@ html, body {
 <!-- S1: CAPTURE -->
 <div class="stage" id="s1" style="left:60px;">
   <div class="stage-title" style="color:var(--blue)">Capture</div>
-  <div class="stage-subtitle">um_demo/input/ · Responses API</div>
+  <div class="stage-subtitle">demo/input/ · Responses API</div>
   <div class="card">
-    <div class="card-label">PA Request · demo input</div>
+    <div class="card-label">Expense Request · demo input</div>
     <div class="input-item hi"><span class="i">✏</span> Text message via Responses API</div>
     <div class="input-item"><span class="i">📄</span> .txt / structured file → input dir</div>
     <div class="input-item"><span class="i">⚡</span> custom_inputs: user_id, delegation_chain</div>
-    <div class="mono-box" style="margin-top:9px;font-size:11px">POST /serving-endpoints/<br>um-orchestrator/invocations<br><span class="mk">"input"</span>: [{<span class="ms">"role"</span>: <span class="ms">"user"</span>,<br>&nbsp;<span class="ms">"content"</span>: <span class="ms">"PA for Humira..."</span>}]</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px">POST /serving-endpoints/<br>svc-orchestrator/invocations<br><span class="mk">"input"</span>: [{<span class="ms">"role"</span>: <span class="ms">"user"</span>,<br>&nbsp;<span class="ms">"content"</span>: <span class="ms">"Reimbursement for conference travel..."</span>}]</div>
   </div>
 </div>
 
@@ -648,8 +571,8 @@ html, body {
     <div class="badge b-teal">sub-agent · classify only · domain-agnostic</div><br>
     <div class="mono-box" style="margin-top:3px;margin-bottom:8px">build_classifier_agent() → StateGraph</div>
     <div class="badge b-blue">llm · read-only · emit JSON</div>
-    <div class="mono-box">{<br>&nbsp;<span class="mk">"request_type"</span>: <span class="ms">"MEDICATION_PRIOR_AUTH"</span>,<br>&nbsp;<span class="mk">"drug"</span>: <span class="ms">"humira"</span>,<br>&nbsp;<span class="mk">"member_id"</span>: <span class="ms">"MBR-001234"</span>,<br>&nbsp;<span class="mk">"dx"</span>: <span class="ms">"RA (M05.79)"</span>,<br>&nbsp;<span class="mk">"provider"</span>: <span class="ms">"rheumatologist"</span><br>}</div>
-    <div class="mono-box" style="margin-top:6px;font-size:10px;color:var(--text-dim)">types: MED_PA · PROC_PA<br>DME_PA · INPATIENT · APPEAL</div>
+    <div class="mono-box">{<br>&nbsp;<span class="mk">"request_type"</span>: <span class="ms">"EXPENSE_REIMBURSEMENT"</span>,<br>&nbsp;<span class="mk">"category"</span>: <span class="ms">"travel"</span>,<br>&nbsp;<span class="mk">"employee_id"</span>: <span class="ms">"EMP-04821"</span>,<br>&nbsp;<span class="mk">"cost_center"</span>: <span class="ms">"CC-4410"</span>,<br>&nbsp;<span class="mk">"department"</span>: <span class="ms">"engineering"</span><br>}</div>
+    <div class="mono-box" style="margin-top:6px;font-size:10px;color:var(--text-dim)">types: EXPENSE · TRAVEL<br>EQUIPMENT · RECURRING · APPEAL</div>
   </div>
 </div>
 
@@ -660,29 +583,29 @@ html, body {
   <div class="card">
     <div class="badge b-ora" style="margin-bottom:8px">ReACT · LLM decides tool order</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);margin-bottom:9px">Sub-agents registered as tools.<br>Orchestrator decides which to call<br>and in what order.</div>
-    <div class="route-row"><div class="rdot" style="background:var(--blue)"></div><div><div class="rname">um-triage</div><div class="rpath">scope: um_triage</div><div class="rdesc">Classify type, extract fields</div></div></div>
-    <div class="route-row"><div class="rdot" style="background:var(--purple)"></div><div><div class="rname">um-clinical-policy</div><div class="rpath">scope: policy_read</div><div class="rdesc">Criteria · medical necessity</div></div></div>
-    <div class="route-row"><div class="rdot" style="background:var(--orange)"></div><div><div class="rname">um-pharmacy</div><div class="rpath">scope: pharmacy_read</div><div class="rdesc">Formulary · step therapy</div></div></div>
+    <div class="route-row"><div class="rdot" style="background:var(--blue)"></div><div><div class="rname">svc-triage</div><div class="rpath">scope: svc_triage</div><div class="rdesc">Classify type, extract fields</div></div></div>
+    <div class="route-row"><div class="rdot" style="background:var(--purple)"></div><div><div class="rname">svc-policy</div><div class="rpath">scope: policy_read</div><div class="rdesc">Criteria · spend threshold</div></div></div>
+    <div class="route-row"><div class="rdot" style="background:var(--orange)"></div><div><div class="rname">svc-finance</div><div class="rpath">scope: finance_read</div><div class="rdesc">Budget · approval tiers</div></div></div>
   </div>
 </div>
 
 <!-- S4: MEMORY -->
 <div class="stage w260" id="s4" style="left:1072px;">
   <div class="stage-title" style="color:var(--blue)">Memory</div>
-  <div class="stage-subtitle">agent_framework.memory</div>
+  <div class="stage-subtitle">memory subsystem</div>
   <div class="card">
-    <div class="badge b-pur">Delta-backed · analytics.warehouse</div>
+    <div class="badge b-pur">warehouse-backed · &lt;catalog&gt;.&lt;schema&gt;</div>
     <div style="margin-top:9px">
-      <div class="mem-title">Short-Term (STM) · short_term_memory.py</div>
-      <div class="mono-box" style="margin-top:4px;font-size:11px">session: MBR-001234-20260702<br><span class="mp">turn 1</span> → PA request received<br><span class="mp">turn 2</span> → classified: MEDICATION_PA<br>window: <span class="mn">10 turns</span></div>
+      <div class="mem-title">Short-Term (STM) · session store</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px">session: EMP-04821-20260702<br><span class="mp">turn 1</span> → expense request received<br><span class="mp">turn 2</span> → classified: EXPENSE_REIMBURSEMENT<br>window: <span class="mn">10 turns</span></div>
     </div>
     <div style="margin-top:8px">
-      <div class="mem-title">Long-Term (LTM) · long_term_memory.py</div>
-      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="ms">prior auth history</span> → 3 found<br>table: <span class="mn">long_term_memory</span><br>connector: <span class="mk">delta_connector.py</span></div>
+      <div class="mem-title">Long-Term (LTM) · persistent store</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="ms">prior request history</span> → 3 found<br>table: <span class="mn">&lt;schema&gt;.long_term_memory</span><br>connector: <span class="mk">warehouse adapter</span></div>
     </div>
     <div style="margin-top:8px">
-      <div class="mem-title">Knowledge Graph · knowledge_graph.py</div>
-      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="my">entity:</span> humira → biologic<br><span class="my">entity:</span> RA (M05.79) → ICD-10<br>tables: <span class="mn">kg_entities</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mn">kg_triples</span></div>
+      <div class="mem-title">Knowledge Graph · entity graph module</div>
+      <div class="mono-box" style="margin-top:4px;font-size:11px"><span class="my">entity:</span> conference travel → expense category<br><span class="my">entity:</span> CC-4410 → cost center<br>tables: <span class="mn">&lt;schema&gt;.entities</span><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="mn">&lt;schema&gt;.relations</span></div>
     </div>
   </div>
 </div>
@@ -690,39 +613,39 @@ html, body {
 <!-- S4b: RAG PIPELINE -->
 <div class="stage w280" id="s4b" style="left:1440px;">
   <div class="stage-title" style="color:var(--blue)">RAG Pipeline</div>
-  <div class="stage-subtitle">base_rag_agent.py · Vector Search · hybrid ranking</div>
+  <div class="stage-subtitle">RAG agent · vector search · hybrid ranking</div>
   <div class="card">
     <div class="hook-bar green">↳ pre_retrieval hook fires here</div>
     <div class="rag-step">
       <span class="rag-num">1</span>
-      <div class="rag-detail"><strong>Embed query</strong><br>embedding.py · Databricks<br>embedding endpoint</div>
+      <div class="rag-detail"><strong>Embed query</strong><br>embedding client · managed<br>embedding endpoint</div>
     </div>
     <div class="rag-step">
       <span class="rag-num">2</span>
-      <div class="rag-detail"><strong>Vector Search</strong><br>VectorSearchRetrieverTool<br>top-k=5 · similarity threshold</div>
+      <div class="rag-detail"><strong>Vector Search</strong><br>vector search retriever tool<br>top-k=5 · similarity threshold</div>
     </div>
     <div class="rag-step">
       <span class="rag-num">3</span>
-      <div class="rag-detail"><strong>Hybrid Ranking</strong><br>BM25 + dense retrieval<br>chunking.py · entity-enriched</div>
+      <div class="rag-detail"><strong>Hybrid Ranking</strong><br>BM25 + dense retrieval<br>chunking utility · entity-enriched</div>
     </div>
     <div class="rag-step">
       <span class="rag-num">4</span>
-      <div class="rag-detail"><strong>Context injection</strong><br>dynamic prompt templating<br>context_manager.py</div>
+      <div class="rag-detail"><strong>Context injection</strong><br>dynamic prompt templating<br>context assembly module</div>
     </div>
     <div class="rag-step">
       <span class="rag-num">5</span>
-      <div class="rag-detail"><strong>Trace</strong><br>rag_tracing_helper.py<br>MLflow span · retrieval logged</div>
+      <div class="rag-detail"><strong>Trace</strong><br>tracing hook<br>span emitted · retrieval logged</div>
     </div>
-    <div class="mono-box" style="margin-top:8px;font-size:10px"><span class="mk">single_turn_rag_agent.py</span><br>or <span class="mk">multi_turn_rag_agent.py</span><br>fallback: graceful_degradation<br>→ respond without context</div>
+    <div class="mono-box" style="margin-top:8px;font-size:10px"><span class="mk">single-turn RAG agent</span><br>or <span class="mk">multi-turn RAG agent</span><br>fallback: graceful_degradation<br>→ respond without context</div>
   </div>
 </div>
 
 <!-- S5: GUARDRAILS -->
 <div class="stage w260" id="s5" style="left:1840px;">
   <div class="stage-title" style="color:var(--blue)">Guardrails</div>
-  <div class="stage-subtitle">utils/guardrails.py · plugin hooks</div>
+  <div class="stage-subtitle">guardrail utilities · plugin hooks</div>
   <div class="card">
-    <div class="badge b-pink">pre_retrieval + pre_tool · plugin_registry.py</div>
+    <div class="badge b-pink">pre_retrieval + pre_tool · plugin registry</div>
     <div style="margin-top:10px">
       <div class="guard-row"><span class="gcheck">🛡</span><span class="gname">AI Gateway</span><span class="gstatus">✓ routing</span></div>
       <div class="guard-row"><span class="gcheck">🔒</span><span class="gname">DelegationChain</span><span class="gstatus">✓ HMAC-SHA256</span></div>
@@ -730,37 +653,37 @@ html, body {
       <div class="guard-row"><span class="gcheck">⏱</span><span class="gname">Rate Limiter</span><span class="gstatus">✓ ok</span></div>
       <div class="guard-row"><span class="gcheck">📋</span><span class="gname">Audit Trail</span><span class="gstatus">✓ hash-chained</span></div>
     </div>
-    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">security_plugin.py</span> → pre_retrieval + pre_tool<br><span class="mk">audit_plugin.py</span> → post_tool<br><span class="mk">rate_limiter.py</span> → 120 req/min<br><span class="mk">budget_enforcer.py</span> → enforced</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">security hook</span> → pre_retrieval + pre_tool<br><span class="mk">audit hook</span> → post_tool<br><span class="mk">rate limiter</span> → configurable req/min<br><span class="mk">budget enforcement</span> → enforced</div>
   </div>
 </div>
 
 <!-- S6: PROCESS -->
 <div class="stage w280" id="s6" style="left:2204px;">
   <div class="stage-title" style="color:var(--blue)">Process</div>
-  <div class="stage-subtitle">parallel_orchestrator.py · scope enforcement</div>
+  <div class="stage-subtitle">parallel orchestrator · scope enforcement</div>
   <div class="card">
     <div class="badge b-blue" style="margin-bottom:8px">DelegationChain · confused deputy blocked</div>
-    <div class="chain-line"><span class="ca">reviewer_id</span> → <span class="cb">um-orchestrator</span><br>&nbsp;&nbsp;[um_orchestrate, delegate]<br>→ <span class="cc">um-clinical-policy</span> [policy_read]<br>→ <span class="cc">um-pharmacy</span> [pharmacy_read]<br><span style="color:var(--text-dim)">HMAC-SHA256 · delegation_chain.py</span></div>
+    <div class="chain-line"><span class="ca">reviewer_id</span> → <span class="cb">svc-orchestrator</span><br>&nbsp;&nbsp;[orchestrate, delegate]<br>→ <span class="cc">svc-policy</span> [policy_read]<br>→ <span class="cc">svc-finance</span> [finance_read]<br><span style="color:var(--text-dim)">HMAC-SHA256 · delegation-signing module</span></div>
   </div>
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <span style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:14px;font-weight:700;color:var(--text)">ToolGateway enforcement</span>
       <span class="pill"><span class="pill-dot"></span>active</span>
     </div>
-    <div class="srow"><span class="sdot sg"></span>check_formulary_status<span class="sval sv-g">allowed</span></div>
-    <div class="srow"><span class="sdot sg"></span>search_medical_policy<span class="sval sv-g">allowed</span></div>
-    <div class="srow"><span class="sdot sg"></span>check_medical_necessity<span class="sval sv-g">allowed</span></div>
-    <div class="srow"><span class="sdot so"></span>get_member_clinical_records<span class="sval sv-o">DENIED</span></div>
-    <div class="mono-box" style="margin-top:8px;font-size:11px">pharmacy scope: <span class="mo">pharmacy_read</span><br>clinical tool requires: <span class="mr">clinical_read</span><br>gateway: <span class="mr">ACCESS_DENIED</span> ← PRE_TOOL · confused deputy blocked<br>react_engine: <span class="mn">tool loop · reflect · retry</span></div>
+    <div class="srow"><span class="sdot sg"></span>check_budget_status<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot sg"></span>search_expense_policy<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot sg"></span>check_spend_threshold<span class="sval sv-g">allowed</span></div>
+    <div class="srow"><span class="sdot so"></span>get_employee_financial_records<span class="sval sv-o">DENIED</span></div>
+    <div class="mono-box" style="margin-top:8px;font-size:11px">finance scope: <span class="mo">finance_read</span><br>HR tool requires: <span class="mr">hr_read</span><br>gateway: <span class="mr">ACCESS_DENIED</span> ← PRE_TOOL · confused deputy blocked<br>react_engine: <span class="mn">tool loop · reflect · retry</span></div>
   </div>
 </div>
 
 <!-- S6b: PARALLEL ORCHESTRATION -->
 <div class="stage w300" id="s6b" style="left:2602px;">
   <div class="stage-title" style="color:var(--blue)">Parallel Orchestration</div>
-  <div class="stage-subtitle">parallel_orchestrator.py · complexity-gated</div>
+  <div class="stage-subtitle">parallel orchestrator · complexity-gated</div>
   <div class="card">
-    <div class="hook-bar purple">↳ parallel_plugin.py · pre_llm hook</div>
+    <div class="hook-bar purple">↳ parallel-execution hook · pre_llm hook</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mid);margin-bottom:8px">ComplexityClassifier gates parallel path<br>(heuristic score — no extra LLM call)</div>
     <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Phase 1 · Decompose</div>
     <div class="mono-box" style="font-size:10px;margin-bottom:8px">TaskPlanner (LLM) → ExecutionPlan<br>topological_groups → parallel batches<br>est. sequential: 180s → parallel: 65s</div>
@@ -768,15 +691,15 @@ html, body {
     <div class="par-row">
       <div class="par-task">
         <div class="par-task-title">worker_1</div>
-        clinical_policy<br>lookup · 45s
+        policy<br>lookup · 45s
       </div>
       <div class="par-task">
         <div class="par-task-title">worker_2</div>
-        pharmacy<br>formulary · 38s
+        finance<br>budget check · 38s
       </div>
       <div class="par-task">
         <div class="par-task-title">worker_3</div>
-        member<br>history · 22s
+        employee<br>history · 22s
       </div>
     </div>
     <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin:6px 0 5px">Phase 3 · Synthesize</div>
@@ -788,7 +711,7 @@ html, body {
 <!-- S7: HUMAN GATE -->
 <div class="stage w260" id="s7" style="left:2994px;">
   <div class="stage-title" style="color:var(--blue)">Human Gate</div>
-  <div class="stage-subtitle">hitl_engine.py · confidence &lt; 0.70</div>
+  <div class="stage-subtitle">HITL engine · confidence &lt; 0.70</div>
   <div class="badge b-pink" style="margin-bottom:10px">HUMAN IN THE LOOP</div>
   <div class="card" style="margin-bottom:8px">
     <div class="card-label">Confidence Composite</div>
@@ -804,8 +727,8 @@ html, body {
   </div>
   <div class="human-box">
     <div class="avatar">👤</div>
-    <div class="hname">UM Reviewer</div>
-    <div class="hfile">PA-BIO-001 · humira-40mg</div>
+    <div class="hname">Approver</div>
+    <div class="hfile">REQ-2026-04821 · conference-travel</div>
     <div class="btn-grid">
       <div class="hbtn hbtn-a">✓ Approve</div>
       <div class="hbtn hbtn-p">◷ Pend</div>
@@ -817,32 +740,32 @@ html, body {
 <!-- S8: DECISION -->
 <div class="stage w280" id="s8" style="left:3388px;">
   <div class="stage-title" style="color:var(--blue)">Decision</div>
-  <div class="stage-subtitle">orchestrator aggregates · audit_trail.py · any outcome</div>
+  <div class="stage-subtitle">orchestrator aggregates · audit trail writer · any outcome</div>
   <div class="card">
-    <div class="mono-box" style="margin-bottom:9px;font-size:11px">orchestrator aggregates results:<br><span class="ms">clinical_policy</span> → criteria met<br><span class="ms">pharmacy</span> → step therapy met<br><span class="mn">confidence: 0.95</span> → auto-approve</div>
-    <div style="background:#dcfce7;border:1px solid #86efac;border-radius:5px;padding:7px 12px;font-family:'IBM Plex Sans','Inter',sans-serif;font-size:14px;font-weight:700;color:#15803d;margin-bottom:10px;text-align:center">PA-BIO-001 → APPROVED</div>
-    <div class="badge b-pur" style="margin-bottom:8px">audit_trail.py · hash-chained</div>
-    <div class="srow"><span class="sdot sg"></span>decision written to Delta<span class="sval sv-g">done</span></div>
+    <div class="mono-box" style="margin-bottom:9px;font-size:11px">orchestrator aggregates results:<br><span class="ms">policy</span> → criteria met<br><span class="ms">finance</span> → within budget<br><span class="mn">confidence: 0.95</span> → auto-approve</div>
+    <div style="background:#dcfce7;border:1px solid #86efac;border-radius:5px;padding:7px 12px;font-family:'IBM Plex Sans','Inter',sans-serif;font-size:14px;font-weight:700;color:#15803d;margin-bottom:10px;text-align:center">REQ-2026-04821 → APPROVED</div>
+    <div class="badge b-pur" style="margin-bottom:8px">audit trail writer · hash-chained</div>
+    <div class="srow"><span class="sdot sg"></span>decision written to warehouse<span class="sval sv-g">done</span></div>
     <div class="srow"><span class="sdot sg"></span>audit entry hash-chained<span class="sval sv-g">done</span></div>
-    <div class="srow"><span class="sdot sy"></span>FHIR R4 ClaimResponse<span class="sval sv-o">queued</span></div>
-    <div class="srow"><span class="sdot sd"></span>provider notification<span class="sval sv-d">pending</span></div>
+    <div class="srow"><span class="sdot sy"></span>ERP transaction record<span class="sval sv-o">queued</span></div>
+    <div class="srow"><span class="sdot sd"></span>requester notification<span class="sval sv-d">pending</span></div>
     <div class="divider"></div>
-    <div class="log-line">audit: <span>PA-BIO-001 approved · hash-chained</span><br>table: <span>analytics.warehouse.agent_audit_trail</span></div>
+    <div class="log-line">audit: <span>REQ-2026-04821 approved · hash-chained</span><br>table: <span>&lt;catalog&gt;.&lt;schema&gt;.audit_trail</span></div>
   </div>
 </div>
 
 <!-- S9: OUTPUT -->
 <div class="stage w260" id="s9" style="left:3786px;">
   <div class="stage-title" style="color:var(--blue)">Output</div>
-  <div class="stage-subtitle">MLflow traces · feedback</div>
+  <div class="stage-subtitle">traces · feedback</div>
   <div class="card">
-    <div class="badge b-teal">post_response · async_tasks.py</div>
-    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">FHIR R4</span> ClaimResponse → sent<br><span class="mk">provider</span> notified: <span class="ms">approved</span><br><span class="mk">output dir</span>: um_demo/output/<br><span class="mk">decision JSON</span> → written</div>
+    <div class="badge b-teal">post_response · async task handler</div>
+    <div class="mono-box" style="margin-top:9px;font-size:11px"><span class="mk">ERP</span> transaction record → sent<br><span class="mk">requester</span> notified: <span class="ms">approved</span><br><span class="mk">output dir</span>: demo/output/<br><span class="mk">decision JSON</span> → written</div>
     <div class="divider"></div>
-    <div class="badge b-blue">MLflow · experiment [experiment-id]</div>
-    <div class="mono-box" style="margin-top:5px;font-size:11px">trace_id: <span class="ms">auto via autolog</span><br>spans: <span class="mn">langchain autolog</span><br>assessment: <span class="ms">user_satisfaction</span><br><span class="mk">mlflow.langchain.autolog()</span></div>
+    <div class="badge b-blue">experiment tracking · [experiment-id]</div>
+    <div class="mono-box" style="margin-top:5px;font-size:11px">trace_id: <span class="ms">auto via autolog</span><br>spans: <span class="mn">framework autolog</span><br>assessment: <span class="ms">user_satisfaction</span><br><span class="mk">tracing.autolog()</span></div>
     <div class="divider"></div>
-    <div class="badge b-grn">feedback · Open WebUI</div>
+    <div class="badge b-grn">feedback · chat UI</div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <div class="hbtn hbtn-a" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center">👍 Good</div>
       <div class="hbtn hbtn-r" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 0;text-align:center;color:#721c24;border:1px solid #f5c6cb;border-radius:6px;">👎 Bad</div>
@@ -853,14 +776,14 @@ html, body {
 <!-- S10: ERROR HANDLING & GRACEFUL DEGRADATION -->
 <div class="stage w640" id="s10" style="left:4184px;">
   <div class="stage-title" style="color:var(--blue)">Error Handling</div>
-  <div class="stage-subtitle">llm_resilience.py · fallback.py · react_engine.py</div>
+  <div class="stage-subtitle">resilience wrapper · fallback handler · reasoning-loop engine</div>
   <div class="err-cols">
   <div class="card">
     <div class="hook-bar" style="color:var(--red);background:rgba(185,28,28,0.07);border-color:rgba(185,28,28,0.25)">TierPolicy · immutable · structurally enforced</div>
-    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">LLM Resilience · call_with_resilience()</div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Resilience · call_with_resilience()</div>
     <div class="err-tier">
       <div class="err-dot-h"></div>
-      <div><div class="err-label">UPSTREAM_5XX / EVAL_FAILURE</div><div class="err-desc">TierPolicy: HIGH → BLOCK<br>max_retries: 3 · exponential backoff<br>audit: write_audit_failure() → Delta<br>user: safe message · no internals</div></div>
+      <div><div class="err-label">UPSTREAM_5XX / EVAL_FAILURE</div><div class="err-desc">TierPolicy: HIGH → BLOCK<br>max_retries: 3 · exponential backoff<br>audit: write_audit_failure() → warehouse<br>user: safe message · no internals</div></div>
     </div>
     <div class="err-tier">
       <div class="err-dot-m"></div>
@@ -872,7 +795,7 @@ html, body {
     </div>
   </div>
   <div class="card">
-    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">ReACT Recovery · react_engine.py</div>
+    <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Reasoning-Loop Recovery</div>
     <div class="err-tier">
       <div class="err-dot-m"></div>
       <div><div class="err-label">One-Strike Rule</div><div class="err-desc">failed service added to blocked set<br>never retried · try alternative tool</div></div>
@@ -883,7 +806,7 @@ html, body {
     </div>
     <div class="err-tier">
       <div class="err-dot-l"></div>
-      <div><div class="err-label">RAG Graceful Degradation</div><div class="err-desc">Vector Search failure → respond<br>without context · fallback.py<br>audit record written either way</div></div>
+      <div><div class="err-label">RAG Graceful Degradation</div><div class="err-desc">Vector Search failure → respond<br>without context · fallback handler<br>audit record written either way</div></div>
     </div>
     <div class="mono-box" style="margin-top:8px;font-size:10px">ContextCompressor: window exceeded<br>→ compress + keep last 8 messages<br>MessageValidator: orphaned tool_calls<br>→ auto-fix before LLM send</div>
   </div>
@@ -904,28 +827,28 @@ html, body {
 <!-- MEMORY -->
 <div class="infra-panel">
   <div class="infra-title" style="color:var(--purple)">Memory Architecture</div>
-  <div class="infra-sub">agent_framework.memory · Delta Lake · analytics.warehouse</div>
+  <div class="infra-sub">memory subsystem · warehouse-backed · &lt;catalog&gt;.&lt;schema&gt;</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid rgba(184,160,248,0.30);border-radius:6px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">STM</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">conversation<br>turns window<br>Delta table<br>session-scoped</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">conversation<br>turns window<br>warehouse table<br>session-scoped</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(119,196,216,0.28);border-radius:6px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">LTM</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">agent_long_<br>term_memory<br>user-scoped<br>persistent</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">persistent_<br>memory<br>user-scoped<br>persistent</div>
     </div>
     <div style="background:var(--panel2);border:1px solid rgba(252,182,49,0.28);border-radius:6px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px">KG</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">kg_entities<br>kg_triples<br>LangGraph<br>entity extract</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">entities<br>relations<br>graph-based<br>entity extract</div>
     </div>
   </div>
-  <div class="mono-box" style="font-size:11px">LangGraph: user_id &#8594; session_id &#8594; memory &#8594; KG &#8594; RAG &#8594; LLM &#8594; [tool loop] &#8594; fact_check &#8594; memory_write &#8594; entity_extract &#8594; END</div>
+  <div class="mono-box" style="font-size:11px">flow: user_id &#8594; session_id &#8594; memory &#8594; KG &#8594; RAG &#8594; LLM &#8594; [tool loop] &#8594; fact_check &#8594; memory_write &#8594; entity_extract &#8594; END</div>
 </div>
 
 <!-- SECURITY -->
 <div class="infra-panel">
   <div class="infra-title" style="color:var(--pink)">Security · Confused Deputy Prevention</div>
-  <div class="infra-sub">delegation_chain.py · tool_gateway · HMAC-SHA256</div>
+  <div class="infra-sub">delegation-signing module · tool gateway · HMAC-SHA256</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid rgba(232,160,144,0.25);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--pink);margin-bottom:5px">DelegationLink</div>
@@ -936,23 +859,23 @@ html, body {
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.80">validates chain<br>scope: PRE_TOOL<br>before execution</div>
     </div>
   </div>
-  <div class="mono-box" style="font-size:11px">user &#8594; orchestrator &#8594; clinical_policy (scope: policy_read)<br>user &#8594; orchestrator &#8594; pharmacy (scope: pharmacy_read)<br><span class="mr">&#10005; confused deputy blocked</span>: orchestrator cannot invoke tools outside its own scope boundary</div>
+  <div class="mono-box" style="font-size:11px">user &#8594; orchestrator &#8594; policy (scope: policy_read)<br>user &#8594; orchestrator &#8594; finance (scope: finance_read)<br><span class="mr">&#10005; confused deputy blocked</span>: orchestrator cannot invoke tools outside its own scope boundary</div>
 </div>
 
 <!-- AGENT TEMPLATE -->
 <div class="infra-panel">
-  <div class="infra-title" style="color:var(--blue)">agent-template/scripts</div>
+  <div class="infra-title" style="color:var(--blue)">Framework Modules</div>
   <div class="infra-sub">16 reusable framework modules · 5 hook-based plugins</div>
   <div class="tag-grid">
     <div class="fs-sec">Core Engine</div>
-    <span class="fs-tag" style="color:var(--blue)">react_engine.py</span><span class="fs-tag" style="color:var(--blue)">model.py</span><span class="fs-tag" style="color:var(--blue)">structured_output.py</span><span class="fs-tag" style="color:var(--blue)">agent_model_template.py</span>
+    <span class="fs-tag" style="color:var(--blue)">reasoning-loop engine</span><span class="fs-tag" style="color:var(--blue)">model interface</span><span class="fs-tag" style="color:var(--blue)">structured-output validator</span><span class="fs-tag" style="color:var(--blue)">agent template loader</span>
     <div class="fs-sec">Multi-Agent</div>
-    <span class="fs-tag" style="color:var(--purple)">agent_comms.py</span><span class="fs-tag" style="color:var(--purple)">parallel_orchestrator.py</span><span class="fs-tag" style="color:var(--purple)">agent_router.py</span><span class="fs-tag" style="color:var(--purple)">delegation_chain.py</span>
+    <span class="fs-tag" style="color:var(--purple)">inter-agent messaging</span><span class="fs-tag" style="color:var(--purple)">parallel orchestrator</span><span class="fs-tag" style="color:var(--purple)">agent router</span><span class="fs-tag" style="color:var(--purple)">delegation signer</span>
     <div class="fs-sec">Security &amp; Compliance</div>
-    <span class="fs-tag" style="color:var(--pink)">audit_trail.py</span><span class="fs-tag" style="color:var(--pink)">budget_enforcer.py</span><span class="fs-tag" style="color:var(--pink)">rate_limiter.py</span><span class="fs-tag" style="color:var(--orange)">hitl_engine.py</span>
+    <span class="fs-tag" style="color:var(--pink)">audit trail writer</span><span class="fs-tag" style="color:var(--pink)">budget enforcement</span><span class="fs-tag" style="color:var(--pink)">rate limiter</span><span class="fs-tag" style="color:var(--orange)">HITL engine</span>
     <div class="fs-sec">Lifecycle &amp; Plugins</div>
-    <span class="fs-tag" style="color:var(--green)">deploy.py</span><span class="fs-tag" style="color:var(--green)">plugin_registry.py</span><span class="fs-tag" style="color:var(--green)">tool_registry.py</span><span class="fs-tag" style="color:var(--green)">memory_tools.py</span>
-    <span class="fs-tag" style="color:var(--green-hi)">hitl_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">audit_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">router_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">parallel_plugin.py</span><span class="fs-tag" style="color:var(--green-hi)">security_plugin.py</span>
+    <span class="fs-tag" style="color:var(--green)">deployment lifecycle</span><span class="fs-tag" style="color:var(--green)">plugin registry</span><span class="fs-tag" style="color:var(--green)">tool authorization gateway</span><span class="fs-tag" style="color:var(--green)">memory tool bindings</span>
+    <span class="fs-tag" style="color:var(--green-hi)">HITL hook</span><span class="fs-tag" style="color:var(--green-hi)">audit hook</span><span class="fs-tag" style="color:var(--green-hi)">router hook</span><span class="fs-tag" style="color:var(--green-hi)">parallel-execution hook</span><span class="fs-tag" style="color:var(--green-hi)">security hook</span>
   </div>
 </div>
 
@@ -960,51 +883,51 @@ html, body {
 <div class="infra-col">
 
 <div class="infra-panel">
-  <div class="infra-title" style="color:var(--purple)">agent_framework</div>
+  <div class="infra-title" style="color:var(--purple)">Agent Subpackages</div>
   <div class="infra-sub">8 agent subpackages · 50+ modules</div>
   <div class="tag-grid">
     <div class="fs-sec">Packages</div>
-    <span class="fs-tag" style="color:var(--purple)">memory (STM+LTM+KG)</span><span class="fs-tag" style="color:var(--purple)">rag (single/multi-turn)</span><span class="fs-tag" style="color:var(--purple)">responses_agent</span><span class="fs-tag" style="color:var(--purple)">ingestion</span>
-    <span class="fs-tag" style="color:var(--purple)">evaluation</span><span class="fs-tag" style="color:var(--purple)">feedback</span><span class="fs-tag" style="color:var(--purple)">agent_tracing</span><span class="fs-tag" style="color:var(--purple)">tool_calling</span>
+    <span class="fs-tag" style="color:var(--purple)">memory (STM+LTM+KG)</span><span class="fs-tag" style="color:var(--purple)">rag (single/multi-turn)</span><span class="fs-tag" style="color:var(--purple)">response handling</span><span class="fs-tag" style="color:var(--purple)">ingestion</span>
+    <span class="fs-tag" style="color:var(--purple)">evaluation</span><span class="fs-tag" style="color:var(--purple)">feedback</span><span class="fs-tag" style="color:var(--purple)">tracing</span><span class="fs-tag" style="color:var(--purple)">tool execution</span>
     <div class="fs-sec">Utils</div>
-    <span class="fs-tag">guardrails.py</span><span class="fs-tag">llm_resilience.py</span><span class="fs-tag">embedding.py</span><span class="fs-tag">chunking.py</span>
-    <span class="fs-tag">databricks.py</span><span class="fs-tag">config.py</span><span class="fs-tag">logger.py</span><span class="fs-tag">indexing.py</span>
-    <span class="fs-tag">parsing.py</span><span class="fs-tag">fallback.py</span><span class="fs-tag">sql_client.py</span><span class="fs-tag">file_utils.py</span>
+    <span class="fs-tag">guardrails</span><span class="fs-tag">resilience wrapper</span><span class="fs-tag">embedding client</span><span class="fs-tag">chunking</span>
+    <span class="fs-tag">platform adapter</span><span class="fs-tag">config</span><span class="fs-tag">logger</span><span class="fs-tag">indexing</span>
+    <span class="fs-tag">parsing</span><span class="fs-tag">fallback handler</span><span class="fs-tag">SQL client</span><span class="fs-tag">file utilities</span>
   </div>
 </div>
 
 <!-- PLATFORM -->
 <div class="infra-panel">
-  <div class="infra-title" style="color:var(--blue)">Databricks Platform</div>
-  <div class="infra-sub">[databricks-workspace] · AI/BI + Model Serving</div>
+  <div class="infra-title" style="color:var(--blue)">Cloud AI Platform</div>
+  <div class="infra-sub">[workspace] · AI/BI + Model Serving</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Serving Layer</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">um-orchestrator<br>um-clinical-policy<br>um-pharmacy<br>um-triage<br>Open WebUI app</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">svc-orchestrator<br>svc-policy<br>svc-finance<br>svc-triage<br>chat UI app</div>
     </div>
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--purple);margin-bottom:6px">Data Layer</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">Unity Catalog<br>Vector Search<br>Delta Lake<br>MLflow (exp: 429&#8230;)<br>AI Gateway</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">catalog<br>vector index<br>lakehouse storage<br>experiment tracking (exp: [id])<br>AI Gateway</div>
     </div>
   </div>
-  <div class="mono-box" style="font-size:11px">task: agent/v1/responses · db_agents.deploy()<br>secret: secrets/sp_token · metadata: {task: "agent/v1/responses"}</div>
+  <div class="mono-box" style="font-size:11px">task: agent/v1/responses · deploy_agent()<br>secret: secrets/&lt;service-principal-token&gt; · metadata: {task: "agent/v1/responses"}</div>
 </div>
 
 <!-- OBSERVABILITY -->
 <div class="infra-panel">
   <div class="infra-title" style="color:var(--green-hi)">Observability</div>
-  <div class="infra-sub">MLflow · traces · assessments · feedback</div>
+  <div class="infra-sub">traces · assessments · feedback</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
-      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--green-hi);margin-bottom:5px">MLflow Traces</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">14 spans/req<br>agent_tracing.py<br>record_tool_event<br>update_trace tags</div>
+      <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--green-hi);margin-bottom:5px">Traces</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">14 spans/req<br>tracing module<br>record_tool_event<br>update_trace tags</div>
     </div>
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:11px">
       <div style="font-family:'IBM Plex Sans','Inter',sans-serif;font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:5px">Feedback Loop</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.85">&#128077;&#128078; action functions<br>custom_good<br>TRACE_ID tag<br>POST /v1/feedback</div>
     </div>
   </div>
-  <div class="mono-box" style="font-size:11px">experiment: [experiment-id]<br>assessment: user_satisfaction &#8594; MLflow Assessments<br>audit: hash-chained Delta · HIPAA/CMS/NCQA</div>
+  <div class="mono-box" style="font-size:11px">experiment: [experiment-id]<br>assessment: user_satisfaction &#8594; evaluation store<br>audit: hash-chained warehouse · internal compliance framework</div>
 </div>
 
 </div><!-- /infra-col right -->
