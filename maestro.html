@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Threat Modeling Agentic AI Platforms - MAESTRO Layer Decomposition</title>
+<style>
+/* ── palette ───────────────────────────────────────────────── */
+:root {
+  --teal:       #0e7490;
+  --navy:       #0f172a;
+  --blue:       #0369a1;
+  --text-dim:   #4a6078;
+  --text-mid:   #334155;
+  --border:     rgba(14,116,144,0.22);
+  --border-hi:  rgba(14,116,144,0.55);
+}
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #0f172a;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+.page {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.9em;
+  font-weight: 700;
+  letter-spacing: .04em;
+  border-bottom: 3px solid #0e7490;
+  padding-bottom: .3em;
+  margin-bottom: .6em;
+  color: #0f172a;
+}
+h2 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  letter-spacing: .03em;
+  border-bottom: 1px solid rgba(14,116,144,0.35);
+  padding-bottom: .25em;
+  margin-top: 2em;
+  color: #0f172a;
+}
+h3 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: .03em;
+  margin-top: 1.4em;
+  color: #334155;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: .9em;
+}
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+tr {
+  background: #FFF;
+}
+th {
+  background: #0369a1;
+  color: #ffffff;
+  padding: 9px 13px;
+  text-align: left;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .78em;
+  font-weight: 600;
+  letter-spacing: .07em;
+}
+td {
+  padding: 7px 13px;
+  border-bottom: 1px solid rgba(14,116,144,0.18);
+  vertical-align: top;
+}
+tr:nth-child(even) td {
+  background: rgba(14,116,144,0.05);
+}
+code {
+  background: #f1f5f9;
+  border: 1px solid rgba(14,116,144,0.28);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  font-size: .85em;
+  color: #0369a1;
+}
+pre {
+  background: #f1f5f9;
+  color: #1e293b;
+  padding: 16px;
+  border-radius: 6px;
+  border-left: 3px solid #0e7490;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: .84em;
+  line-height: 1.55;
+  max-width: 100%;
+  white-space: pre;
+  word-wrap: normal;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+blockquote {
+  border-left: 4px solid #0e7490;
+  margin: 0;
+  padding: 0 1em;
+  color: #4a6078;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgba(14,116,144,0.30);
+  margin: 2em 0;
+}
+strong { color: #0f172a; }
+a { color: #0369a1; }
+.cell-title {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .68em;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #0e7490;
+  padding: .3em .7em;
+  background: rgba(14,116,144,0.08);
+  border-left: 3px solid #0e7490;
+  border-radius: 0 4px 4px 0;
+  display: inline-block;
+}
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: .72em;
+  font-weight: 600;
+  letter-spacing: .05em;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.badge-fp   { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.badge-na   { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge-part { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.badge-conf { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.badge-new  { background: #f0f9ff; color: #0369a1; border: 1px solid #7dd3fc; }
+.badge-open { background: #fff1f2; color: #be123c; border: 1px solid #fda4af; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════
+     DOCUMENT HEADER
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">Document Header</div>
+<h1>Threat Modeling Agentic AI Platforms</h1>
+<p><em>A MAESTRO methodology worked end to end against a representative enterprise agentic AI architecture, cross-referenced against OWASP LLM Top 10, MITRE ATLAS v4, and NIST AI RMF 1.0.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Field</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><strong>Document type</strong></td><td>Threat model, MAESTRO layer decomposition</td></tr>
+<tr><td><strong>Base Methodology</strong></td><td>MAESTRO (Model, Application, Environment, System, Trust Relationships, Operations, Risk)</td></tr>
+<tr><td><strong>Subject</strong></td><td>Representative enterprise agentic AI architecture</td></tr>
+<tr><td><strong>Scope</strong></td><td>Chat frontend proxy · agent runtime · memory/KG/RAG · SQL tools · multi-agent delegation chain</td></tr>
+<tr><td><strong>Assessment Method</strong></td><td>Static code inspection; adversarial red team testing; code-level analysis of the agent framework</td></tr>
+<tr><td><strong>Framework Alignment</strong></td><td>OWASP LLM Top 10 · MITRE ATLAS v4 · NIST AI RMF 1.0</td></tr>
+</tbody>
+</table></div>
+<hr />
+<p><strong>Purpose</strong>: A worked threat model for an enterprise agentic AI platform, enumerating and scoring threats across the agentic attack surface using the MAESTRO layer taxonomy. MAESTRO was designed for agentic AI systems; its seven layers map directly onto the class of system it targets: an LLM endpoint, proxy middleware, managed runtime, data integrations, delegation chain, and ReACT engine.</p>
+<blockquote style="border-left: 4px solid #0e7490; background: #f0f9ff; padding: 1em 1.2em; margin: 1em 0;">
+<p style="margin:0 0 .4em 0;"><strong>About this document</strong></p>
+<p style="margin:0;">Threat model derived from code-level inspection and adversarial red team testing of the agent framework. Proprietary credentials, endpoint URLs, infrastructure identifiers, vendor-specific configuration state, and customer data are deliberately excluded. The architecture is generalized to the pattern rather than to any single deployment.</p>
+</blockquote>
+<p><strong>Assessment approach</strong>: Each finding carries a MAESTRO layer, unique ID, attack vector, impact, mitigation status, and DREAD score. Red team findings are reconciled with verdicts based on code-level analysis of the framework.</p>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAESTRO LAYER OVERVIEW
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">MAESTRO Layer Overview</div>
+<hr />
+<h2>MAESTRO Layer Overview</h2>
+<p><strong>MAESTRO</strong> organises agentic AI risk across seven layers, each with its own threat surface and control mechanisms:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Layer</th><th>Name</th><th>Maps to</th><th>Primary threats</th></tr></thead>
+<tbody>
+<tr><td><strong>M</strong></td><td>Model</td><td>LLM inference endpoint</td><td>Prompt injection, jailbreak, system prompt extraction, training data leakage, stale model version</td></tr>
+<tr><td><strong>A</strong></td><td>Application</td><td>Chat frontend + <code>ProxyMiddleware</code></td><td>Identity forgery, PAT bypass, SSE manipulation, feedback abuse, SQL injection in admin endpoints</td></tr>
+<tr><td><strong>E</strong></td><td>Environment</td><td>Managed runtime, secrets, model registry</td><td>Code-path tampering, registry version swap, token exfiltration, hardcoded credentials</td></tr>
+<tr><td><strong>S</strong></td><td>System</td><td>table store, vector store, SQL warehouse, knowledge graph, tracking store</td><td>Memory poisoning, RAG corpus injection, SQL injection, cross-user leakage, table flooding</td></tr>
+<tr><td><strong>T</strong></td><td>Trust Relationships</td><td>DelegationChain, ToolGateway, AgentRouter</td><td>Relay injection, chain tampering, chain replay, confused deputy, intent misclassification</td></tr>
+<tr><td><strong>R</strong></td><td>Operations</td><td>ReACT engine, PluginRegistry, HITLEngine, RateLimiter</td><td>Infinite tool loop, token flooding, HITL bypass, rate-limit exploitation, embedding saturation</td></tr>
+<tr><td><strong>O</strong></td><td>Risk Governance</td><td>AuditTrail, PIIDetector, FeedbackAdapter, ContradictionQueue</td><td>Session attribution gaps, PII in escalation queue, feedback poisoning, audit SQL injection</td></tr>
+</tbody>
+</table></div>
+
+<h3>Finding Status</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Mitigated</strong></td><td>Control is implemented and empirically validated</td></tr>
+<tr><td><strong>Partial</strong></td><td>Control exists but has known gaps; not fully validated</td></tr>
+<tr><td><strong>Accepted</strong></td><td>Risk acknowledged; no remediation planned (documented justification required)</td></tr>
+<tr><td><strong>Open</strong></td><td>No control in place; remediation required</td></tr>
+</tbody>
+</table></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     REFERENCE ARCHITECTURE
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">Reference Architecture</div>
+<hr />
+<h2>Reference Architecture</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Component</th><th>Purpose</th><th>Deployment</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>Chat frontend + proxy</strong></td>
+  <td>Chat frontend; <code>ProxyMiddleware</code> translates OpenAI-format requests, injects SSO-derived identity, relays SSE streams, routes feedback to the evaluation store</td>
+  <td>Managed application platform</td>
+</tr>
+<tr>
+  <td><strong>Agent runtime</strong></td>
+  <td>ReACT reasoning engine, plugin hook system, delegation chain, parallel orchestrator, circuit breaker, rate limiter, HITL engine, boundary markers</td>
+  <td>Model serving endpoint (packaged into model artifact)</td>
+</tr>
+<tr>
+  <td><strong>Data integrations</strong></td>
+  <td>table-store LTM tables, vector index, SQL warehouse, knowledge graph, trace/inference log store</td>
+  <td>Managed data platform</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Architecture Overview</h3>
+<pre><code>+---------------------------------------------------------------------+
+|                         USER (Browser)                              |
+|   Chat frontend (Trusted-Header SSO: &lt;SSO-identity-header&gt;)                |
++------------------------------+--------------------------------------+
+                               | HTTPS
++------------------------------v--------------------------------------+
+|                    APPLICATION LAYER                                |
+|   ProxyMiddleware → identity injection → serving endpoint call      |
+|   Feedback capture → evaluation assessment API                          |
++------------------------------+--------------------------------------+
+                               | Internal REST (service-principal)
++------------------------------v--------------------------------------+
+|                MODEL SERVING ENDPOINT                               |
+|   System SP auto-auth | &lt;delegation-signing-secret&gt; (secrets scope)           |
+|   [agent runtime] (predict → state graph → tools → response)        |
++-------+----------+----------+----------+-----------+----------------+
+        |          |          |          |           |
+   +----v---+ +---v----+ +--v---+ +---v----+ +---v-----+
+   | LLM    | | Memory | | RAG  | | SQL    | | Vector  |
+   |Endpoint| |(table) | |store | |Warehouse| | store   |
+   +--------+ +--------+ +------+ +--------+ +---------+</code></pre>
+
+<h3>Trust Boundaries</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Boundary</th><th>Security Control</th><th>MAESTRO Layer</th></tr></thead>
+<tbody>
+<tr><td>TB1</td><td>Browser &lt;-&gt; chat frontend (&lt;SSO-identity-header&gt; injected by platform reverse proxy)</td><td>Trusted-header auth; &lt;trusted-header config flag&gt;; cookie session</td><td>A Application</td></tr>
+<tr><td>TB2</td><td>Chat frontend &lt;-&gt; serving endpoint (service-principal OAuth token)</td><td>client_credentials grant; 120s pre-expiry token refresh; secret in secrets scope</td><td>E Environment</td></tr>
+<tr><td>TB3</td><td>Serving endpoint &lt;-&gt; LLM provider (PAT/SP)</td><td>Secrets scope; exception handlers mask token material in responses</td><td>E Environment</td></tr>
+<tr><td>TB4</td><td>Agent runtime &lt;-&gt; data stores (Delta, Vector, SQL, KG)</td><td>SP grants scoped to application schema; append-only Delta tables; parameterised SQL functions</td><td>S System</td></tr>
+<tr><td>TB5</td><td>Agent &lt;-&gt; Agent (multi-agent routing via <code>AgentRouter</code> / <code>DelegationChain</code>)</td><td>HMAC-SHA256 DelegationChain; <code>ToolGateway.authorize()</code> on PRE_TOOL hook; TTL=300s per link</td><td>T Trust</td></tr>
+</tbody>
+</table></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     M MODEL
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">M - Model Layer Findings</div>
+<hr />
+<h2>M - Model Layer Findings</h2>
+<p><em>Threats intrinsic to the LLM inference endpoint: prompt injection, jailbreak, system prompt leakage, training data extraction, and model version integrity.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>M-1</strong></td>
+  <td>Direct Prompt Injection</td>
+  <td>Adversarial user input attempts to override system prompt instructions, hijack agent persona, or unlock restricted tool calls</td>
+  <td>Agent executes attacker-controlled actions; tool scope escape; cross-user data access if identity also compromised</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>M-2</strong></td>
+  <td>Indirect Prompt Injection via Tool Output</td>
+  <td>Adversarial content in tool results (RAG documents, SQL rows, KG data) contains injection instructions that the model treats as authoritative; boundary markers are best-effort, not cryptographic</td>
+  <td>Model executes attacker-embedded instructions; memory poisoning; privilege escalation via agent confusion</td>
+  <td><strong>Partial</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>M-3</strong></td>
+  <td>Jailbreak via Encoding / Obfuscation</td>
+  <td>Base64, ROT13, hex, reversed text, homoglyph substitution, or l33tspeak used to encode malicious instructions and evade input filters</td>
+  <td>Filter bypass; model executes hidden payload; safety controls circumvented</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>M-4</strong></td>
+  <td>System Prompt Extraction</td>
+  <td>Roleplay, authority-escalation, translation, or encoding attacks to recover system prompt content</td>
+  <td>Defensive instructions disclosed; enables targeted bypass crafting</td>
+  <td><strong>Partial</strong></td>
+  <td>27</td>
+</tr>
+<tr>
+  <td><strong>M-5</strong></td>
+  <td>Training Data Extraction</td>
+  <td>Repetition attacks or targeted prompts to recover memorised training data, including proprietary or sensitive content</td>
+  <td>Sensitive-data exposure; proprietary data disclosure; regulatory liability</td>
+  <td><strong>Mitigated</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>M-6</strong></td>
+  <td>Stale Model Version Serving</td>
+  <td>Prior model version with looser prompt controls served by name from registry; no alias lock prevents this</td>
+  <td>Agent runs with weakened defences; injection vulnerabilities believed remediated reappear</td>
+  <td><strong>Partial</strong></td>
+  <td>20</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>M-1</strong>: the boundary-marking component wraps every tool output in per-request HMAC nonce delimiters before it enters message history; the tool registry is static, loaded at deployment-packaging time with no runtime registration path; SSO-derived identity enforced server-side</li>
+<li><strong>M-2 partial</strong>: Boundary markers provide defense-in-depth but model compliance is not cryptographic; the LTM pre-write race (S-1 below) means adversarial facts can persist before the fact-checking module validates them; the memory-trust module adds write-side confidence tagging and read-side filtering</li>
+<li><strong>M-3</strong>: Red team adversarial encoding tests (Base64, ROT13, hex, reversed) and perturbation attacks (homoglyph, character swap, l33tspeak) all produced correct model refusals; AI Gateway input and output safety filters provide additional coverage</li>
+<li><strong>M-4 partial</strong>: Direct, encoded, and translated extraction attacks blocked; authority escalation framing was a false positive; full extraction not demonstrated but residual surface remains</li>
+<li><strong>M-5</strong>: Foundation model provider safeguards; AI Gateway PII detection and output safety filters active; membership inference testing did not confirm extraction</li>
+<li><strong>M-6 partial</strong>: Model registry has multiple active versions; no alias lock prevents serving older versions by name; registry governance control required</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     A APPLICATION
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">A - Application Layer Findings</div>
+<hr />
+<h2>A - Application Layer Findings</h2>
+<p><em>Threats in the chat frontend and <code>ProxyMiddleware</code>, the only user-facing ingress. Correct identity derivation here is the single most important control for a large set of findings.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>A-1</strong></td>
+  <td>Trusted-Header Identity Forgery</td>
+  <td>Attacker with a direct path to the chat-frontend container (bypassing the platform reverse proxy) sets the SSO-identity header to an admin address; the proxy derives an admin identity from it</td>
+  <td>Admin-level agent access; cross-user data access; full session impersonation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>A-2</strong></td>
+  <td>Direct Endpoint Bypass via User PAT</td>
+  <td>User generates a personal access token and calls the serving endpoint directly, supplying arbitrary <code>custom_inputs</code> including <code>user identifier</code>, bypassing all proxy-enforced controls</td>
+  <td>All proxy controls bypassed; arbitrary user-identity injection; A-4 / S-5 attack surface materialises</td>
+  <td><strong>Mitigated</strong></td>
+  <td>25</td>
+</tr>
+<tr>
+  <td><strong>A-3</strong></td>
+  <td>Account Registration Forgery</td>
+  <td>If trusted-header auth is not configured, attacker registers with an admin email address directly in the chat frontend</td>
+  <td>Admin access to all stored conversations</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>A-4</strong></td>
+  <td>User-Identifier Injection via custom_inputs</td>
+  <td>Via A-2 path (when open): attacker sends a crafted custom_inputs payload with a target user identifier to query another user's memory and tools</td>
+  <td>Cross-user data access; unauthorised memory reads</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>A-5</strong></td>
+  <td>SSE Stream Content Manipulation</td>
+  <td>On-path attacker manipulates SSE chunks between the proxy and serving endpoint, or triggers response-parsing edge cases to swallow legitimate output</td>
+  <td>Tampered agent response displayed to user; partial data loss</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>A-6</strong></td>
+  <td>Feedback Rate-Limit Bypass</td>
+  <td>Attacker submits more than a small configured per-user cap on assessments per trace by supplying a different <code>user_id</code> in the POST <code>/v1/feedback</code> body; the rate-limit check uses this body field, not the SSO-derived identity</td>
+  <td>Evaluation-store assessment pollution; HITL threshold calibration corrupted via the feedback adapter</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>A-7</strong></td>
+  <td>SQL Injection via Evaluate Endpoint</td>
+  <td>the evaluation-submission handler previously constructed a raw SQL INSERT using a manual string-escaping helper (single-quote doubling only); attacker-controlled form fields were not parameterised</td>
+  <td>SQL injection into the evaluation-results table via the operational database; data corruption; potential privilege escalation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>35</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>A-1</strong>: the SSO-identity header is injected by the platform reverse proxy (infrastructure-controlled); user browser sessions cannot set it; a trusted-header config flag enforces this; trusted-header auth configured with manual admin assignment</li>
+<li><strong>A-2</strong>: Serving endpoint invocation is restricted to the application service principal only; user-scoped tokens cannot invoke the endpoint directly, collapsing the A-4 attack surface</li>
+<li><strong>A-3</strong>: Trusted-header auth configured; direct registration with arbitrary email blocked at platform level</li>
+<li><strong>A-4</strong>: the user identifier is always derived server-side from the SSO header; user-supplied <code>custom_inputs</code> value is overwritten before reaching the model; the A-2 control makes this surface structurally unreachable</li>
+<li><strong>A-5</strong>: SSE relay operates over authenticated TLS to the serving endpoint; JSON-stripping logic is local to the proxy container; on-path attack requires platform-level breach</li>
+<li><strong>A-6 partial</strong>: the per-user feedback counter enforces a small configured limit via an evaluation-store API lookup; feedback <code>user_id</code> is bound to the SSO-derived identity rather than the POST body field, closing both the rate-limit bypass and the G-4 threshold poisoning surface</li>
+<li><strong>A-7</strong>: the evaluation-submission handler uses parameterised SQL statements; the manual string-escaping helper has been replaced with parameterised binding throughout the evaluate endpoint path; the agent SQL tool path independently uses pre-defined parameterised functions</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     E ENVIRONMENT
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">E - Environment Layer Findings</div>
+<hr />
+<h2>E - Environment Layer Findings</h2>
+<p><em>Threats in the managed serving container, secrets management, model artifact integrity, and deployment pipeline. Compromise at this layer renders all higher-layer controls moot.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>E-1</strong></td>
+  <td>Code-Path Tampering at Deploy Time</td>
+  <td>Malicious Python modules substituted into bundled code paths before deployment packaging; no integrity check on bundled artifacts at time of threat identification</td>
+  <td>Arbitrary code executes on every inference request for all users</td>
+  <td><strong>Mitigated</strong></td>
+  <td>38</td>
+</tr>
+<tr>
+  <td><strong>E-2</strong></td>
+  <td>Model Registry Version Swap</td>
+  <td>Workspace user with EDIT on the model registers a malicious version; no alias lock enforced; any version can be served by name</td>
+  <td>Backdoored model executes for all users on next endpoint update; prompt injection defences bypassed</td>
+  <td><strong>Partial</strong></td>
+  <td>33</td>
+</tr>
+<tr>
+  <td><strong>E-3</strong></td>
+  <td>Secrets Exposure via Error Messages</td>
+  <td>Exception paths triggered that include token or secret material in the HTTP response body</td>
+  <td>Service-principal token or delegation-signing secret exfiltrated; lateral movement to all SP-permitted resources</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>E-4</strong></td>
+  <td>Hardcoded Token in Version-Controlled Source</td>
+  <td>PAT committed in a deployment script; anyone with repository read access acquires direct endpoint invocation capability</td>
+  <td>Unauthorised endpoint access; lateral movement; direct invocation bypassing proxy controls</td>
+  <td><strong>Mitigated</strong></td>
+  <td>33</td>
+</tr>
+<tr>
+  <td><strong>E-5</strong></td>
+  <td>Service Principal Token Exfiltration + Pivot</td>
+  <td>SP token leaked from serving environment; used directly against platform APIs</td>
+  <td>Full SP-scope access to the data catalog, storage volumes, and warehouse tables; lateral movement</td>
+  <td><strong>Mitigated</strong></td>
+  <td>35</td>
+</tr>
+<tr>
+  <td><strong>E-6</strong></td>
+  <td>Missing Delegation-Signing Secret at Runtime</td>
+  <td>the secret-loading function in the delegation-signing module raises a hard error if the secret is absent; if this exception is swallowed, the HMAC chain may operate unsigned</td>
+  <td>Multi-agent HMAC delegation chain disabled; confused-deputy attack surface opens</td>
+  <td><strong>Mitigated</strong></td>
+  <td>32</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>E-1</strong>: Every bundled code-path file is SHA-256 hashed into a manifest at deploy time and stored as a named model artifact; at runtime startup each file is re-hashed before any user code executes, failing closed on mismatch</li>
+<li><strong>E-2 partial</strong>: No alias lock on model registry; any workspace user with EDIT on the model can push a new version; recommended control: registry alias lock + deployment approval gate</li>
+<li><strong>E-3</strong>: Secrets scope syntax prevents token exposure in response body; exception handlers in the serving framework mask token material before returning to caller; AI Gateway safety filters provide secondary coverage</li>
+<li><strong>E-4</strong>: The PAT identified in the deployment script has been rotated and removed; secrets are sourced exclusively from the platform secrets manager at runtime</li>
+<li><strong>E-5</strong>: Secrets scope access restricted to named principals; platform service-principal credentials stored in the platform secrets manager, not in source</li>
+<li><strong>E-6</strong>: the secret-loading function raises a hard error with no hardcoded fallback; serving endpoint fails to start if the secret is absent; fail-closed behaviour is the correct control</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     S SYSTEM
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">S - System Layer Findings</div>
+<hr />
+<h2>S - System Layer Findings</h2>
+<p><em>Threats in data store integrations, covering table-store LTM tables, vector index, SQL warehouse, knowledge graph, and trace/inference log stores. Each is an independent write or read surface.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>S-1</strong></td>
+  <td>Long-Term Memory Poisoning (Pre-Write Race)</td>
+  <td>Multi-turn conversation injects adversarial facts via normal interaction; LTM extraction and write occur in a background thread; the fact-checking module runs post-response rather than as a synchronous pre-write guard</td>
+  <td>Persistent false identity or context across all future sessions for that user</td>
+  <td><strong>Mitigated</strong></td>
+  <td>32</td>
+</tr>
+<tr>
+  <td><strong>S-2</strong></td>
+  <td>Knowledge Graph Entity Injection</td>
+  <td>Craft prompts that cause the model-driven KG extractor to write attacker-controlled entities or triples</td>
+  <td>KG provides false organisational context to all future RAG/tool queries for users sharing that tenant's KG</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>S-3</strong></td>
+  <td>RAG Corpus Document Poisoning</td>
+  <td>Attacker obtains write access to the vector index and upserts documents containing hidden injection instructions</td>
+  <td>All users receive poisoned responses; persistent cross-session; reputationally and legally significant if the poisoned content is sensitive</td>
+  <td><strong>Mitigated</strong></td>
+  <td>38</td>
+</tr>
+<tr>
+  <td><strong>S-4</strong></td>
+  <td>SQL Injection via Agent Tool Chain</td>
+  <td>Attacker injects SQL fragment into a parameter passed to a SQL tool; the SQL tool wrapper expands it under the SP's warehouse privileges</td>
+  <td>Arbitrary SQL executed under SP's warehouse privileges; data exfiltration; schema manipulation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>40</td>
+</tr>
+<tr>
+  <td><strong>S-5</strong></td>
+  <td>Cross-User Memory Leakage</td>
+  <td>Via direct PAT path (A-2, when open): user supplies a different user identifier in <code>custom_inputs</code> and reads another user's LTM facts</td>
+  <td>Unauthorised access to another user's persistent context, including sensitive conversation history</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>S-6</strong></td>
+  <td>Inference Table Exposure</td>
+  <td>Full request/response history in the inference log table is accessible without column masking; unauthorised read yields historical sensitive conversations</td>
+  <td>Historical sensitive conversations exposed; audit risk</td>
+  <td><strong>Partial</strong></td>
+  <td>25</td>
+</tr>
+<tr>
+  <td><strong>S-7</strong></td>
+  <td>RAG Over-Retrieval</td>
+  <td>Document retrieval returns content beyond a user's intended authorisation scope; no document-level ACLs on the vector index</td>
+  <td>Internal documents surfaced to users without explicit access</td>
+  <td><strong>Accepted</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>S-8</strong></td>
+  <td>LTM Table Flooding</td>
+  <td>Sustained conversation flow continuously writes facts to LTM; no per-user write quota; <code>RateLimiter</code> controls request rate but not LTM record volume</td>
+  <td>LTM table grows unbounded; memory retrieval performance degrades for all users sharing the tenant</td>
+  <td><strong>Partial</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>S-9</strong></td>
+  <td>Audit Log Tampering</td>
+  <td>Attempt to DELETE or UPDATE records in the <code>AuditTrail</code> append-only Delta table</td>
+  <td>Destruction of forensic evidence; non-repudiation gap; compliance failure</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>S-1</strong>: the fact-checking module operates as a synchronous pre-write guard on the LTM path; <code>TrustTagger</code> adds confidence and source classification to every write; <code>TrustFilter</code> enforces a minimum confidence threshold and staleness decay on reads; <code>ContradictionQueue</code> persists detected contradictions for review</li>
+<li><strong>S-2</strong>: KG extraction is model-driven only; no user-controlled write path exposed; testing confirmed no user-controlled write path exists</li>
+<li><strong>S-3</strong>: vector index populated from controlled batch ingestion job; no user-facing upsert API; red team testing confirmed no injection path through the controlled ingestion pipeline</li>
+<li><strong>S-4</strong>: the tool registry generates pre-defined parameterised SQL functions at deployment-packaging time; user-controlled data is never interpolated into raw SQL strings in the agent tool path; tautology and UNION SELECT injection attempts were both confirmed mitigated</li>
+<li><strong>S-5</strong>: Depends on A-2. With direct PAT invocation restricted to service principal, memory queries use the session-config user identifier (SSO-derived), not prompt content</li>
+<li><strong>S-6 partial</strong>: Inference log table present; column masking for sensitive fields is the outstanding control; recommended: apply catalog-level column security to the inference log schema</li>
+<li><strong>S-7 accepted</strong>: Homogeneous user population with equivalent clearance for all indexed content; document-level ACL tagging cost disproportionate to risk; review trigger: any differentiation of user access levels</li>
+<li><strong>S-8 partial</strong>: No per-user LTM write quota; <code>RateLimiter</code> throttles request rate; <code>BudgetEnforcer</code> tracks token consumption but not storage record count; recommended: per-user LTM row cap in the long-term memory module</li>
+<li><strong>S-9</strong>: Append-only table mode with time travel; DELETE requires MODIFY privilege not granted to the serving SP; SHA-256 hash chain across events provides tamper detection</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     T TRUST
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">T - Trust Relationships Findings</div>
+<hr />
+<h2>T - Trust Relationships Findings</h2>
+<p><em>Threats in inter-agent delegation, scope enforcement, and the confused-deputy problem. Primary controls are <code>DelegationChain</code> (HMAC-SHA256, TTL-enforced), <code>ToolGateway</code> (pre-tool scope checks at CRITICAL priority), and <code>AgentRouter</code>.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>T-1</strong></td>
+  <td>Relay Message Injection (Agent-to-Agent)</td>
+  <td>Craft JSON written to the IPC relay message queue without HMAC signature; receiving agent executes content as a task</td>
+  <td>Arbitrary tool execution in agent context; lateral movement across agents; privilege escalation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>36</td>
+</tr>
+<tr>
+  <td><strong>T-2</strong></td>
+  <td>Delegation Chain Tampering</td>
+  <td>Attacker modifies the delegation-chain header in transit to forge a higher-privilege scope for the current agent link</td>
+  <td>Agent executes tools outside its granted scope; confused-deputy privilege escalation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>32</td>
+</tr>
+<tr>
+  <td><strong>T-3</strong></td>
+  <td>Delegation Chain Replay</td>
+  <td>A previously captured valid delegation-chain header is replayed after the TTL (default 300s) has elapsed</td>
+  <td>Expired agent credentials reused; tool calls executed outside the authorised time window</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>T-4</strong></td>
+  <td>Confused Deputy via Plugin Hook</td>
+  <td>Craft a prompt framing a privileged tool call as if from a trusted orchestrator, attempting to bypass <code>ToolGateway.authorize()</code> scope check on the PRE_TOOL hook</td>
+  <td>Agent executes a tool outside its authorised scope; data access beyond permitted perimeter</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+<tr>
+  <td><strong>T-5</strong></td>
+  <td>Agent Router Intent Misclassification</td>
+  <td>Craft a prompt that causes the intent router's keyword matching to route the request to a higher-privilege specialised agent; the router uses keyword scoring, not LLM-based classification</td>
+  <td>Unintended access to domain-specific tools; data exposure beyond intended scope</td>
+  <td><strong>Partial</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>T-6</strong></td>
+  <td>Tier Policy Enforcement Bypass</td>
+  <td>Craft prompt to invoke tier-restricted functionality; test whether tier-policy checks are model-only (prompt-dependent) or structural (code-enforced)</td>
+  <td>Access to features reserved for higher-tier users without authorisation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>T-1</strong>: HMAC-SHA256 signing is applied to the relay's write path via a signing function; a matching verification function on the read path rejects unsigned or tampered messages when the delegation-signing secret is configured; direct filesystem injection path is closed</li>
+<li><strong>T-2</strong>: the delegation chain's signing method computes HMAC-SHA256 over the full serialised chain (user_id + all links); a timing-safe comparison prevents timing attacks; any modification to any link invalidates the signature; the tool gateway's authorization check returns a tamper-detected deny</li>
+<li><strong>T-3</strong>: Each each delegation link carries a TTL (default 300s); the chain's verification step rejects links whose timestamp is older than their TTL; expired or replayed chains fail at <code>verify()</code></li>
+<li><strong>T-4</strong>: the security plugin wires the tool gateway's authorization check into the PRE_TOOL hook at the highest priority tier; scope checks fire before tool execution so a denied tool never produces side effects; the plugin registry's hook execution is called unconditionally in the LangGraph flow; no prompt can suppress a Python function call at the infrastructure layer</li>
+<li><strong>T-5 partial</strong>: the intent router uses keyword matching with a configured confidence threshold; adversarial keyword injection could shift scores; recommended: LLM-based intent classification for high-privilege routing decisions, or explicit capability matching requiring an explicit target agent identifier</li>
+<li><strong>T-6</strong>: <code>TierPolicy</code> enforced structurally in plugin manager; not model-prompt dependent; red team E-8 confirmed structural enforcement</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     R OPERATIONS
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">R - Operations Layer Findings</div>
+<hr />
+<h2>R - Operations Layer Findings</h2>
+<p><em>Threats in the ReACT reasoning engine, plugin hook execution, HITL escalation, rate limiting, the parallel orchestrator, and the circuit breaker; these are the runtime mechanisms that govern what the agent actually does.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>O-1</strong></td>
+  <td>ReACT Infinite Tool Loop</td>
+  <td>Craft a prompt causing the agent to call tools in a cycle without a termination condition; agent session occupies a serving slot indefinitely</td>
+  <td>Serving slot starvation; denial of service for other users; disproportionate compute cost</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>O-2</strong></td>
+  <td>Token Flooding / Context Exhaustion</td>
+  <td>Send an oversized prompt saturating the model context window; 6.6s latency increase observed in red team D-1a; the context compression component engages at a configured token threshold</td>
+  <td>Latency spike; reduced throughput; disproportionate cost under scale-from-zero billing</td>
+  <td><strong>Mitigated</strong></td>
+  <td>20</td>
+</tr>
+<tr>
+  <td><strong>O-3</strong></td>
+  <td>KG Write Amplification</td>
+  <td>Prompts designed to trigger heavy knowledge-graph write operations; 17.35s latency observed under write-heavy load; no per-user KG write quota</td>
+  <td>KG service degraded for all users sharing the tenant; cascading latency to dependent tool calls</td>
+  <td><strong>Partial</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>O-4</strong></td>
+  <td>HITL Escalation Bypass via Category Manipulation</td>
+  <td>Agent determines its own action category via LLM inference; a prompt could cause the model to classify a high-risk action as a never-escalate item, bypassing required human review</td>
+  <td>High-risk decisions executed without human review; compliance gap</td>
+  <td><strong>Partial</strong></td>
+  <td>25</td>
+</tr>
+<tr>
+  <td><strong>O-5</strong></td>
+  <td>Rate Limiter Degradation Exploitation</td>
+  <td>Attacker drives a tenant to a configured utilisation threshold, causing the rate limiter to return degrade decisions that disable tools and reduce output length</td>
+  <td>Tool availability reduced; response quality degraded; SLA breach; competitive denial of service across tenants</td>
+  <td><strong>Mitigated</strong></td>
+  <td>18</td>
+</tr>
+<tr>
+  <td><strong>O-6</strong></td>
+  <td>Parallel Orchestrator Cost Amplification</td>
+  <td>High-complexity request causes the complexity classifier to route to the parallel path, spawning a small worker pool of sub-agents each making independent LLM calls and tool invocations</td>
+  <td>5× token consumption per user request; rate-limit quota exhaustion; cost amplification</td>
+  <td><strong>Partial</strong></td>
+  <td>16</td>
+</tr>
+<tr>
+  <td><strong>O-7</strong></td>
+  <td>Embedding Model Saturation</td>
+  <td>High-volume retrieval queries with very long inputs sent to the embedding endpoint; no per-request timeout on embedding calls; rate limit relies on platform defaults</td>
+  <td>Embedding endpoint throttled; RAG pipeline timeout for all users</td>
+  <td><strong>Partial</strong></td>
+  <td>14</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>O-1</strong>: a configured step cap plus a consecutive-error threshold terminate the ReACT loop; the step cap is enforced by LangGraph's recursion limit; red team D-2a confirmed effective</li>
+<li><strong>O-2</strong>: Platform serving endpoint autoscaling; the context compression component trims messages at a configured token threshold, keeping context within a configured ceiling; red team D-1a observed 6.6s latency within bounds</li>
+<li><strong>O-3 partial</strong>: 17.35s latency under write-heavy load observed and accepted as architectural trade-off (accepted as architectural trade-off); no per-user KG write quota enforced</li>
+<li><strong>O-4 partial</strong>: an always-escalate category list includes high-risk decisions, financial authorisation, and sensitive-data modification &mdash; these always escalate regardless of confidence; gap is that the action category is LLM-derived and a prompt could misclassify to avoid escalation; recommended: validate category against a structural allow-list independent of model output</li>
+<li><strong>O-5</strong>: the rate limiter's token-bucket algorithm applies per-tenant quotas, priority multipliers, and a global bucket; the budget enforcer feeds actual token consumption back to quota state post-request; degradation is a controlled, intentional response</li>
+<li><strong>O-6 partial</strong>: the complexity classifier gates parallel execution at a configured threshold; a worker cap is enforced; per-request cost impact of parallel execution is not independently capped relies on the global rate-limiter quota</li>
+<li><strong>O-7 partial</strong>: No per-request timeout on embedding calls; recommended: per-request timeout in RAG pipeline embedding path</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     O RISK GOVERNANCE
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">O - Risk Governance Findings</div>
+<hr />
+<h2>O - Risk Governance Findings</h2>
+<p><em>Threats in audit completeness, compliance alignment, PII handling, non-repudiation, and the feedback loop that calibrates HITL thresholds. Primary controls are the <code>AuditTrail</code> hash chain, <code>PIIDetector</code>, and <code>FeedbackAdapter</code>.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Title</th><th>Attack Vector</th><th>Impact</th><th>Status</th><th>DREAD</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>G-1</strong></td>
+  <td>Session Attribution Gap</td>
+  <td>Platform trace does not capture session_id on every span; gaps in session user linking prevent full conversation timeline reconstruction; red team R-2a not fully verified</td>
+  <td>Incident investigation incomplete; cannot fully reconstruct what a user did in a session; audit gap</td>
+  <td><strong>Partial</strong></td>
+  <td>15</td>
+</tr>
+<tr>
+  <td><strong>G-2</strong></td>
+  <td>Tool Output Non-Attribution</td>
+  <td>SQL query result returned to user; the audit trail's tool-result logger captures only a short summary, not the full result content or a hash of it</td>
+  <td>Cannot prove what data was shown to which user; data exposure liability; non-repudiation gap</td>
+  <td><strong>Partial</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>G-3</strong></td>
+  <td>PII Leakage in Escalation Context on Redaction Failure</td>
+  <td>the escalation-building step applies PII-detection redaction before queue persistence; if redaction raises an exception, the escalation context is sanitised and persistence is blocked; a redaction-failure flag is logged for audit without allowing unredacted content through</td>
+  <td>Sensitive personal data in escalation queue accessible to reviewers without need-to-know; minimum-necessary data-handling violation</td>
+  <td><strong>Mitigated</strong></td>
+  <td>30</td>
+</tr>
+<tr>
+  <td><strong>G-4</strong></td>
+  <td>Feedback-Driven HITL Threshold Poisoning</td>
+  <td>Attacker with access to submit feedback (enabled by A-6 gap) floods a use-case's feedback adapter rolling window with negative ratings, driving the confidence threshold to a configured ceiling, forcing all responses to escalate</td>
+  <td>HITL queue flooded; legitimate escalations delayed; service degraded for high-risk use cases</td>
+  <td><strong>Partial</strong></td>
+  <td>22</td>
+</tr>
+<tr>
+  <td><strong>G-5</strong></td>
+  <td>Internal Resource URL Exposure via RAG</td>
+  <td>RAG responses include source URLs pointing to internal knowledge base resources, revealing internal KB architecture</td>
+  <td>KB structure disclosed; URLs resolve only behind existing access controls low direct risk</td>
+  <td><strong>Accepted</strong></td>
+  <td>12</td>
+</tr>
+<tr>
+  <td><strong>G-6</strong></td>
+  <td>Excessive SQL Result-Set Return</td>
+  <td>Prompt-crafted queries return more rows than intended via SQL agent tools; pre-defined functions constrain query shape but not always row count</td>
+  <td>Unauthorised data volume exposure; minimum-necessary data-handling risk if large customer datasets returned</td>
+  <td><strong>Accepted</strong></td>
+  <td>16</td>
+</tr>
+<tr>
+  <td><strong>G-7</strong></td>
+  <td>ContradictionQueue Query Parameterisation</td>
+  <td>the contradiction queue's query methods use a parameterised-binding pattern consistent throughout; string interpolation has been removed from all query methods</td>
+  <td>SQL injection into contradiction queue table; data corruption; potential privilege escalation via Spark SQL</td>
+  <td><strong>Mitigated</strong></td>
+  <td>28</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Mitigation Evidence</h3>
+<ul>
+<li><strong>G-1 partial</strong>: Platform tracing with a user-identifier tag plus append-only audit table provides durable per-request records (red team confirmed); session-identifier tagging not consistently applied across all trace spans; recommended: enforce session_id tag at all span creation sites</li>
+<li><strong>G-2 partial</strong>: the audit trail's tool-result logger captures tool name, success status, and a short summary, not full result content; warehouse query history correlated via request identifier; full result hashing is the outstanding control</li>
+<li><strong>G-3</strong>: the escalation-building step hard-blocks queue persistence if PII detection raises an exception; PII-bearing fields are excluded from the escalation context before any persistence call; a redaction-failure flag is logged for audit but does not allow unredacted content to enter the queue</li>
+<li><strong>G-4 partial</strong>: the feedback adapter enforces a configured ceiling and requires a minimum sample size of ratings before adjusting; feedback identity is bound to the SSO-derived identity (resolved via A-6), closing the sockpuppet rating surface</li>
+<li><strong>G-5 accepted</strong>: KB structure is not a protected asset; URLs carry no authentication material and resolve only behind existing access controls; review trigger: KB contents reclassified as restricted</li>
+<li><strong>G-6 accepted</strong>: Pre-defined SQL functions constrain query shape; result-size enforcement cost disproportionate to risk under fixed function set; review trigger: functions become user-extensible or dynamically generated</li>
+<li><strong>G-7</strong>: the contradiction queue's query methods have been updated to use the parameterised-binding pattern already established elsewhere; string interpolation has been removed from all query methods</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════
+     OWASP LLM TOP 10 MAPPING
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">OWASP LLM Top 10 Mapping</div>
+<hr />
+<h2>OWASP LLM Top 10 Mapping (2025)</h2>
+<p>The following maps MAESTRO findings to the OWASP Top 10 for Large Language Model Applications.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>OWASP LLM</th><th>Category</th><th>MAESTRO Findings</th><th>Status</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>LLM01</strong></td>
+  <td>Prompt Injection</td>
+  <td>M-1, M-2, A-4, T-4, O-4</td>
+  <td>Largely mitigated - proxy-enforced identity, static tool registry, boundary markers, ToolGateway; M-2 partial (indirect injection via tool output); O-4 partial (LLM-derived action category)</td>
+</tr>
+<tr>
+  <td><strong>LLM02</strong></td>
+  <td>Sensitive Information Disclosure</td>
+  <td>M-4, M-5, S-5, S-6, G-3, G-5</td>
+  <td>Largely mitigated; M-4 partial (system prompt residual surface); S-6 partial (inference table column masking); G-3 open (sensitive data in escalation queue on redaction failure)</td>
+</tr>
+<tr>
+  <td><strong>LLM03</strong></td>
+  <td>Supply Chain Vulnerabilities</td>
+  <td>E-1, E-2, M-6</td>
+  <td>E-1 mitigated (SHA-256 code-path manifest); E-2 partial (registry alias lock); M-6 partial (version rollback)</td>
+</tr>
+<tr>
+  <td><strong>LLM04</strong></td>
+  <td>Data and Model Poisoning</td>
+  <td>S-1, S-2, S-3, M-2</td>
+  <td>S-1 remediated post-assessment; S-2/S-3 mitigated; M-2 partial (boundary markers best-effort)</td>
+</tr>
+<tr>
+  <td><strong>LLM05</strong></td>
+  <td>Improper Output Handling</td>
+  <td>E-3, G-1, G-2</td>
+  <td>E-3 mitigated (exception handlers mask credentials); G-1/G-2 partial (session attribution and result hashing gaps)</td>
+</tr>
+<tr>
+  <td><strong>LLM06</strong></td>
+  <td>Excessive Agency</td>
+  <td>T-1, T-2, T-3, T-4, T-5, T-6, O-1</td>
+  <td>T-1/T-2/T-3/T-4/T-6/O-1 mitigated; T-5 partial (intent misclassification in keyword router)</td>
+</tr>
+<tr>
+  <td><strong>LLM07</strong></td>
+  <td>System Prompt Leakage</td>
+  <td>M-4</td>
+  <td>Partial - direct/encoded/translated extraction blocked; authority escalation was a false positive; residual surface remains</td>
+</tr>
+<tr>
+  <td><strong>LLM08</strong></td>
+  <td>Vector and Embedding Weaknesses</td>
+  <td>S-3, S-7, O-7</td>
+  <td>S-3 mitigated (controlled ingestion); S-7 accepted (homogeneous user base); O-7 partial (no per-request embedding timeout)</td>
+</tr>
+<tr>
+  <td><strong>LLM09</strong></td>
+  <td>Misinformation</td>
+  <td>S-1, S-2, G-4</td>
+  <td>S-1 remediated; S-2 mitigated; G-4 partial (feedback-driven threshold poisoning via attacker-controlled user_id)</td>
+</tr>
+<tr>
+  <td><strong>LLM10</strong></td>
+  <td>Unbounded Consumption</td>
+  <td>O-1, O-2, O-3, O-5, O-6, O-7, S-8</td>
+  <td>O-1/O-2/O-5 mitigated; O-3/O-6/O-7/S-8 partial (KG write quota, parallel cost cap, embedding timeout, LTM write quota)</td>
+</tr>
+</tbody>
+</table></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NIST AI RMF ALIGNMENT
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">NIST AI RMF Alignment</div>
+<hr />
+<h2>NIST AI Risk Management Framework 1.0 Alignment</h2>
+<p>The NIST AI RMF organizes AI risk management across four core functions. This assessment covers all four.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Function</th><th>Description</th><th>How This Assessment Addresses It</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>GOVERN</strong></td>
+  <td>Policies, accountability, culture</td>
+  <td>MAESTRO decomposition and adversarial testing establish a repeatable governance framework for AI security risk. Trust boundary definitions (TB1 TB5) document the authorization model. Accepted risks (S-7, G-5, G-6) carry documented justification and review triggers. New findings (A-7, G-3, G-7) require owner assignment before acceptance or remediation.</td>
+</tr>
+<tr>
+  <td><strong>MAP</strong></td>
+  <td>Risk identification, categorization</td>
+  <td>MAP artifact: MAESTRO findings across seven layers with attack vectors, impacts, and OWASP LLM Top 10 mappings. Static code inspection of the agent framework identified additional findings beyond the adversarial test suite.</td>
+</tr>
+<tr>
+  <td><strong>MEASURE</strong></td>
+  <td>Analysis, assessment, benchmarking</td>
+  <td>DREAD scores rank severity across all findings, with the scoring caveats noted in the Severity Framework. The distinction between mitigated findings, partial controls, and accepted risks is explicit throughout.</td>
+</tr>
+<tr>
+  <td><strong>MANAGE</strong></td>
+  <td>Prioritize, respond, monitor</td>
+  <td>Finding status Mitigated, Partial, Open, Accepted tracks response actions. All findings have controls or documented acceptance. Partial findings carry explicit remediation direction. Accepted risks carry documented review triggers and quarterly review cadence.</td>
+</tr>
+</tbody>
+</table></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     DREAD RISK SCORING MATRIX
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">DREAD Risk Scoring Matrix</div>
+<hr />
+<h2>DREAD Risk Scoring Matrix</h2>
+<p><em>Findings ranked by DREAD total (D=Damage, R=Reproducibility, E=Exploitability, A=Affected users, D=Discoverability). Scores are analyst-assigned. Additive scoring conflates unlike dimensions, and ordinal scores treated as cardinal can mislead near band boundaries. These scores support relative ordering within this document and are not comparable across assessments.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Finding</th><th>Layer</th><th>D</th><th>R</th><th>E</th><th>A</th><th>D₂</th><th>Total</th><th>Severity</th></tr></thead>
+<tbody>
+<tr><td>S-4</td><td>System</td><td>8</td><td>9</td><td>7</td><td>9</td><td>7</td><td><strong>40</strong></td><td>Critical</td></tr>
+<tr><td>S-3</td><td>System</td><td>9</td><td>9</td><td>5</td><td>6</td><td>9</td><td><strong>38</strong></td><td>Critical</td></tr>
+<tr><td>E-1</td><td>Environment</td><td>10</td><td>10</td><td>4</td><td>4</td><td>10</td><td><strong>38</strong></td><td>Critical</td></tr>
+<tr><td>T-1</td><td>Trust</td><td>9</td><td>8</td><td>8</td><td>3</td><td>8</td><td><strong>36</strong></td><td>High</td></tr>
+<tr><td>E-5</td><td>Environment</td><td>8</td><td>8</td><td>6</td><td>7</td><td>6</td><td><strong>35</strong></td><td>High</td></tr>
+<tr><td><strong>A-7</strong></td><td>Application</td><td>7</td><td>9</td><td>7</td><td>6</td><td>6</td><td><strong>35</strong></td><td>High</td></tr>
+<tr><td>E-2</td><td>Environment</td><td>9</td><td>7</td><td>5</td><td>6</td><td>6</td><td><strong>33</strong></td><td>High</td></tr>
+<tr><td>E-4</td><td>Environment</td><td>7</td><td>7</td><td>9</td><td>5</td><td>5</td><td><strong>33</strong></td><td>High</td></tr>
+<tr><td>T-2</td><td>Trust</td><td>8</td><td>7</td><td>6</td><td>5</td><td>6</td><td><strong>32</strong></td><td>High</td></tr>
+<tr><td>E-6</td><td>Environment</td><td>8</td><td>7</td><td>6</td><td>5</td><td>6</td><td><strong>32</strong></td><td>High</td></tr>
+<tr><td>S-1</td><td>System</td><td>8</td><td>7</td><td>6</td><td>5</td><td>6</td><td><strong>32</strong></td><td>High</td></tr>
+<tr><td>M-2</td><td>Model</td><td>7</td><td>7</td><td>6</td><td>5</td><td>5</td><td><strong>30</strong></td><td>High</td></tr>
+<tr><td>S-5</td><td>System</td><td>6</td><td>7</td><td>6</td><td>6</td><td>5</td><td><strong>30</strong></td><td>High</td></tr>
+<tr><td>A-4</td><td>Application</td><td>7</td><td>8</td><td>5</td><td>5</td><td>5</td><td><strong>30</strong></td><td>High</td></tr>
+<tr><td><strong>G-3</strong></td><td>Risk Gov.</td><td>7</td><td>6</td><td>6</td><td>6</td><td>5</td><td><strong>30</strong></td><td>High</td></tr>
+<tr><td>T-3</td><td>Trust</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td><strong>28</strong></td><td>High</td></tr>
+<tr><td>T-4</td><td>Trust</td><td>7</td><td>6</td><td>5</td><td>5</td><td>5</td><td><strong>28</strong></td><td>High</td></tr>
+<tr><td>E-3</td><td>Environment</td><td>6</td><td>5</td><td>6</td><td>5</td><td>6</td><td><strong>28</strong></td><td>High</td></tr>
+<tr><td><strong>G-7</strong></td><td>Risk Gov.</td><td>6</td><td>6</td><td>5</td><td>6</td><td>5</td><td><strong>28</strong></td><td>High</td></tr>
+<tr><td>M-4</td><td>Model</td><td>3</td><td>3</td><td>9</td><td>10</td><td>2</td><td><strong>27</strong></td><td>Medium</td></tr>
+<tr><td>O-4</td><td>Operations</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td><td><strong>25</strong></td><td>Medium</td></tr>
+<tr><td>S-6</td><td>System</td><td>6</td><td>6</td><td>4</td><td>5</td><td>4</td><td><strong>25</strong></td><td>Medium</td></tr>
+<tr><td>A-2</td><td>Application</td><td>6</td><td>5</td><td>5</td><td>5</td><td>4</td><td><strong>25</strong></td><td>Medium</td></tr>
+<tr><td>G-2</td><td>Risk Gov.</td><td>4</td><td>5</td><td>4</td><td>5</td><td>4</td><td><strong>22</strong></td><td>Medium</td></tr>
+<tr><td>T-5</td><td>Trust</td><td>5</td><td>4</td><td>4</td><td>5</td><td>4</td><td><strong>22</strong></td><td>Medium</td></tr>
+<tr><td><strong>G-4</strong></td><td>Risk Gov.</td><td>5</td><td>4</td><td>5</td><td>4</td><td>4</td><td><strong>22</strong></td><td>Medium</td></tr>
+<tr><td>G-1</td><td>Risk Gov.</td><td>3</td><td>4</td><td>5</td><td>3</td><td>3</td><td><strong>18</strong></td><td>Medium</td></tr>
+<tr><td><strong>A-6</strong></td><td>Application</td><td>4</td><td>4</td><td>4</td><td>3</td><td>3</td><td><strong>18</strong></td><td>Medium</td></tr>
+<tr><td>O-3</td><td>Operations</td><td>3</td><td>4</td><td>4</td><td>4</td><td>3</td><td><strong>18</strong></td><td>Medium</td></tr>
+<tr><td>S-8</td><td>System</td><td>2</td><td>3</td><td>3</td><td>3</td><td>3</td><td><strong>14</strong></td><td>Low</td></tr>
+<tr><td>O-7</td><td>Operations</td><td>2</td><td>3</td><td>3</td><td>3</td><td>3</td><td><strong>14</strong></td><td>Low</td></tr>
+<tr><td>G-5</td><td>Risk Gov.</td><td>2</td><td>3</td><td>3</td><td>2</td><td>2</td><td><strong>12</strong></td><td>Low</td></tr>
+</tbody>
+</table></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MITIGATION STATUS SUMMARY
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">Mitigation Status Summary</div>
+<hr />
+<h2>Mitigation Status Summary</h2>
+<h3>By Finding Status</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Status</th><th>Count</th><th>Findings</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>Mitigated</strong></td>
+  <td>27</td>
+  <td>M-1, M-3, M-5 · A-1, A-2, A-3, A-4, A-5, A-6, A-7 · E-1, E-3, E-4, E-5, E-6 · S-1, S-2, S-3, S-4, S-5, S-9 · T-1, T-2, T-3, T-4, T-6 · O-1, O-2, O-5 · G-3, G-7</td>
+</tr>
+<tr>
+  <td><strong>Partial</strong></td>
+  <td>11</td>
+  <td>M-2, M-4, M-6 · E-2 · S-6, S-8 · T-5 · O-3, O-4, O-6, O-7 · G-1, G-2, G-4</td>
+</tr>
+<tr>
+  <td><strong>Accepted</strong></td>
+  <td>3</td>
+  <td>S-7, G-5, G-6</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3>Defense-in-Depth Assessment</h3>
+<pre><code>USER
+  └─ the chat frontend (Trusted-Header SSO)          ✔ A-1, A-3 mitigated
+      └─ ProxyMiddleware (user identifier)           ✔ identity derived server-side from SSO
+          │                                   ✔ A-2 mitigated: direct PAT access restricted
+          │                                   ✔ A-6 mitigated: feedback identity bound to SSO
+          │                                   ✔ A-7 mitigated: evaluate endpoint parameterised
+          └─ Serving Endpoint (SP token)       ✔ A-4 mitigated via proxy
+              └─ ReACT Agent                  ✔ O-1 mitigated (max_steps cap)
+                  └─ SQL Tools                ✔ S-4 mitigated (pre-defined fns)
+                  └─ Memory R/W               ✔ S-1 mitigated (synchronous pre-write guard)
+                  │                           ✔ TrustTagger/TrustFilter in place
+                  └─ RAG Pipeline             ✔ S-3, S-7 mitigated/accepted
+                  └─ Boundary Markers         ✔ M-1 mitigated; ⚠ M-2 best-effort only
+                  └─ Plugin Hooks             ✔ TierPolicy structural (T-6)
+                  └─ Delegation Chain         ✔ T-2/T-3 HMAC + TTL; T-4 PRE_TOOL hook
+                  └─ Audit Trail              ✔ G-1/G-2 partial; append-only + hash chain
+                  │                           ✔ G-3 mitigated: hard-block on redaction failure
+                  └─ ContradictionQueue        ✔ G-7 mitigated: parameterised query methods
+                  └─ FeedbackAdapter           ⚠ G-4 partial: threshold bounds enforced</code></pre>
+
+<p><em>Point-in-time assessment. Findings do not carry across model version changes, tool additions, or access-model modifications any of those events triggers re-assessment.</em></p>
+
+<!-- ═══════════════════════════════════════════════════════
+     RISK ACCEPTANCE
+══════════════════════════════════════════════════════════ -->
+<div class="cell-title">Risk Acceptance</div>
+<hr />
+<h2>Risk Acceptance</h2>
+<p><em>Not every finding warrants remediation, and a threat model that pretends otherwise is not useful to the people who have to fund it. Acceptance is a decision with three required parts: an explicit justification, a named owner, and a review trigger. The trigger is the important one - it is what stops an accepted risk from quietly becoming an unmanaged one when the system's assumptions change.</em></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Finding</th><th>Class</th><th>Basis for acceptance</th><th>Review trigger</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>S-7</strong></td>
+  <td>RAG over-retrieval</td>
+  <td>Homogeneous user population holding equivalent clearance for all indexed content; document-level ACLs carry a per-document tagging cost disproportionate to risk under that assumption</td>
+  <td>Any differentiation of user access levels - external, partner-facing, or cross-organizational</td>
+</tr>
+<tr>
+  <td><strong>G-5</strong></td>
+  <td>Internal resource URL exposure</td>
+  <td>Knowledge base structure is not itself a protected asset; exposed URLs carry no authentication material and resolve only behind existing access controls</td>
+  <td>Knowledge base contents reclassified as restricted</td>
+</tr>
+<tr>
+  <td><strong>G-6</strong></td>
+  <td>Excessive result-set return</td>
+  <td>Pre-defined query functions constrain query shape to known patterns; result-size enforcement costs more than the residual risk under a fixed function set</td>
+  <td>Query functions become user-extensible or dynamically generated</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Review cadence</strong>: Quarterly, or immediately on any change to the user population, access model, or tool configuration. Each acceptance above rests on an assumption about who the users are and what the agent can invoke; when that assumption changes, the acceptance is void and the finding returns to the queue.</p>
+
+</div>
+</body>
+</html>
